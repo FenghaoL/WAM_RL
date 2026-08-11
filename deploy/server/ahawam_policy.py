@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import inspect
 import logging
 import os
@@ -15,7 +16,7 @@ from typing import Any, Optional
 import numpy as np
 import torch
 import yaml
-from PIL import Image
+from PIL import Image, ImageDraw
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +66,8 @@ class AHAWAMPolicy:
     ``policy_path`` points to a deployment YAML file. The public keys are:
     ``checkpoint_path``, ``dataset_stats_path``, ``project_root``,
     ``hydra_config_name``, ``task``, device/precision fields, and inference
-    sampling fields. The wrapper consumes a front RGB image plus a 14-D robot
-    state and returns a denormalized action chunk.
+    sampling fields. The wrapper consumes one already-composed RGB image plus
+    a robot state vector and returns a denormalized action chunk.
     """
 
     def __init__(self, policy_path: str, task_name: Optional[str] = None):
@@ -74,6 +75,14 @@ class AHAWAMPolicy:
         self.task_name = task_name
         self.current_instruction = ""
         self._observation: Optional[dict[str, Any]] = None
+        self._current_observation_hash: Optional[bytes] = None
+        self._last_prefill_observation_hash: Optional[bytes] = None
+        self._last_prefill_frame_index = 0
+        self._preview_history_before_last_prefill: list[dict[str, torch.Tensor]] = []
+        self._standalone_preview_history_entries: list[
+            list[dict[str, torch.Tensor]]
+        ] = []
+        self._standalone_preview_frame_index = 0
 
         cfg = self._load_deploy_config(policy_path)
         project_root = cfg.get("project_root", Path(__file__).resolve().parents[2])
@@ -102,10 +111,30 @@ class AHAWAMPolicy:
 
         if GlobalHydra.instance().is_initialized():
             GlobalHydra.instance().clear()
+        hydra_overrides = cfg.get("hydra_overrides", [])
+        if hydra_overrides is None:
+            hydra_overrides = []
+        if not isinstance(hydra_overrides, list):
+            raise TypeError("`hydra_overrides` must be a YAML list of Hydra override strings.")
+        overrides.extend(str(value) for value in hydra_overrides)
+
         with initialize_config_dir(version_base="1.3", config_dir=str(configs_root)):
             hydra_cfg = compose(config_name=hydra_config_name, overrides=overrides)
 
-        logger.info("Hydra config composed: config=%s task=%s", hydra_config_name, task)
+        hydra_patch = cfg.get("hydra_patch")
+        if hydra_patch is not None:
+            if not isinstance(hydra_patch, dict):
+                raise TypeError("`hydra_patch` must be a YAML mapping.")
+            OmegaConf.set_struct(hydra_cfg, False)
+            hydra_cfg = OmegaConf.merge(hydra_cfg, OmegaConf.create(hydra_patch))
+
+        logger.info(
+            "Hydra config composed: config=%s task=%s extra_overrides=%d patched=%s",
+            hydra_config_name,
+            task,
+            len(hydra_overrides),
+            hydra_patch is not None,
+        )
 
         device = str(os.environ.get("AHAWAM_DEPLOY_DEVICE_OVERRIDE") or cfg.get("device", "cuda"))
         if device.startswith("cuda") and not torch.cuda.is_available():
@@ -134,8 +163,29 @@ class AHAWAMPolicy:
         if not dataset_stats_path.exists():
             raise FileNotFoundError(f"Dataset stats not found: {dataset_stats_path}")
 
+        text_cache_dir = cfg.get("text_embedding_cache_dir")
+        self.text_embedding_cache_dir: Optional[Path] = None
+        if not _is_none_like(text_cache_dir):
+            resolved_cache_dir = Path(str(text_cache_dir)).expanduser()
+            if not resolved_cache_dir.is_absolute():
+                resolved_cache_dir = self.project_root / resolved_cache_dir
+            if not resolved_cache_dir.is_dir():
+                raise FileNotFoundError(
+                    f"Text embedding cache directory not found: {resolved_cache_dir}"
+                )
+            self.text_embedding_cache_dir = resolved_cache_dir
+
         model_cfg = OmegaConf.create(OmegaConf.to_container(hydra_cfg.model, resolve=True))
-        model_cfg.load_text_encoder = True
+        load_text_encoder = bool(
+            cfg.get("load_text_encoder", self.text_embedding_cache_dir is None)
+        )
+        if not load_text_encoder and self.text_embedding_cache_dir is None:
+            raise ValueError(
+                "`load_text_encoder=false` requires `text_embedding_cache_dir`."
+            )
+        model_cfg.load_text_encoder = load_text_encoder
+        self.context_len = int(model_cfg.get("tokenizer_max_len", 128))
+        self._text_context_cache: dict[str, tuple[torch.Tensor, torch.Tensor]] = {}
 
         logger.info("Instantiating AHAWAM model...")
         model_t0 = time.perf_counter()
@@ -147,6 +197,8 @@ class AHAWAMPolicy:
         self.processor = instantiate(hydra_cfg.data.train.processor).eval()
         dataset_stats = load_dataset_stats_from_json(str(dataset_stats_path))
         self.processor.set_normalizer_from_stats(dataset_stats)
+        self.proprio_dim = int(hydra_cfg.data.train.processor.proprio_output_dim)
+        self.action_dim = int(hydra_cfg.data.train.processor.action_output_dim)
         logger.info("Processor and normalizer initialized from %s", dataset_stats_path)
 
         eval_cfg = hydra_cfg.get("EVALUATION", {})
@@ -180,6 +232,30 @@ class AHAWAMPolicy:
         self._episode_prefilled = False
         self.video_height = int(cfg.get("video_height", 384))
         self.video_width = int(cfg.get("video_width", 320))
+        self.input_control_hz = float(cfg.get("input_control_hz", 15.0))
+        self.action_video_freq_ratio = int(cfg.get("action_video_freq_ratio", 4))
+        self.preview_num_frames = int(cfg.get("preview_num_frames", 13))
+        self.preview_num_inference_steps = int(
+            cfg.get("preview_num_inference_steps", self.num_inference_steps)
+        )
+        self.preview_fps = float(
+            cfg.get(
+                "preview_fps",
+                self.input_control_hz / self.action_video_freq_ratio,
+            )
+        )
+        preview_output_dir = Path(
+            str(cfg.get("preview_output_dir", "runs/so101_g05_square_v1/online_previews"))
+        ).expanduser()
+        if not preview_output_dir.is_absolute():
+            preview_output_dir = self.project_root / preview_output_dir
+        self.preview_output_dir = preview_output_dir
+        self._preview_count = 0
+
+        if self.preview_num_frames % 4 != 1:
+            raise ValueError(
+                f"`preview_num_frames` must satisfy T % 4 == 1, got {self.preview_num_frames}"
+            )
 
         logger.info(
             "AHAWAM policy ready | device=%s dtype=%s | horizon=%d chunk_size=%d num_chunks=%d | image=%dx%d",
@@ -191,7 +267,20 @@ class AHAWAMPolicy:
             self.video_width,
             self.video_height,
         )
-        if self.warmup_rounds > 0:
+        logger.info(
+            "Text conditioning: %s",
+            (
+                f"cached embeddings from {self.text_embedding_cache_dir}"
+                if self.text_embedding_cache_dir is not None
+                else "online UMT5 encoder"
+            ),
+        )
+        if self.warmup_rounds > 0 and self.text_embedding_cache_dir is not None:
+            logger.warning(
+                "Skipping constructor warmup because cached text mode needs the "
+                "instruction, which is set by the server after policy construction."
+            )
+        elif self.warmup_rounds > 0:
             self._warmup()
         logger.info("AHAWAM initialization complete in %.1f ms", (time.perf_counter() - init_t0) * 1000.0)
 
@@ -199,9 +288,88 @@ class AHAWAMPolicy:
         self.current_instruction = instruction
         logger.info("Instruction set: %r", instruction)
 
+    def get_metadata(self) -> dict[str, Any]:
+        return {
+            "policy": type(self).__name__,
+            "action_dim": self.action_dim,
+            "proprio_dim": self.proprio_dim,
+            "action_chunk_size": self.action_chunk_size,
+            "action_horizon": self.action_horizon,
+            "num_action_chunks_per_planner_refresh": self.num_chunks,
+            "model_image_shape_hwc": [self.video_height, self.video_width, 3],
+            "accepted_image_keys": [["front"], ["fixed", "wrist"]],
+            "text_mode": (
+                "cached" if self.text_embedding_cache_dir is not None else "online_encoder"
+            ),
+            "preview_num_frames": self.preview_num_frames,
+            "preview_fps": self.preview_fps,
+        }
+
+    def reset_cuda_peak_memory(self) -> None:
+        if self.device.startswith("cuda"):
+            torch.cuda.reset_peak_memory_stats(self.device)
+
+    def get_cuda_memory_metrics(self) -> Optional[dict[str, float]]:
+        if not self.device.startswith("cuda"):
+            return None
+        mib = 1024.0 * 1024.0
+        return {
+            "allocated_mib": torch.cuda.memory_allocated(self.device) / mib,
+            "reserved_mib": torch.cuda.memory_reserved(self.device) / mib,
+            "peak_allocated_mib": torch.cuda.max_memory_allocated(self.device) / mib,
+            "peak_reserved_mib": torch.cuda.max_memory_reserved(self.device) / mib,
+        }
+
+    @staticmethod
+    def _as_hwc_rgb(image: Any, name: str) -> np.ndarray:
+        array = np.asarray(image)
+        if array.ndim != 3:
+            raise ValueError(f"images['{name}'] must be 3D, got {array.shape}")
+        if array.shape[-1] == 3:
+            pass
+        elif array.shape[0] == 3:
+            array = np.moveaxis(array, 0, -1)
+        else:
+            raise ValueError(
+                f"images['{name}'] must be HWC or CHW RGB with 3 channels, got {array.shape}"
+            )
+        if array.dtype != np.uint8:
+            if np.issubdtype(array.dtype, np.floating) and array.size:
+                max_value = float(np.nanmax(array))
+                if max_value <= 1.0:
+                    array = array * 255.0
+            array = np.clip(array, 0, 255).astype(np.uint8)
+        return np.ascontiguousarray(array)
+
+    def prepare_camera_images(self, images: dict[str, Any]) -> np.ndarray:
+        """Return the exact 384x320 camera layout used by SO101 training."""
+        if images.get("front") is not None:
+            return self._as_hwc_rgb(images["front"], "front")
+
+        if images.get("fixed") is None or images.get("wrist") is None:
+            raise ValueError(
+                "request images must contain either ['front'] or both ['fixed', 'wrist']"
+            )
+        fixed = Image.fromarray(self._as_hwc_rgb(images["fixed"], "fixed"), mode="RGB")
+        wrist = Image.fromarray(self._as_hwc_rgb(images["wrist"], "wrist"), mode="RGB")
+
+        # Match training: fixed on top, SO101 wrist in RoboCOIN's bottom-left
+        # slot, and black padding for the unavailable bottom-right wrist view.
+        fixed = fixed.resize((320, 240), resample=Image.Resampling.BILINEAR)
+        wrist = wrist.resize((320, 240), resample=Image.Resampling.BILINEAR)
+        fixed = fixed.resize((320, 256), resample=Image.Resampling.BILINEAR)
+        wrist = wrist.resize((160, 128), resample=Image.Resampling.BILINEAR)
+        wrist_array = np.asarray(wrist, dtype=np.uint8)
+        wrist_row = np.concatenate([wrist_array, np.zeros_like(wrist_array)], axis=1)
+        return np.concatenate([np.asarray(fixed, dtype=np.uint8), wrist_row], axis=0)
+
     def update_observation_window(self, img_arr, state):
-        """Buffer one front-camera observation and 14-D state vector."""
+        """Buffer one composed camera observation and one state vector."""
         front_img = np.asarray(img_arr[0])
+        if front_img.ndim != 3 or front_img.shape[2] != 3:
+            raise ValueError(
+                f"Expected an HWC RGB image with 3 channels, got {front_img.shape}"
+            )
         if front_img.shape[:2] != (self.video_height, self.video_width):
             pil_img = Image.fromarray(front_img.astype(np.uint8), mode="RGB")
             pil_img = pil_img.resize((self.video_width, self.video_height), resample=Image.BILINEAR)
@@ -215,7 +383,14 @@ class AHAWAMPolicy:
         )
         image_tensor = image_tensor * (2.0 / 255.0) - 1.0
         state_vector = np.asarray(state, dtype=np.float32).reshape(-1)
+        if state_vector.size != self.proprio_dim:
+            raise ValueError(
+                f"Expected {self.proprio_dim}-D state, got {state_vector.size} values"
+            )
+        if not np.all(np.isfinite(state_vector)):
+            raise ValueError("State contains NaN or Inf")
         self._observation = {"image_tensor": image_tensor, "state_vector": state_vector}
+        self._current_observation_hash = hashlib.sha256(front_img.tobytes()).digest()
 
     def get_action(self) -> np.ndarray:
         """Run one action chunk inference."""
@@ -234,14 +409,27 @@ class AHAWAMPolicy:
 
         proprio = self._normalize_state(state_vector)
         prompt = self._DEFAULT_PROMPT.format(task=self.current_instruction)
+        context, context_mask = self._resolve_text_condition(prompt)
 
         with torch.no_grad():
             if not self._episode_prefilled:
-                self._prefill_episode(prompt=prompt, image_tensor=image_tensor)
+                self._prefill_episode(
+                    prompt=prompt,
+                    image_tensor=image_tensor,
+                    context=context,
+                    context_mask=context_mask,
+                )
             pred = self._infer_action_chunk(image_tensor=image_tensor, proprio=proprio)
 
         action_tensor = pred["action_chunk"].unsqueeze(0)
-        return self._denormalize_action(action_tensor)[0]
+        action = self._denormalize_action(action_tensor)[0]
+        if action.shape[-1] != self.action_dim:
+            raise ValueError(
+                f"Model returned {action.shape[-1]} action dimensions; expected {self.action_dim}"
+            )
+        if not np.all(np.isfinite(action)):
+            raise ValueError("Model action contains NaN or Inf")
+        return action
 
     def reset_obsrvationwindows(self):
         self._observation = None
@@ -251,11 +439,26 @@ class AHAWAMPolicy:
     def eval(self):
         self.model.eval()
 
-    def _prefill_episode(self, *, prompt: str, image_tensor: torch.Tensor) -> None:
+    def _prefill_episode(
+        self,
+        *,
+        prompt: str,
+        image_tensor: torch.Tensor,
+        context: Optional[torch.Tensor] = None,
+        context_mask: Optional[torch.Tensor] = None,
+    ) -> None:
+        prior_entries = list(getattr(self.model, "_history_kv_entries", None) or [])
+        self._preview_history_before_last_prefill = prior_entries
+        self._last_prefill_observation_hash = self._current_observation_hash
+        self._last_prefill_frame_index = int(
+            getattr(self.model, "_observed_frame_index", 0)
+        )
         video_kwargs = {
-            "prompt": prompt,
+            "prompt": None if context is not None else prompt,
             "input_image": image_tensor,
             "action_horizon": self.action_horizon,
+            "context": context,
+            "context_mask": context_mask,
             "negative_prompt": self.negative_prompt,
             "text_cfg_scale": self.text_cfg_scale,
             "seed": self.seed,
@@ -284,8 +487,14 @@ class AHAWAMPolicy:
         """Run only the video phase and return a state snapshot for async serving."""
         if prompt is None:
             prompt = self._DEFAULT_PROMPT.format(task=self.current_instruction)
+        context, context_mask = self._resolve_text_condition(prompt)
         with torch.no_grad():
-            self._prefill_episode(prompt=prompt, image_tensor=image_tensor)
+            self._prefill_episode(
+                prompt=prompt,
+                image_tensor=image_tensor,
+                context=context,
+                context_mask=context_mask,
+            )
         state = self.model._inference_state
         if state is None:
             raise RuntimeError("Video prefill did not produce inference state.")
@@ -312,9 +521,324 @@ class AHAWAMPolicy:
         if hasattr(self.model, "_inference_state"):
             self.model._inference_state = None
         self._episode_prefilled = False
+        self._last_prefill_observation_hash = None
+        self._last_prefill_frame_index = 0
+        self._preview_history_before_last_prefill = []
+        self._standalone_preview_history_entries = []
+        self._standalone_preview_frame_index = 0
 
     def _soft_reset_for_new_observation(self) -> None:
         self._episode_prefilled = False
+
+    def _resolve_text_condition(
+        self, prompt: str
+    ) -> tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
+        if self.text_embedding_cache_dir is None:
+            return None, None
+
+        digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+        cached = self._text_context_cache.get(digest)
+        if cached is None:
+            cache_path = self.text_embedding_cache_dir / (
+                f"{digest}.t5_len{self.context_len}.wan22ti2v5b.pt"
+            )
+            if not cache_path.is_file():
+                raise FileNotFoundError(
+                    "No cached text embedding for this exact instruction. "
+                    f"Expected: {cache_path}. Run scripts/precompute_text_embeds.py "
+                    "before using a new instruction."
+                )
+            payload = torch.load(cache_path, map_location="cpu", weights_only=True)
+            context = payload["context"].detach().to(dtype=self.model.torch_dtype)
+            context_mask = payload["mask"].detach().bool()
+            if context.ndim != 2 or context_mask.ndim != 1:
+                raise ValueError(
+                    f"Invalid text cache shapes in {cache_path}: "
+                    f"context={tuple(context.shape)} mask={tuple(context_mask.shape)}"
+                )
+            context[~context_mask] = 0.0
+            context_mask = torch.ones_like(context_mask)
+            cached = (context.contiguous(), context_mask.contiguous())
+            self._text_context_cache[digest] = cached
+        context, context_mask = cached
+        return (
+            context.unsqueeze(0).to(device=self.device, non_blocking=True),
+            context_mask.unsqueeze(0).to(device=self.device, non_blocking=True),
+        )
+
+    @torch.no_grad()
+    def generate_future_video(
+        self, *, advance_preview_history: bool = False
+    ) -> dict[str, Any]:
+        """Explicitly denoise and VAE-decode a diagnostic future RGB clip."""
+        if self._observation is None:
+            raise RuntimeError("Call update_observation_window before generate_future_video.")
+
+        from ahawam.utils.video_io import save_mp4
+
+        started = time.perf_counter()
+        image_tensor = self._observation["image_tensor"]
+        prompt = self._DEFAULT_PROMPT.format(task=self.current_instruction)
+        context, context_mask = self._resolve_text_condition(prompt)
+        if context is None or context_mask is None:
+            context, context_mask = self.model.encode_prompt(prompt)
+
+        num_frames = self.preview_num_frames
+        _, _, height, width = image_tensor.shape
+        latent_t = (
+            (num_frames - 1) // int(self.model.vae.temporal_downsample_factor) + 1
+        )
+        latent_h = height // int(self.model.vae.upsampling_factor)
+        latent_w = width // int(self.model.vae.upsampling_factor)
+        generator = torch.Generator(device=self.rand_device).manual_seed(
+            0 if self.seed is None else self.seed
+        )
+        latents = torch.randn(
+            (1, self.model.vae.model.z_dim, latent_t, latent_h, latent_w),
+            generator=generator,
+            device=self.rand_device,
+            dtype=torch.float32,
+        ).to(device=self.device, dtype=self.model.torch_dtype)
+        first_frame_latents = self.model._encode_input_image_latents_tensor(
+            input_image=image_tensor,
+            tiled=self.tiled,
+        )
+        latents[:, :, 0:1] = first_frame_latents
+
+        infer_timesteps, infer_deltas = (
+            self.model.infer_video_scheduler.build_inference_schedule(
+                num_inference_steps=self.preview_num_inference_steps,
+                device=self.model.device,
+                dtype=latents.dtype,
+                shift_override=self.sigma_shift,
+            )
+        )
+        temporal_ids = (
+            torch.arange(latent_t, device=self.model.device, dtype=torch.long)
+            * int(self.model.vae.temporal_downsample_factor)
+        )
+        if advance_preview_history:
+            history_entries = self._standalone_preview_history_entries
+            current_frame_index = self._standalone_preview_frame_index
+        elif self._current_observation_hash == self._last_prefill_observation_hash:
+            history_entries = self._preview_history_before_last_prefill
+            current_frame_index = self._last_prefill_frame_index
+        else:
+            history_entries = list(
+                getattr(self.model, "_history_kv_entries", None) or []
+            )
+            current_frame_index = int(
+                getattr(self.model, "_observed_frame_index", 0)
+            )
+        history_video_kv_cache = (
+            self.model._concat_history_kv_entries(history_entries)
+            if history_entries
+            else None
+        )
+        temporal_ids = temporal_ids + current_frame_index
+        for step_t, step_delta in zip(infer_timesteps, infer_deltas):
+            timestep = step_t.unsqueeze(0).to(
+                device=self.model.device, dtype=latents.dtype
+            )
+            pred_flow = self._predict_future_video_flow(
+                latents=latents,
+                timestep=timestep,
+                context=context,
+                context_mask=context_mask,
+                temporal_position_ids=temporal_ids,
+                history_video_kv_cache=history_video_kv_cache,
+            )
+            latents = self.model.infer_video_scheduler.step(
+                pred_flow, step_delta, latents
+            )
+            latents[:, :, 0:1] = first_frame_latents
+
+        frames = self.model._decode_latents(latents, tiled=self.tiled)
+        if advance_preview_history:
+            self._append_standalone_preview_history(
+                first_frame_latents=first_frame_latents,
+                context=context,
+                context_mask=context_mask,
+                current_frame_index=current_frame_index,
+                history_video_kv_cache=history_video_kv_cache,
+            )
+        preview_frames = self._build_camera_preview_frames(frames)
+        self.preview_output_dir.mkdir(parents=True, exist_ok=True)
+        self._preview_count += 1
+        stem = f"preview_{int(time.time())}_{self._preview_count:04d}"
+        raw_path = self.preview_output_dir / f"{stem}_raw_composite.mp4"
+        view_path = self.preview_output_dir / f"{stem}_fixed_wrist.mp4"
+        save_mp4(frames, str(raw_path), fps=self.preview_fps)
+        save_mp4(preview_frames, str(view_path), fps=self.preview_fps)
+        latency_ms = (time.perf_counter() - started) * 1000.0
+        horizon_seconds = (num_frames - 1) / self.preview_fps
+        return {
+            "encoding": "mp4",
+            "mime_type": "video/mp4",
+            "data": view_path.read_bytes(),
+            "frame_count": len(frames),
+            "fps": self.preview_fps,
+            "horizon_seconds": horizon_seconds,
+            "includes_current_frame": True,
+            "layout": "display_fixed_left_wrist_right",
+            "model_input_layout": "fixed_top_wrist_bottom_left_black_bottom_right",
+            "server_path": str(view_path),
+            "raw_composite_server_path": str(raw_path),
+            "generation_latency_ms": latency_ms,
+            "history_frames_used": len(history_entries),
+            "video_current_frame_index": current_frame_index,
+        }
+
+    def _predict_future_video_flow(
+        self,
+        *,
+        latents: torch.Tensor,
+        timestep: torch.Tensor,
+        context: torch.Tensor,
+        context_mask: torch.Tensor,
+        temporal_position_ids: torch.Tensor,
+        history_video_kv_cache: Optional[list[dict[str, torch.Tensor]]] = None,
+    ) -> torch.Tensor:
+        expert = self.model.video_expert
+        pre = expert.pre_dit(
+            x=latents,
+            timestep=timestep,
+            context=context,
+            context_mask=context_mask,
+            action=None,
+            temporal_position_ids=temporal_position_ids,
+            fuse_vae_embedding_in_latents=True,
+            clean_prefix_frames=1,
+        )
+        tokens = pre["tokens"]
+        attention_mask = expert.build_video_to_video_mask(
+            video_seq_len=int(tokens.shape[1]),
+            video_tokens_per_frame=int(pre["meta"]["tokens_per_frame"]),
+            device=tokens.device,
+        )
+        if history_video_kv_cache is not None:
+            prefix_len = int(history_video_kv_cache[0]["k"].shape[1])
+            attention_mask = torch.cat(
+                [
+                    torch.ones(
+                        (int(tokens.shape[1]), prefix_len),
+                        dtype=torch.bool,
+                        device=tokens.device,
+                    ),
+                    attention_mask,
+                ],
+                dim=1,
+            )
+        tokens = self.model.mot.forward_video_with_history(
+            video_tokens=tokens,
+            video_freqs=pre["freqs"],
+            video_t_mod=pre["t_mod"],
+            video_context_payload={
+                "context": pre["context"],
+                "mask": pre["context_mask"],
+            },
+            video_attention_mask=attention_mask,
+            history_video_kv_cache=history_video_kv_cache,
+        )
+        return expert.post_dit(tokens, pre)
+
+    def _append_standalone_preview_history(
+        self,
+        *,
+        first_frame_latents: torch.Tensor,
+        context: torch.Tensor,
+        context_mask: torch.Tensor,
+        current_frame_index: int,
+        history_video_kv_cache: Optional[list[dict[str, torch.Tensor]]],
+    ) -> None:
+        expert = self.model.video_expert
+        timestep = torch.zeros(
+            (1,), device=self.model.device, dtype=self.model.torch_dtype
+        )
+        pre = expert.pre_dit(
+            x=first_frame_latents,
+            timestep=timestep,
+            context=context,
+            context_mask=context_mask,
+            action=None,
+            temporal_position_ids=torch.tensor(
+                [current_frame_index], device=self.model.device, dtype=torch.long
+            ),
+            fuse_vae_embedding_in_latents=True,
+            clean_prefix_frames=1,
+        )
+        seq_len = int(pre["tokens"].shape[1])
+        tokens_per_frame = int(pre["meta"]["tokens_per_frame"])
+        attention_mask = expert.build_video_to_video_mask(
+            video_seq_len=seq_len,
+            video_tokens_per_frame=tokens_per_frame,
+            device=self.model.device,
+        )
+        payload = {"context": pre["context"], "mask": pre["context_mask"]}
+        if history_video_kv_cache is None:
+            current_cache = self.model.mot.prefill_video_cache(
+                video_tokens=pre["tokens"],
+                video_freqs=pre["freqs"],
+                video_t_mod=pre["t_mod"],
+                video_context_payload=payload,
+                video_attention_mask=attention_mask,
+            )
+        else:
+            prefix_len = int(history_video_kv_cache[0]["k"].shape[1])
+            attention_mask = torch.cat(
+                [
+                    torch.ones(
+                        (seq_len, prefix_len),
+                        dtype=torch.bool,
+                        device=self.model.device,
+                    ),
+                    attention_mask,
+                ],
+                dim=1,
+            )
+            current_cache = self.model.mot.prefill_video_cache_with_prefix(
+                video_tokens=pre["tokens"],
+                video_freqs=pre["freqs"],
+                video_t_mod=pre["t_mod"],
+                video_context_payload=payload,
+                prefix_video_kv_cache=history_video_kv_cache,
+                prefix_video_seq_len=prefix_len,
+                video_attention_mask=attention_mask,
+            )
+        current_cache = [
+            {"k": layer["k"].detach(), "v": layer["v"].detach()}
+            for layer in current_cache
+        ]
+        entries = [*self._standalone_preview_history_entries, current_cache]
+        max_history = int(self.model._configured_num_history_frames())
+        self._standalone_preview_history_entries = (
+            entries[-max_history:] if max_history > 0 else []
+        )
+        self._standalone_preview_frame_index = (
+            current_frame_index + self.preview_num_frames - 1
+        )
+
+    def _build_camera_preview_frames(self, frames: list[Image.Image]) -> list[Image.Image]:
+        rendered: list[Image.Image] = []
+        for frame_index, frame in enumerate(frames):
+            composite = frame.convert("RGB")
+            fixed = composite.crop((0, 0, self.video_width, 256))
+            wrist = composite.crop((0, 256, self.video_width // 2, 384)).resize(
+                (self.video_width, 256), resample=Image.Resampling.BILINEAR
+            )
+            canvas = Image.new("RGB", (self.video_width * 2, 288), color=(18, 18, 18))
+            canvas.paste(fixed, (0, 32))
+            canvas.paste(wrist, (self.video_width, 32))
+            draw = ImageDraw.Draw(canvas)
+            draw.text((8, 8), "predicted fixed", fill=(255, 255, 255))
+            draw.text((self.video_width + 8, 8), "predicted wrist", fill=(255, 255, 255))
+            draw.text(
+                (self.video_width - 46, 8),
+                f"t={frame_index / self.preview_fps:.2f}s",
+                fill=(255, 220, 90),
+            )
+            rendered.append(canvas)
+        return rendered
 
     def _normalize_state(self, state: np.ndarray) -> torch.Tensor:
         state_meta = self.processor.shape_meta["state"]
@@ -421,4 +945,3 @@ class AHAWAMPolicy:
             f"No AHAWAM deploy config found at '{policy_path}'. "
             "Pass a YAML config file or place 'deploy.yml' in the directory."
         )
-

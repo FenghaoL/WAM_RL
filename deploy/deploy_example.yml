@@ -6,7 +6,7 @@ checkpoint_path: ./checkpoints/ahawam_release/YOUR_CHECKPOINT.pt
 dataset_stats_path: ./checkpoints/ahawam_release/YOUR_DATASET_STATS.json
 project_root: .
 
-# Hydra config composed from configs/deploy.yml.
+# Hydra config composed from configs/deploy.yaml.
 hydra_config_name: deploy
 task: null
 

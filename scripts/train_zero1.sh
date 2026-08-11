@@ -171,9 +171,13 @@ if master_addr:
         resolved = f"<resolve failed: {exc}>"
 else:
     resolved = "<unset>"
+try:
+    local_ips = socket.gethostbyname_ex(socket.gethostname())[-1]
+except OSError as exc:
+    local_ips = [f"<resolve failed: {exc}>"]
 print(
     "[env] resolved_master_addr="
-    f"{master_addr or '<unset>'}->{resolved} local_ips={socket.gethostbyname_ex(socket.gethostname())[-1]}",
+    f"{master_addr or '<unset>'}->{resolved} local_ips={local_ips}",
     flush=True,
 )
 PY

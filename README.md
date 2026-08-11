@@ -89,7 +89,7 @@ AHA-WAM/
 │   ├── data/                 # Dataset configs
 │   ├── model/                # AHA-WAM model configs
 │   ├── task/                 # Training task configs
-│   ├── deploy.yml            # Hydra config for real-robot deployment
+│   ├── deploy.yaml           # Hydra config for real-robot deployment
 │   ├── sim_robotwin.yaml     # RoboTwin evaluation config
 │   └── train.yaml            # Base training config
 ├── scripts/
@@ -454,13 +454,13 @@ cp deploy/deploy_example.yml deploy/deploy.yml
 # edit checkpoint_path, dataset_stats_path, project_root, and inference options
 ```
 
-The deployment policy composes [`configs/deploy.yml`](./configs/deploy.yml) by
+The deployment policy composes [`configs/deploy.yaml`](./configs/deploy.yaml) by
 default. If `task` is left `null`, it uses the default task in that Hydra config
 (currently `robotwin_ahawam_offset`); set a task name here to override it:
 
 ```yaml
 hydra_config_name: deploy
-task: null  # uses configs/deploy.yml default; set a task name to override it
+task: null  # uses configs/deploy.yaml default; set a task name to override it
 ```
 
 Run the server on the GPU workstation:

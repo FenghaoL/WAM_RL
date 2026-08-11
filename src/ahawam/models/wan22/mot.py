@@ -515,6 +515,81 @@ class MoT(nn.Module):
 
         return {"video": x_video, "action_prior": x_action}
 
+    def forward_video_with_history(
+        self,
+        *,
+        video_tokens: torch.Tensor,
+        video_freqs: torch.Tensor,
+        video_t_mod: torch.Tensor,
+        video_context_payload: Optional[dict[str, torch.Tensor]],
+        video_attention_mask: torch.Tensor,
+        history_video_kv_cache: Optional[list[dict[str, torch.Tensor]]] = None,
+    ) -> torch.Tensor:
+        """Run the same video branch used by joint training, without action work."""
+        if "video" not in self.mixtures:
+            raise ValueError("MoT requires the `video` expert.")
+        if history_video_kv_cache is not None and len(history_video_kv_cache) != self.num_layers:
+            raise ValueError(
+                "`history_video_kv_cache` must contain "
+                f"{self.num_layers} layers, got {len(history_video_kv_cache)}."
+            )
+
+        video_expert = cast(Any, self.mixtures["video"])
+        x_video = video_tokens
+        for layer_idx in range(self.num_layers):
+            video_block = cast(Any, video_expert.blocks[layer_idx])
+            (
+                q_video,
+                k_video,
+                v_video,
+                residual_video,
+                gate_video,
+                shift_video_mlp,
+                scale_video_mlp,
+                gate_video_mlp,
+                video_checkpoint,
+            ) = self._build_expert_attention_io(
+                expert=video_expert,
+                block=video_block,
+                x=x_video,
+                freqs=video_freqs,
+                t_mod=video_t_mod,
+            )
+            if history_video_kv_cache is not None:
+                history_layer = history_video_kv_cache[layer_idx]
+                k_video = torch.cat(
+                    [
+                        history_layer["k"].to(device=k_video.device, dtype=k_video.dtype),
+                        k_video,
+                    ],
+                    dim=1,
+                )
+                v_video = torch.cat(
+                    [
+                        history_layer["v"].to(device=v_video.device, dtype=v_video.dtype),
+                        v_video,
+                    ],
+                    dim=1,
+                )
+            mixed_video = self._mixed_attention(
+                q_cat=q_video,
+                k_cat=k_video,
+                v_cat=v_video,
+                attention_mask=video_attention_mask,
+            )
+            x_video = self._apply_post_with_optional_checkpoint(
+                block=video_block,
+                residual_x=residual_video,
+                gate_msa=gate_video,
+                shift_mlp=shift_video_mlp,
+                scale_mlp=scale_video_mlp,
+                gate_mlp=gate_video_mlp,
+                use_gradient_checkpointing=video_checkpoint,
+                mixed_slice=mixed_video,
+                context_payload=video_context_payload,
+            )
+        return x_video
+
     def compute_cross_attn_kv(
         self,
         context: torch.Tensor,

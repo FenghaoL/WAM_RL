@@ -7,7 +7,11 @@ import torch.nn.functional as F
 from omegaconf import OmegaConf
 
 from ahawam.models.wan22.action_dit import ActionDiT
-from ahawam.models.wan22.helpers.loader import load_wan22_ti2v_5b_components
+from ahawam.models.wan22.helpers.loader import (
+    _load_registered_model,
+    _resolve_configs,
+    _validate_dit_config,
+)
 
 
 def _parse_dtype(name: str) -> torch.dtype:
@@ -48,6 +52,53 @@ def _resolve_from_video_cfg(value: Any, video_cfg: dict[str, Any]) -> Any:
         return value
     resolved = video_cfg[key]
     return value if _is_unresolved_interpolation(resolved) else resolved
+
+
+def _get_nested(mapping: dict[str, Any], dotted_key: str) -> Any:
+    cur: Any = mapping
+    for part in dotted_key.split("."):
+        if not isinstance(cur, dict) or part not in cur:
+            raise KeyError(dotted_key)
+        cur = cur[part]
+    return cur
+
+
+def _resolve_direct_model_interpolation(value: Any, root_cfg: dict[str, Any]) -> Any:
+    """Resolve ${model.foo} when this script loads configs/model/*.yaml directly.
+
+    In normal Hydra training, model yaml files are nested under cfg.model, so
+    ${model.action_chunk_size} points to cfg.model.action_chunk_size. This
+    standalone preprocessor reads the model yaml as the root config, where the
+    same value lives at top-level action_chunk_size.
+    """
+    if not _is_unresolved_interpolation(value):
+        return value
+    text = str(value).strip()
+    if not (text.startswith("${") and text.endswith("}")):
+        return value
+    expr = text[2:-1]
+    if not expr.startswith("model."):
+        return value
+    key = expr.split(".", 1)[1]
+    try:
+        resolved = _get_nested(root_cfg, key)
+    except KeyError:
+        return value
+    return value if _is_unresolved_interpolation(resolved) else resolved
+
+
+def _resolve_known_interpolations(
+    cfg_dict: dict[str, Any],
+    *,
+    root_cfg: dict[str, Any],
+    video_cfg: dict[str, Any],
+) -> dict[str, Any]:
+    resolved: dict[str, Any] = {}
+    for key, value in cfg_dict.items():
+        value = _resolve_from_video_cfg(value, video_cfg)
+        value = _resolve_direct_model_interpolation(value, root_cfg)
+        resolved[key] = value
+    return resolved
 
 
 def _interpolate_last_dim(tensor: torch.Tensor, new_size: int) -> torch.Tensor:
@@ -103,10 +154,24 @@ def _load_model_config(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             f"`{path}` must contain both `video_dit_config` and `action_dit_config` at top level."
         )
 
+    root_cfg = OmegaConf.to_container(cfg, resolve=False)
     video_cfg = OmegaConf.to_container(cfg.video_dit_config, resolve=False)
     action_cfg = OmegaConf.to_container(cfg.action_dit_config, resolve=False)
+    if not isinstance(root_cfg, dict):
+        raise ValueError("Model config root must resolve to a dict.")
     if not isinstance(video_cfg, dict) or not isinstance(action_cfg, dict):
         raise ValueError("`video_dit_config` and `action_dit_config` must resolve to dicts.")
+
+    video_cfg = _resolve_known_interpolations(
+        video_cfg,
+        root_cfg=root_cfg,
+        video_cfg=video_cfg,
+    )
+    action_cfg = _resolve_known_interpolations(
+        action_cfg,
+        root_cfg=root_cfg,
+        video_cfg=video_cfg,
+    )
 
     if _is_unresolved_interpolation(video_cfg.get("action_dim")):
         print("[WARN] `video_dit_config.action_dim` is unresolved; defaulting to 7 for preprocessing.")
@@ -168,15 +233,19 @@ def main() -> None:
     print(f"[INFO] Loaded model config from {model_config_path}. "
           f"Preprocessing ActionDiT backbone with dtype={torch_dtype} on device={args.device}, "
           f"apply_alpha_scaling={apply_alpha_scaling}.")
-    components = load_wan22_ti2v_5b_components(
-        device=args.device,
-        torch_dtype=torch_dtype,
+    dit_config, _, _, _ = _resolve_configs(
         model_id=cfg.get("model_id", "Wan-AI/Wan2.2-TI2V-5B"),
         tokenizer_model_id=cfg.get("tokenizer_model_id", "Wan-AI/Wan2.1-T2V-1.3B"),
         redirect_common_files=redirect_common_files,
-        dit_config=video_cfg,
     )
-    video_expert = components.dit
+    dit_config.download_if_necessary()
+    video_expert = _load_registered_model(
+        dit_config.path,
+        "wan_video_dit",
+        torch_dtype=torch_dtype,
+        device=args.device,
+        model_kwargs_override=_validate_dit_config(video_cfg),
+    )
 
     action_expert = ActionDiT(**action_cfg).to(device=args.device, dtype=torch_dtype)
     if int(action_cfg["num_heads"]) != int(video_expert.num_heads):

@@ -45,6 +45,7 @@ class Wan22Trainer:
         self.max_steps = int(max_steps) if max_steps is not None else None
         self.log_every = int(cfg.log_every)
         self.save_every = int(cfg.save_every)
+        self.save_at_end = bool(cfg.get("save_at_end", True))
         self.eval_every = int(cfg.eval_every)
         self.eval_num_inference_steps = int(cfg.eval_num_inference_steps)
         self.gradient_accumulation_steps = int(cfg.gradient_accumulation_steps)
@@ -1176,7 +1177,8 @@ class Wan22Trainer:
                                     steps_per_sec,
                                     steps_per_sec
                                     * self.batch_size
-                                    * self.accelerator.num_processes,
+                                    * self.accelerator.num_processes
+                                    * self.gradient_accumulation_steps,
                                     eta_str,
                                 )
                             )
@@ -1203,7 +1205,8 @@ class Wan22Trainer:
                                 "performance/steps_per_sec": steps_per_sec,
                                 "performance/samples_per_sec": steps_per_sec
                                 * self.batch_size
-                                * self.accelerator.num_processes,
+                                * self.accelerator.num_processes
+                                * self.gradient_accumulation_steps,
                                 "performance/data_time_s": profile_metrics["data_time"],
                                 "performance/forward_time_s": profile_metrics[
                                     "forward_time"
@@ -1278,23 +1281,35 @@ class Wan22Trainer:
                             )
 
                     if self.global_step >= self.max_steps:
-                        ckpt_info = self.save_checkpoint()
-                        if self.accelerator.is_main_process:
+                        if self.save_at_end:
+                            ckpt_info = self.save_checkpoint()
+                            if self.accelerator.is_main_process:
+                                logger.info(
+                                    "[done] max_steps reached step=%d weights=%s state=%s",
+                                    self.global_step,
+                                    ckpt_info["weights_path"],
+                                    ckpt_info["state_path"],
+                                )
+                        elif self.accelerator.is_main_process:
                             logger.info(
-                                "[done] max_steps reached step=%d weights=%s state=%s",
+                                "[done] max_steps reached step=%d; final checkpoint disabled.",
                                 self.global_step,
-                                ckpt_info["weights_path"],
-                                ckpt_info["state_path"],
                             )
                         return
 
                     last_step_end_time = time.perf_counter()
 
-        ckpt_info = self.save_checkpoint()
-        if self.accelerator.is_main_process:
+        if self.save_at_end:
+            ckpt_info = self.save_checkpoint()
+            if self.accelerator.is_main_process:
+                logger.info(
+                    "[done] training finished step=%d weights=%s state=%s",
+                    self.global_step,
+                    ckpt_info["weights_path"],
+                    ckpt_info["state_path"],
+                )
+        elif self.accelerator.is_main_process:
             logger.info(
-                "[done] training finished step=%d weights=%s state=%s",
+                "[done] training finished step=%d; final checkpoint disabled.",
                 self.global_step,
-                ckpt_info["weights_path"],
-                ckpt_info["state_path"],
             )

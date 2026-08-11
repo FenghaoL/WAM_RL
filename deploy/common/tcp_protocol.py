@@ -7,10 +7,25 @@ messages from untrusted peers is unsafe.
 
 from __future__ import annotations
 
+import io
 import pickle
 import socket
 import struct
 from typing import Any
+
+
+class _NumpyCompatibleUnpickler(pickle.Unpickler):
+    """Load ndarray pickles across NumPy's ``core`` to ``_core`` rename."""
+
+    def find_class(self, module: str, name: str) -> Any:
+        if module == "numpy._core" or module.startswith("numpy._core."):
+            module = "numpy.core" + module[len("numpy._core") :]
+        return super().find_class(module, name)
+
+
+def loads_compatible_pickle(payload: bytes) -> Any:
+    """Deserialize trusted payloads, accepting NumPy 2 arrays on NumPy 1.26."""
+    return _NumpyCompatibleUnpickler(io.BytesIO(payload)).load()
 
 
 def recv_exact(conn: socket.socket, size: int) -> bytes:
@@ -29,7 +44,7 @@ def recv_message(conn: socket.socket) -> tuple[Any, int]:
     header = recv_exact(conn, 4)
     (size,) = struct.unpack("!I", header)
     payload = recv_exact(conn, size)
-    return pickle.loads(payload), size
+    return loads_compatible_pickle(payload), size
 
 
 def send_message(conn: socket.socket, message: Any) -> int:

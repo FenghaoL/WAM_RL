@@ -3,16 +3,18 @@
 
 Run this on the GPU workstation. It intentionally has no ROS dependency: the
 robot-side process sends NumPy/Python observations and this server returns a
-14-D dual-arm action chunk.
+configured action chunk (6-D for the SO101 deployment).
 """
 
 import argparse
 import copy
 import importlib
+import inspect
 import logging
 import multiprocessing as mp
 import os
 import queue
+import signal
 import socket
 import sys
 import threading
@@ -188,13 +190,17 @@ class WAMPolicyAdapter:
             (time.perf_counter() - t0) * 1000.0,
         )
 
-    def infer(self, request):
-        t0 = time.perf_counter()
+    def _prepare_observation(self, request):
         images = request.get("images", {})
-        front = images.get("front")
-        if front is None:
-            raise ValueError("request must contain images['front']")
+        if hasattr(self.policy, "prepare_camera_images"):
+            front = self.policy.prepare_camera_images(images)
+        else:
+            front = images.get("front")
+            if front is None:
+                raise ValueError("request must contain images['front']")
 
+        if "state" not in request:
+            raise ValueError("request must contain a state vector")
         state = np.asarray(request["state"], dtype=np.float32).reshape(-1)
         if state.shape[0] != self.args.action_dim:
             raise ValueError(f"state dim must be {self.args.action_dim}, got {state.shape[0]}")
@@ -210,10 +216,8 @@ class WAMPolicyAdapter:
             request_instruction,
         )
 
-        # Only img_arr[0] (front/head camera) is used by the deployment model.
         img_arr = [front]
 
-        infer_t0 = time.perf_counter()
         if hasattr(self.policy, "update_observation_window"):
             update_t0 = time.perf_counter()
             self.policy.update_observation_window(img_arr, state)
@@ -221,6 +225,14 @@ class WAMPolicyAdapter:
                 "Observation window updated in %.1f ms",
                 (time.perf_counter() - update_t0) * 1000.0,
             )
+        return front, state, request_instruction
+
+    def infer(self, request):
+        t0 = time.perf_counter()
+        front, state, request_instruction = self._prepare_observation(request)
+
+        infer_t0 = time.perf_counter()
+        if hasattr(self.policy, "update_observation_window"):
             action_chunk = self.policy.get_action()
         elif hasattr(self.policy, "predict_action_chunk"):
             observation = {
@@ -256,6 +268,38 @@ class WAMPolicyAdapter:
         )
         return action_chunk
 
+    def generate_future_video(self, request, *, prepare_observation=True):
+        if prepare_observation:
+            self._prepare_observation(request)
+        generate = getattr(self.policy, "generate_future_video", None)
+        if generate is None:
+            raise NotImplementedError(
+                f"{type(self.policy).__name__} does not expose generate_future_video()"
+            )
+        parameters = inspect.signature(generate).parameters
+        if "advance_preview_history" in parameters:
+            return generate(advance_preview_history=bool(prepare_observation))
+        return generate()
+
+    def metadata(self):
+        metadata = {
+            "protocol": "length_prefixed_pickle_tcp",
+            "protocol_version": 1,
+        }
+        get_metadata = getattr(self.policy, "get_metadata", None)
+        if get_metadata is not None:
+            metadata.update(get_metadata())
+        return metadata
+
+    def reset_cuda_peak_memory(self):
+        reset = getattr(self.policy, "reset_cuda_peak_memory", None)
+        if reset is not None:
+            reset()
+
+    def cuda_memory_metrics(self):
+        get_metrics = getattr(self.policy, "get_cuda_memory_metrics", None)
+        return None if get_metrics is None else get_metrics()
+
 
 class PolicyRuntime:
     """Owns the policy object and handles requests in its current process."""
@@ -275,19 +319,44 @@ class PolicyRuntime:
     def handle_request(self, request):
         request_type = request.get("type")
         logger.info("Handling request type=%r", request_type)
-        if request.get("type") == "reset":
+        if request_type == "health":
+            return {
+                "ok": True,
+                "type": "health",
+                "video_preview_enabled": bool(self.args.enable_video_preview),
+                **self.adapter.metadata(),
+            }
+        if request_type == "reset":
             return self.reset(instruction=request.get("instruction"))
 
-        if request.get("type") != "infer":
+        if request_type not in {"infer", "video_preview", "infer_with_video"}:
             logger.warning("Unknown request type received: %r", request.get("type"))
             return {"ok": False, "error": f"unknown request type: {request.get('type')}"}
+        if request_type in {"video_preview", "infer_with_video"} and not self.args.enable_video_preview:
+            return {
+                "ok": False,
+                "error": (
+                    "future-video requests are disabled on this server; "
+                    "start it with --enable-video-preview"
+                ),
+            }
 
         self.inference_step_count += 1
         inference_step = self.inference_step_count
         logger.info("Starting policy inference step #%d", inference_step)
         t0 = time.perf_counter()
         try:
-            action_chunk = self.adapter.infer(request)
+            self.adapter.reset_cuda_peak_memory()
+            action_chunk = None
+            future_video = None
+            if request_type in {"infer", "infer_with_video"}:
+                action_chunk = self.adapter.infer(request)
+            if request_type == "video_preview":
+                future_video = self.adapter.generate_future_video(request)
+            elif request_type == "infer_with_video":
+                future_video = self.adapter.generate_future_video(
+                    request, prepare_observation=False
+                )
         except Exception as exc:
             logger.exception("Policy inference step #%d failed.", inference_step)
             reply = {"ok": False, "error": repr(exc), "server_inference_step": inference_step}
@@ -296,7 +365,7 @@ class PolicyRuntime:
                 reply["fatal_reason"] = "cuda_fatal_error"
             return reply
 
-        if self.args.max_return_actions > 0:
+        if action_chunk is not None and self.args.max_return_actions > 0:
             logger.info(
                 "Truncating action chunk from %d to max_return_actions=%d",
                 action_chunk.shape[0],
@@ -305,19 +374,34 @@ class PolicyRuntime:
             action_chunk = action_chunk[: self.args.max_return_actions]
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
-        logger.info(
-            "Inference step #%d handled successfully in %.1f ms; returning action_chunk_shape=%s",
-            inference_step,
-            latency_ms,
-            action_chunk.shape,
-        )
-        return {
+        reply = {
             "ok": True,
-            "type": "action_chunk",
-            "action_chunk": action_chunk,
             "model_latency_ms": latency_ms,
             "server_inference_step": inference_step,
         }
+        cuda_memory = self.adapter.cuda_memory_metrics()
+        if cuda_memory is not None:
+            reply["cuda_memory"] = cuda_memory
+        if request_type == "video_preview":
+            reply.update({"type": "future_video", "future_video": future_video})
+        elif request_type == "infer_with_video":
+            reply.update(
+                {
+                    "type": "action_chunk_with_video",
+                    "action_chunk": action_chunk,
+                    "future_video": future_video,
+                }
+            )
+        else:
+            reply.update({"type": "action_chunk", "action_chunk": action_chunk})
+        logger.info(
+            "Inference step #%d handled successfully in %.1f ms; type=%s action_shape=%s",
+            inference_step,
+            latency_ms,
+            reply["type"],
+            None if action_chunk is None else action_chunk.shape,
+        )
+        return reply
 
 
 class InProcessPolicyBackend:
@@ -336,6 +420,9 @@ class InProcessPolicyBackend:
 
 
 def policy_worker_main(args, conn):
+    # Let the parent own terminal shutdown and ask this CUDA worker to exit via
+    # the pipe, avoiding a noisy child traceback on Ctrl+C.
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
     logging.basicConfig(
         level=getattr(logging, args.log_level),
         format="%(asctime)s.%(msecs)03d [%(levelname)s] %(name)s: %(message)s",
@@ -1429,6 +1516,15 @@ def parse_args():
         help="Optional cap on returned action chunk length; 0 means no cap.",
     )
     parser.add_argument(
+        "--enable-video-preview",
+        action="store_true",
+        default=False,
+        help=(
+            "Enable diagnostic video_preview and infer_with_video requests. "
+            "Explicit future RGB generation is slow and is not part of the control path."
+        ),
+    )
+    parser.add_argument(
         "--random-instruction",
         action="store_true",
         help="Use the policy's random_set_language() instead of the fixed instruction when available.",
@@ -1542,4 +1638,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        logger.info("Server stopped by user.")

@@ -1,0 +1,107 @@
+# Full WAM fine-tuning: VideoDiT + ActionDiT + MoT/OVCR + observation adapters.
+# The text encoder and VAE remain frozen feature/codec modules.
+base_task: robotwin_ahawam_offset
+
+output_dir: runs/so101_g05_square_v1/full_zero3/manual
+batch_size: 1
+num_workers: 2
+learning_rate: 1.0e-5
+num_epochs: 4
+max_steps: null
+log_every: 1
+save_every: 1
+eval_every: 0
+eval_num_inference_steps: 10
+save_at_end: false
+gradient_accumulation_steps: 4
+mixed_precision: bf16
+weight_decay: 1.0e-2
+freeze_video_dit: false
+resume: null
+init_checkpoint: checkpoints/AHA-WAM-Pretrained/AHA-WAM-pretrained.pt
+
+# Portable bf16 checkpoints are about 14 GiB each and load through model.load_checkpoint().
+# Full Adam/DeepSpeed state is much larger; enable it only when exact optimizer resume is needed.
+zero3_save_portable_weights: true
+zero3_save_training_state: false
+
+wandb:
+  enabled: true
+  workspace: null
+  project: ahawam-so101-g05-square
+  name: so101-g05-square-full-zero3
+  group: square-v1-full-wam-zero3
+  mode: online
+
+model:
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+  checkpoint_shape_adapt: true
+  mot_checkpoint_mixed_attn: true
+  action_horizon: 40
+  action_chunk_size: 8
+  max_action_offset: 7
+  num_history_frames: 6
+  video_rope_frame_stride: ${data.train.action_video_freq_ratio}
+
+data:
+  train: &so101_dataset
+    _target_: scripts.so101_pipeline.so101_dataset.SO101RobotVideoDataset
+    dataset_dirs:
+      - data/so101_g05_square_v1_ahawam_v21
+    shape_meta:
+      images:
+        - key: fixed
+          raw_shape: [3, 480, 480]
+          shape: [3, 240, 320]
+        - key: wrist
+          raw_shape: [3, 480, 640]
+          shape: [3, 240, 320]
+      action:
+        - key: default
+          raw_shape: 6
+          shape: 6
+      state:
+        - key: default
+          raw_shape: 6
+          shape: 6
+    num_frames: 49
+    global_sample_stride: 1
+    action_video_freq_ratio: 4
+    video_size: [384, 320]
+    camera_key: null
+    val_set_proportion: 0.05
+    is_training_set: true
+    pretrained_norm_stats: runs/so101_g05_square_v1/assets/dataset_stats.json
+    # ZeRO-3 ranks must execute identical history branches. Retrying a padded
+    # sample independently on each rank can change its history length.
+    skip_padding_as_possible: false
+    concat_multi_camera: so101
+    text_embedding_cache_dir: data/so101_g05_square_v1_text_embeds_cache
+    video_latent_cache_dir: null
+    context_len: 128
+    max_action_offset: ${model.max_action_offset}
+    action_chunk_size: ${model.action_chunk_size}
+    action_horizon: ${model.action_horizon}
+    processor:
+      _target_: ahawam.datasets.lerobot.processors.ahawam_processor.AHAWAMProcessor
+      shape_meta: ${data.train.shape_meta}
+      num_obs_steps: ${data.train.num_frames}
+      num_output_cameras: 2
+      action_output_dim: 6
+      proprio_output_dim: 6
+      action_state_transforms: null
+      use_stepwise_action_norm: false
+      norm_default_mode: z-score
+      norm_exception_mode: null
+      action_state_merger:
+        _target_: ahawam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+      train_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size: [240, 320]
+      val_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size: [240, 320]
+  val: null

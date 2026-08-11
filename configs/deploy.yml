@@ -1,5 +1,5 @@
 # @package _global_
-# Neutral Hydra config for public AHAWAM real-robot deployment.
+# Legacy copy kept for existing links. Hydra composes deploy.yaml.
 
 defaults:
   - train

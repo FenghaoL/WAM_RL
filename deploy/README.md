@@ -42,8 +42,8 @@ hydra_config_name: deploy
 task: null
 ```
 
-`hydra_config_name: deploy` composes [`configs/deploy.yml`](../configs/deploy.yml).
-If `task` is left `null`, the task default from `configs/deploy.yml` is used. Set
+`hydra_config_name: deploy` composes [`configs/deploy.yaml`](../configs/deploy.yaml).
+If `task` is left `null`, the task default from `configs/deploy.yaml` is used. Set
 `task` to a task config name when you want to override that default.
 
 ## 2. Start the server
