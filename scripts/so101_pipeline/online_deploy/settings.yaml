@@ -1,7 +1,8 @@
 # Final SO101 G05 square-task deployment configuration.
-checkpoint_path: runs/so101_g05_square_v1/formal-3gpu-zero2-4ep-20260807-143159/model/checkpoints/weights/step_006524.pt
-dataset_stats_path: runs/so101_g05_square_v1/assets/dataset_stats.json
-text_embedding_cache_dir: data/so101_g05_square_v1_text_embeds_cache
+# 001720 002580 003440
+checkpoint_path: runs/so101_ahawam_square_v1/full_zero2_offload/formal-fastwam-zero2offload-bs4-acc1-4ep-20260813-220551/model/checkpoints/weights/step_003440.pt
+dataset_stats_path: runs/so101_ahawam_square_v1/assets/dataset_stats.json
+text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
 load_text_encoder: false
 project_root: .
 

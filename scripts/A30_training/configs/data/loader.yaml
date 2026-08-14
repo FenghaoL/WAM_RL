@@ -1,0 +1,110 @@
+train:
+  _target_: ahawam.datasets.lerobot.robot_video_dataset.RobotVideoDataset
+  dataset_dirs:
+    - /project/data/expert_lerobot_7_2
+  shape_meta:
+    images:
+      - key: front
+        raw_shape: [3, 768, 960]
+        shape: [3, 256, 320]
+    action:
+      - key: default        # -> lerobot 列 "action" (5-D)
+        raw_shape: 5
+        shape: 5
+    state:
+      - key: default        # -> lerobot 列 "observation.state" (6-D)
+        raw_shape: 6
+        shape: 6
+  num_frames: 65
+  global_sample_stride: 1
+  action_video_freq_ratio: 8   # 64 action steps, 9 video frames
+  video_size: [256, 320]       # final resize (H,W); latent 16x20; 比例1.25 完全匹配原图 768x960
+  camera_key: null
+  val_set_proportion: 0.01
+  is_training_set: true
+  pretrained_norm_stats: /data/wzy/AHA-WAM/checkpoints/loader_dataset_stats.json  # 已离线统计并固定，两阶段共用
+  skip_padding_as_possible: true
+  concat_multi_camera: null    # 单相机: 走 squeeze 分支; "robotwin" 会强制要求 3 相机
+  processor:
+    _target_: ahawam.datasets.lerobot.processors.ahawam_processor.AHAWAMProcessor
+    shape_meta: ${data.train.shape_meta}
+    num_obs_steps: ${data.train.num_frames}
+    num_output_cameras: 1
+    action_output_dim: 5
+    proprio_output_dim: 6
+
+    # action & state normalization
+    action_state_transforms: null
+    use_stepwise_action_norm: False
+    norm_default_mode: "z-score"
+    norm_exception_mode: null
+
+    action_state_merger:
+      _target_: ahawam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+
+    train_transforms:
+      - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Resize
+        size: [256, 320]
+    val_transforms:
+      - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Resize
+        size: [256, 320]
+  text_embedding_cache_dir: /data/wzy/AHA-WAM/data/text_embeds_cache/loader
+  video_latent_cache_dir: null
+  context_len: 128
+
+val:
+  _target_: ahawam.datasets.lerobot.robot_video_dataset.RobotVideoDataset
+  dataset_dirs:
+    - /project/data/expert_lerobot_7_2
+  shape_meta:
+    images:
+      - key: front
+        raw_shape: [3, 768, 960]
+        shape: [3, 256, 320]
+    action:
+      - key: default
+        raw_shape: 5
+        shape: 5
+    state:
+      - key: default
+        raw_shape: 6
+        shape: 6
+  num_frames: 65
+  global_sample_stride: 1
+  action_video_freq_ratio: 8
+  video_size: [256, 320]
+  camera_key: null
+  val_set_proportion: 0.01
+  is_training_set: false
+  pretrained_norm_stats: /data/wzy/AHA-WAM/checkpoints/loader_dataset_stats.json  # 已离线统计并固定，两阶段共用
+  skip_padding_as_possible: true
+  concat_multi_camera: null
+  processor:
+    _target_: ahawam.datasets.lerobot.processors.ahawam_processor.AHAWAMProcessor
+    shape_meta: ${data.train.shape_meta}
+    num_obs_steps: ${data.train.num_frames}
+    num_output_cameras: 1
+    action_output_dim: 5
+    proprio_output_dim: 6
+
+    # action & state normalization
+    action_state_transforms: null
+    use_stepwise_action_norm: False
+    norm_default_mode: "z-score"
+    norm_exception_mode: null
+
+    action_state_merger:
+      _target_: ahawam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+
+    train_transforms:
+      - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Resize
+        size: [256, 320]
+    val_transforms:
+      - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+      - _target_: torchvision.transforms.Resize
+        size: [256, 320]
+  text_embedding_cache_dir: /data/wzy/AHA-WAM/data/text_embeds_cache/loader
+  context_len: 128

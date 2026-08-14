@@ -1,0 +1,67 @@
+# Native configuration for the downloaded FastWAM RoboTwin checkpoint.
+# This is a 14-D dual-arm policy. It is not an SO101 control configuration.
+checkpoint_path: checkpoints/FastWAM-SharePoint/step_137500.pt
+dataset_stats_path: checkpoints/FastWAM-SharePoint/robotwin_uncond_3cam_384_dataset_stats.json
+text_embedding_cache_dir: data/so101_g05_square_v1_text_embeds_cache
+load_text_encoder: false
+project_root: .
+
+hydra_config_name: train
+task: null
+hydra_overrides:
+  - data=robotwin
+  - model=fastwam
+
+hydra_patch:
+  model:
+    skip_dit_load_from_pretrain: true
+    action_dit_pretrained_path: null
+    mot_checkpoint_mixed_attn: false
+  data:
+    train:
+      shape_meta:
+        images:
+          - key: cam_high
+            raw_shape: [3, 480, 640]
+            shape: [3, 240, 320]
+          - key: cam_left_wrist
+            raw_shape: [3, 480, 640]
+            shape: [3, 240, 320]
+          - key: cam_right_wrist
+            raw_shape: [3, 480, 640]
+            shape: [3, 240, 320]
+        action:
+          - key: default
+            raw_shape: 14
+            shape: 14
+        state:
+          - key: default
+            raw_shape: 14
+            shape: 14
+      num_frames: 33
+      action_video_freq_ratio: 4
+      video_size: [384, 320]
+      processor:
+        shape_meta: ${data.train.shape_meta}
+        num_obs_steps: ${data.train.num_frames}
+        num_output_cameras: 3
+        action_output_dim: 14
+        proprio_output_dim: 14
+        action_state_transforms: null
+        use_stepwise_action_norm: false
+        norm_default_mode: z-score
+        norm_exception_mode: null
+
+device: cuda
+mixed_precision: bf16
+action_horizon: 32
+num_inference_steps: 10
+sigma_shift: null
+seed: 42
+text_cfg_scale: 1.0
+negative_prompt: ""
+rand_device: cpu
+tiled: false
+warmup_rounds: 0
+video_height: 384
+video_width: 320

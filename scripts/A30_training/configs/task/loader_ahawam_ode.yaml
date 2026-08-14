@@ -1,0 +1,44 @@
+# @package _global_
+# 阶段 2：ODE 蒸馏，得到 Flash（1 步推理）学生。
+# teacher.checkpoint_path 必须指向【阶段 1 产出的装载机全量教师权重】(5维/1相机)，
+# 不是官方 robotwin_ahawam.pt(14维)，也不是官方 flash 权重。
+# 教师/学生结构由 loader 数据配置插值成 5维/1相机，与阶段 1 完全一致。
+
+defaults:
+  - override /data: loader
+  - override /model: ahawam_ode
+  - _self_
+
+batch_size: 4
+num_workers: 16
+history_aware_batching: true
+
+model:
+  mot_checkpoint_mixed_attn: false
+  teacher:
+    # TODO: 填阶段 1 训练产出的教师权重，例如 /data/wzy/AHA-WAM/runs/loader_ahawam-<时间>/step_xxxxx.pt
+    checkpoint_path: path/to/loader_teacher.pt
+  student:
+    checkpoint_path: null   # null = 学生从教师权重初始化
+
+output_dir: /data/wzy/AHA-WAM/runs/${hydra:runtime.choices.task}-${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+wandb:
+  enabled: true
+  workspace: null
+  project: ahawam
+  name: loader_ahawam_ode
+  group: null
+  mode: offline
+
+lr_scheduler_type: "cosine"
+learning_rate: 2e-5
+num_epochs: 30
+max_steps: null
+log_every: 10
+save_every: 2500
+eval_every: 500
+
+gradient_accumulation_steps: 4
+weight_decay: 1e-2
+resume: null

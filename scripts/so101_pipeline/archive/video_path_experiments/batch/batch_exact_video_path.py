@@ -18,13 +18,13 @@ from omegaconf import OmegaConf
 from PIL import Image, ImageDraw
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parents[3]
+REPO_ROOT = HERE.parents[4]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from ahawam.runtime import build_datasets
 from ahawam.utils.video_io import save_mp4
-from scripts.so101_pipeline.video_path_experiments.exact_video_path import (
+from scripts.so101_pipeline.archive.video_path_experiments.exact_video_path import (
     _batch_sample,
     _comparison_frames,
     _frame_metrics,
@@ -44,7 +44,12 @@ def _read_episode_rows(dataset_dir: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
-def _select_so101_indices(dataset: Any, count: int) -> list[dict[str, Any]]:
+def _select_so101_indices(
+    dataset: Any,
+    count: int,
+    *,
+    minimum_history_span: int = 0,
+) -> list[dict[str, Any]]:
     starts = dataset.lerobot_dataset.episode_data_index["from"].tolist()
     ends = dataset.lerobot_dataset.episode_data_index["to"].tolist()
     raw = dataset.lerobot_dataset.multi_dataset._datasets[0]
@@ -54,10 +59,10 @@ def _select_so101_indices(dataset: Any, count: int) -> list[dict[str, Any]]:
     for episode_slot, (start, end) in enumerate(zip(starts, ends)):
         length = int(end) - int(start)
         latest = length - int(dataset.num_frames)
-        if latest < horizon:
+        if latest < max(horizon, minimum_history_span):
             continue
         relative = min(latest, int(dataset.num_history_frames) * horizon)
-        relative = max(horizon, (relative // horizon) * horizon)
+        relative = max(horizon, minimum_history_span, (relative // horizon) * horizon)
         sample_index = int(start) + relative
         raw_item = raw.hf_dataset[sample_index]
         task_index = int(raw_item["task_index"].item())
@@ -91,6 +96,63 @@ def _select_so101_indices(dataset: Any, count: int) -> list[dict[str, Any]]:
     if len(selected) < count:
         raise ValueError(f"Only found {len(selected)} valid SO101 samples, requested {count}.")
     return selected
+
+
+def _replace_with_online_history(
+    dataset: Any,
+    sample_index: int,
+    episode_slot: int,
+    sample: dict[str, Any],
+    *,
+    history_count: int,
+    planner_control_stride: int,
+    video_rope_frame_stride: int,
+) -> dict[str, Any]:
+    """Use the same observation cadence and RoPE positions as online action inference."""
+    episode_start = int(
+        dataset.lerobot_dataset.episode_data_index["from"][episode_slot].item()
+    )
+    available_history = (sample_index - episode_start) // planner_control_stride
+    effective_history = min(history_count, available_history)
+    if effective_history <= 0:
+        raise ValueError(f"Sample {sample_index} has no online history observation.")
+    history_sample_indices = [
+        sample_index - planner_control_stride * offset
+        for offset in range(effective_history, 0, -1)
+    ]
+
+    history_frames = [
+        dataset[index]["video"][:, 0] for index in history_sample_indices
+    ]
+    current_frame_index = int(sample["video_current_frame_index"].item())
+    rope_step = planner_control_stride // video_rope_frame_stride
+    if rope_step * video_rope_frame_stride != planner_control_stride:
+        raise ValueError(
+            "action_horizon must be divisible by video_rope_frame_stride for online history."
+        )
+    history_rope_indices = [
+        current_frame_index - rope_step * offset
+        for offset in range(effective_history, 0, -1)
+    ]
+    if history_rope_indices[0] < 0:
+        raise ValueError(
+            f"Sample {sample_index} produces negative history RoPE positions: "
+            f"{history_rope_indices}"
+        )
+
+    pad_count = history_count - effective_history
+    padded_history_frames = [history_frames[0]] * pad_count + history_frames
+    padded_rope_indices = [0] * pad_count + history_rope_indices
+
+    sample = dict(sample)
+    sample["video_history"] = torch.stack(padded_history_frames, dim=1)
+    sample["video_history_valid_len"] = torch.tensor(
+        effective_history, dtype=torch.long
+    )
+    sample["video_history_frame_indices"] = torch.tensor(
+        padded_rope_indices, dtype=torch.long
+    )
+    return sample
 
 
 def _select_robocoin_windows(dataset_dir: Path, count: int) -> list[dict[str, Any]]:
@@ -155,9 +217,15 @@ def _contact_sheet(images: list[tuple[str, Image.Image]], output: Path) -> None:
     canvas.save(output)
 
 
-def _save_summary(output: Path, mode: str, rows: list[dict[str, Any]]) -> None:
+def _save_summary(
+    output: Path,
+    mode: str,
+    history_mode: str,
+    rows: list[dict[str, Any]],
+) -> None:
     summary = {
         "mode": mode,
+        "history_mode": history_mode,
         "num_samples": len(rows),
         "mean_future_rgb_mse": round(float(np.mean([x["future_rgb_mse"] for x in rows])), 3),
         "mean_future_rgb_psnr": round(float(np.mean([x["future_rgb_psnr"] for x in rows])), 3),
@@ -180,6 +248,16 @@ def _save_summary(output: Path, mode: str, rows: list[dict[str, Any]]) -> None:
         writer.writeheader()
         writer.writerows(rows)
 
+    if history_mode == "online":
+        path_description = (
+            "This prediction uses sequential online rolling history K/V and the shared "
+            "online future-video denoising implementation."
+        )
+    else:
+        path_description = (
+            "This prediction uses the training-style one-shot causal history prefill and "
+            "the shared online future-video denoising implementation."
+        )
     lines = [
         f"# {mode.upper()} history-conditioned VideoDiT batch report",
         "",
@@ -193,9 +271,9 @@ def _save_summary(output: Path, mode: str, rows: list[dict[str, Any]]) -> None:
         "Each sample directory contains `history_strip.png`, `ground_truth.mp4`, "
         "`prediction_with_history.mp4`, `comparison_gt_vs_prediction.mp4`, and `metrics.json`.",
         "",
-        "This prediction uses the same VideoDiT `pre_dit -> history KV -> per-frame causal MoT "
-        "-> post_dit -> flow scheduler -> VAE decode` path as joint inference. The released "
-        "configuration has `action_conditioned=false`, so no action tensor is consumed by the video branch.",
+        path_description,
+        "The released configuration has `action_conditioned=false`, so no action tensor "
+        "is consumed by the video branch.",
     ]
     (output / "README.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(json.dumps({key: value for key, value in summary.items() if key != "samples"}, indent=2))
@@ -211,6 +289,12 @@ def main() -> None:
     parser.add_argument("--num-samples", type=int, default=8)
     parser.add_argument("--steps", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--history-mode",
+        choices=("training", "online"),
+        default="training",
+        help="Use one-shot training prefill or sequential online rolling prefill.",
+    )
     parser.add_argument("--fps", type=float, required=True)
     parser.add_argument("--dataset-dir", type=Path)
     parser.add_argument("--text-cache-dir", type=Path)
@@ -224,7 +308,16 @@ def main() -> None:
     if args.mode == "so101":
         cfg.data.train.skip_padding_as_possible = False
         dataset, _ = build_datasets(cfg.data, cfg.model)
-        selections = _select_so101_indices(dataset, args.num_samples)
+        history_count = int(cfg.model.num_history_frames)
+        planner_control_stride = int(cfg.model.action_horizon)
+        minimum_history_span = (
+            planner_control_stride if args.history_mode == "online" else 0
+        )
+        selections = _select_so101_indices(
+            dataset,
+            args.num_samples,
+            minimum_history_span=minimum_history_span,
+        )
     else:
         if args.dataset_dir is None or args.text_cache_dir is None:
             parser.error("robocoin mode requires --dataset-dir and --text-cache-dir")
@@ -244,7 +337,19 @@ def main() -> None:
     for output_index, selection in enumerate(selections):
         if args.mode == "so101":
             assert dataset is not None
-            sample = _batch_sample(dataset[int(selection["sample_index"])])
+            sample_index = int(selection["sample_index"])
+            raw_sample = dataset[sample_index]
+            if args.history_mode == "online":
+                raw_sample = _replace_with_online_history(
+                    dataset,
+                    sample_index,
+                    int(selection["episode_slot"]),
+                    raw_sample,
+                    history_count=int(cfg.model.num_history_frames),
+                    planner_control_stride=int(cfg.model.action_horizon),
+                    video_rope_frame_stride=int(cfg.model.video_rope_frame_stride),
+                )
+            sample = _batch_sample(raw_sample)
             tag = f"{output_index:02d}_idx_{selection['sample_index']}_{_safe_name(selection['task'])[:36]}"
         else:
             assert args.dataset_dir is not None and args.text_cache_dir is not None
@@ -268,10 +373,16 @@ def main() -> None:
             steps=args.steps,
             seed=args.seed + output_index,
             use_history=True,
+            history_mode=args.history_mode,
         )
         metrics = _frame_metrics(prediction, ground_truth)
+        prediction_label = (
+            "online video-only prediction"
+            if args.history_mode == "online"
+            else "training-history video prediction"
+        )
         comparison = _comparison_frames(
-            [("ground truth", ground_truth), ("training-style history KV prediction", prediction)]
+            [("ground truth", ground_truth), (prediction_label, prediction)]
         )
         save_mp4(ground_truth, str(sample_dir / "ground_truth.mp4"), fps=args.fps)
         save_mp4(prediction, str(sample_dir / "prediction_with_history.mp4"), fps=args.fps)
@@ -290,6 +401,10 @@ def main() -> None:
             "sample_index": selection.get("sample_index", ""),
             "episode": selection.get("source_episode", selection.get("episode", "")),
             "start_frame": selection.get("source_frame", selection.get("start_frame", "")),
+            "history_rope_indices": sample["video_history_frame_indices"][0].tolist(),
+            "current_rope_index": int(
+                sample["video_current_frame_index"].reshape(-1)[0].item()
+            ),
             **generation_info,
             **metrics,
         }
@@ -305,7 +420,7 @@ def main() -> None:
 
     _contact_sheet(middle_images, args.output / "contact_sheet_middle.png")
     _contact_sheet(last_images, args.output / "contact_sheet_last.png")
-    _save_summary(args.output, args.mode, rows)
+    _save_summary(args.output, args.mode, args.history_mode, rows)
 
 
 if __name__ == "__main__":

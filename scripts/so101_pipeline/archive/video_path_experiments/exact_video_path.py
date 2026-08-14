@@ -30,6 +30,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from ahawam.runtime import build_datasets
 from ahawam.utils.video_io import save_mp4
+from deploy.server.ahawam_policy import denoise_future_video_latents
 
 
 DEFAULT_PROMPT = (
@@ -220,6 +221,100 @@ def _prepare_history_cache(
     return [{"k": item["k"].detach(), "v": item["v"].detach()} for item in cache], effective
 
 
+def _prepare_online_history_cache(
+    model: Any,
+    sample: dict[str, Any],
+    context: torch.Tensor,
+    context_mask: torch.Tensor,
+) -> tuple[Optional[list[dict[str, torch.Tensor]]], int]:
+    """Prefill each history frame exactly like consecutive online observations."""
+    valid_len = model._get_video_history_valid_len(
+        sample,
+        batch_size=1,
+        num_history_frames=int(model.num_history_frames),
+    )
+    effective = int(valid_len.max().item())
+    if effective == 0:
+        return None, 0
+
+    frame_indices = model._get_video_history_frame_indices(
+        sample,
+        batch_size=1,
+        num_history_frames=int(model.num_history_frames),
+    )[:, -effective:]
+    history_latents = model._encode_training_history_latents(
+        sample,
+        batch_size=1,
+        num_history_frames=effective,
+        tiled=False,
+    )
+    timestep = torch.zeros((1,), device=model.device, dtype=model.torch_dtype)
+    entries: list[list[dict[str, torch.Tensor]]] = []
+
+    for frame_offset in range(effective):
+        frame_latents = history_latents[:, :, frame_offset : frame_offset + 1]
+        frame_pre = model.video_expert.pre_dit(
+            x=frame_latents,
+            timestep=timestep,
+            context=context,
+            context_mask=context_mask,
+            action=None,
+            temporal_position_ids=frame_indices[:, frame_offset : frame_offset + 1],
+            fuse_vae_embedding_in_latents=True,
+            clean_prefix_frames=1,
+        )
+        seq_len = int(frame_pre["tokens"].shape[1])
+        tokens_per_frame = int(frame_pre["meta"]["tokens_per_frame"])
+        frame_mask = model.video_expert.build_video_to_video_mask(
+            video_seq_len=seq_len,
+            video_tokens_per_frame=tokens_per_frame,
+            device=model.device,
+        )
+        payload = {
+            "context": frame_pre["context"],
+            "mask": frame_pre["context_mask"],
+        }
+        if entries:
+            prefix_cache = model._concat_history_kv_entries(entries)
+            prefix_len = int(prefix_cache[0]["k"].shape[1])
+            frame_mask = torch.cat(
+                [
+                    torch.ones(
+                        (seq_len, prefix_len),
+                        dtype=torch.bool,
+                        device=model.device,
+                    ),
+                    frame_mask,
+                ],
+                dim=1,
+            )
+            current_cache = model.mot.prefill_video_cache_with_prefix(
+                video_tokens=frame_pre["tokens"],
+                video_freqs=frame_pre["freqs"],
+                video_t_mod=frame_pre["t_mod"],
+                video_context_payload=payload,
+                prefix_video_kv_cache=prefix_cache,
+                prefix_video_seq_len=prefix_len,
+                video_attention_mask=frame_mask,
+            )
+        else:
+            current_cache = model.mot.prefill_video_cache(
+                video_tokens=frame_pre["tokens"],
+                video_freqs=frame_pre["freqs"],
+                video_t_mod=frame_pre["t_mod"],
+                video_context_payload=payload,
+                video_attention_mask=frame_mask,
+            )
+        entries.append(
+            [
+                {"k": layer["k"].detach(), "v": layer["v"].detach()}
+                for layer in current_cache
+            ]
+        )
+
+    return model._concat_history_kv_entries(entries), effective
+
+
 @torch.no_grad()
 def _generate(
     model: Any,
@@ -228,7 +323,8 @@ def _generate(
     steps: int,
     seed: int,
     use_history: bool,
-) -> tuple[list[Image.Image], dict[str, float | int]]:
+    history_mode: str = "training",
+) -> tuple[list[Image.Image], dict[str, float | int | str]]:
     video = sample["video"].to(device=model.device, dtype=model.torch_dtype)
     context = sample["context"].to(device=model.device, dtype=model.torch_dtype)
     context_mask = sample["context_mask"].to(device=model.device, dtype=torch.bool)
@@ -265,64 +361,36 @@ def _generate(
     history_cache = None
     history_frames = 0
     if use_history:
-        history_cache, history_frames = _prepare_history_cache(
-            model, sample, context, context_mask, tokens_per_frame
-        )
+        if history_mode == "online":
+            history_cache, history_frames = _prepare_online_history_cache(
+                model, sample, context, context_mask
+            )
+        elif history_mode == "training":
+            history_cache, history_frames = _prepare_history_cache(
+                model, sample, context, context_mask, tokens_per_frame
+            )
+        else:
+            raise ValueError(f"Unsupported history_mode: {history_mode}")
 
-    timesteps, deltas = model.infer_video_scheduler.build_inference_schedule(
-        num_inference_steps=steps,
-        device=model.device,
-        dtype=latents.dtype,
-        shift_override=None,
-    )
     started = time.perf_counter()
     torch.cuda.reset_peak_memory_stats(model.device)
-    for step_t, step_delta in zip(timesteps, deltas):
-        timestep = step_t.unsqueeze(0).to(device=model.device, dtype=latents.dtype)
-        pre = model.video_expert.pre_dit(
-            x=latents,
-            timestep=timestep,
-            context=context,
-            context_mask=context_mask,
-            action=None,
-            temporal_position_ids=temporal_ids,
-            fuse_vae_embedding_in_latents=True,
-            clean_prefix_frames=1,
-        )
-        attention_mask = model.video_expert.build_video_to_video_mask(
-            video_seq_len=int(pre["tokens"].shape[1]),
-            video_tokens_per_frame=int(pre["meta"]["tokens_per_frame"]),
-            device=model.device,
-        )
-        if history_cache is not None:
-            prefix_len = int(history_cache[0]["k"].shape[1])
-            attention_mask = torch.cat(
-                [
-                    torch.ones(
-                        (int(pre["tokens"].shape[1]), prefix_len),
-                        dtype=torch.bool,
-                        device=model.device,
-                    ),
-                    attention_mask,
-                ],
-                dim=1,
-            )
-        tokens = model.mot.forward_video_with_history(
-            video_tokens=pre["tokens"],
-            video_freqs=pre["freqs"],
-            video_t_mod=pre["t_mod"],
-            video_context_payload={"context": pre["context"], "mask": pre["context_mask"]},
-            video_attention_mask=attention_mask,
-            history_video_kv_cache=history_cache,
-        )
-        pred_flow = model.video_expert.post_dit(tokens, pre)
-        latents = model.infer_video_scheduler.step(pred_flow, step_delta, latents)
-        latents[:, :, :1] = first_frame
+    latents = denoise_future_video_latents(
+        model=model,
+        latents=latents,
+        first_frame_latents=first_frame,
+        context=context,
+        context_mask=context_mask,
+        temporal_position_ids=temporal_ids,
+        history_video_kv_cache=history_cache,
+        num_inference_steps=steps,
+        sigma_shift=None,
+    )
     frames = model._decode_latents(latents, tiled=False)
     elapsed = time.perf_counter() - started
     peak_gib = torch.cuda.max_memory_allocated(model.device) / (1024**3)
     return frames, {
         "history_frames": history_frames,
+        "history_mode": history_mode if use_history else "none",
         "steps": steps,
         "seed": seed,
         "generation_seconds": round(elapsed, 3),

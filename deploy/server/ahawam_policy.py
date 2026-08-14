@@ -60,6 +60,101 @@ def _mixed_precision_to_dtype(mixed_precision: str) -> torch.dtype:
     return torch.bfloat16
 
 
+def predict_future_video_flow(
+    *,
+    model: Any,
+    latents: torch.Tensor,
+    timestep: torch.Tensor,
+    context: torch.Tensor,
+    context_mask: torch.Tensor,
+    temporal_position_ids: torch.Tensor,
+    history_video_kv_cache: Optional[list[dict[str, torch.Tensor]]] = None,
+) -> torch.Tensor:
+    """Run the video-only MoT branch used by online future-video inference."""
+    expert = model.video_expert
+    pre = expert.pre_dit(
+        x=latents,
+        timestep=timestep,
+        context=context,
+        context_mask=context_mask,
+        action=None,
+        temporal_position_ids=temporal_position_ids,
+        fuse_vae_embedding_in_latents=True,
+        clean_prefix_frames=1,
+    )
+    tokens = pre["tokens"]
+    attention_mask = expert.build_video_to_video_mask(
+        video_seq_len=int(tokens.shape[1]),
+        video_tokens_per_frame=int(pre["meta"]["tokens_per_frame"]),
+        device=tokens.device,
+    )
+    if history_video_kv_cache is not None:
+        prefix_len = int(history_video_kv_cache[0]["k"].shape[1])
+        attention_mask = torch.cat(
+            [
+                torch.ones(
+                    (int(tokens.shape[1]), prefix_len),
+                    dtype=torch.bool,
+                    device=tokens.device,
+                ),
+                attention_mask,
+            ],
+            dim=1,
+        )
+    tokens = model.mot.forward_video_with_history(
+        video_tokens=tokens,
+        video_freqs=pre["freqs"],
+        video_t_mod=pre["t_mod"],
+        video_context_payload={
+            "context": pre["context"],
+            "mask": pre["context_mask"],
+        },
+        video_attention_mask=attention_mask,
+        history_video_kv_cache=history_video_kv_cache,
+    )
+    return expert.post_dit(tokens, pre)
+
+
+@torch.no_grad()
+def denoise_future_video_latents(
+    *,
+    model: Any,
+    latents: torch.Tensor,
+    first_frame_latents: torch.Tensor,
+    context: torch.Tensor,
+    context_mask: torch.Tensor,
+    temporal_position_ids: torch.Tensor,
+    history_video_kv_cache: Optional[list[dict[str, torch.Tensor]]],
+    num_inference_steps: int,
+    sigma_shift: Optional[float],
+) -> torch.Tensor:
+    """Denoise future latents through the exact shared online/offline path."""
+    timesteps, deltas = model.infer_video_scheduler.build_inference_schedule(
+        num_inference_steps=int(num_inference_steps),
+        device=model.device,
+        dtype=latents.dtype,
+        shift_override=sigma_shift,
+    )
+    for step_t, step_delta in zip(timesteps, deltas):
+        timestep = step_t.unsqueeze(0).to(
+            device=model.device, dtype=latents.dtype
+        )
+        pred_flow = predict_future_video_flow(
+            model=model,
+            latents=latents,
+            timestep=timestep,
+            context=context,
+            context_mask=context_mask,
+            temporal_position_ids=temporal_position_ids,
+            history_video_kv_cache=history_video_kv_cache,
+        )
+        latents = model.infer_video_scheduler.step(
+            pred_flow, step_delta, latents
+        )
+        latents[:, :, 0:1] = first_frame_latents
+    return latents
+
+
 class AHAWAMPolicy:
     """AHAWAM policy wrapper used by ``deploy/server/wam_policy_server.py``.
 
@@ -187,11 +282,15 @@ class AHAWAMPolicy:
         self.context_len = int(model_cfg.get("tokenizer_max_len", 128))
         self._text_context_cache: dict[str, tuple[torch.Tensor, torch.Tensor]] = {}
 
-        logger.info("Instantiating AHAWAM model...")
+        logger.info("Instantiating WAM model...")
         model_t0 = time.perf_counter()
         self.model = instantiate(model_cfg, model_dtype=model_dtype, device=device)
         self.model.load_checkpoint(str(checkpoint_path))
         self.model = self.model.to(device).eval()
+        infer_action_params = inspect.signature(self.model.infer_action).parameters
+        self.model_variant = (
+            "ahawam" if "phase" in infer_action_params else "fastwam"
+        )
         logger.info("Model loaded in %.1f ms", (time.perf_counter() - model_t0) * 1000.0)
 
         self.processor = instantiate(hydra_cfg.data.train.processor).eval()
@@ -224,8 +323,13 @@ class AHAWAMPolicy:
         self.tiled = bool(cfg.get("tiled", eval_cfg.get("tiled", False)))
         self.warmup_rounds = max(0, int(cfg.get("warmup_rounds", 1)))
 
-        self.action_chunk_size = int(self.model.action_chunk_size)
-        self.num_chunks = int(self.action_horizon // self.action_chunk_size)
+        if self.model_variant == "ahawam":
+            self.action_chunk_size = int(self.model.action_chunk_size)
+            self.num_chunks = int(self.action_horizon // self.action_chunk_size)
+        else:
+            # FastWAM predicts one complete action horizon from each observation.
+            self.action_chunk_size = self.action_horizon
+            self.num_chunks = 1
         if self.num_chunks <= 0:
             raise ValueError("action_horizon must be at least one action chunk.")
 
@@ -258,7 +362,8 @@ class AHAWAMPolicy:
             )
 
         logger.info(
-            "AHAWAM policy ready | device=%s dtype=%s | horizon=%d chunk_size=%d num_chunks=%d | image=%dx%d",
+            "%s policy ready | device=%s dtype=%s | horizon=%d chunk_size=%d num_chunks=%d | image=%dx%d",
+            self.model_variant,
             device,
             model_dtype,
             self.action_horizon,
@@ -291,13 +396,18 @@ class AHAWAMPolicy:
     def get_metadata(self) -> dict[str, Any]:
         return {
             "policy": type(self).__name__,
+            "model_variant": self.model_variant,
             "action_dim": self.action_dim,
             "proprio_dim": self.proprio_dim,
             "action_chunk_size": self.action_chunk_size,
             "action_horizon": self.action_horizon,
             "num_action_chunks_per_planner_refresh": self.num_chunks,
             "model_image_shape_hwc": [self.video_height, self.video_width, 3],
-            "accepted_image_keys": [["front"], ["fixed", "wrist"]],
+            "accepted_image_keys": [
+                ["front"],
+                ["fixed", "wrist"],
+                ["cam_high", "cam_left_wrist", "cam_right_wrist"],
+            ],
             "text_mode": (
                 "cached" if self.text_embedding_cache_dir is not None else "online_encoder"
             ),
@@ -342,13 +452,38 @@ class AHAWAMPolicy:
         return np.ascontiguousarray(array)
 
     def prepare_camera_images(self, images: dict[str, Any]) -> np.ndarray:
-        """Return the exact 384x320 camera layout used by SO101 training."""
+        """Return a 384x320 SO101 or native RoboTwin camera composite."""
         if images.get("front") is not None:
             return self._as_hwc_rgb(images["front"], "front")
 
+        robotwin_keys = ("cam_high", "cam_left_wrist", "cam_right_wrist")
+        if all(images.get(key) is not None for key in robotwin_keys):
+            high = Image.fromarray(
+                self._as_hwc_rgb(images["cam_high"], "cam_high"), mode="RGB"
+            ).resize((320, 240), resample=Image.Resampling.BILINEAR)
+            left = Image.fromarray(
+                self._as_hwc_rgb(images["cam_left_wrist"], "cam_left_wrist"),
+                mode="RGB",
+            ).resize((320, 240), resample=Image.Resampling.BILINEAR)
+            right = Image.fromarray(
+                self._as_hwc_rgb(images["cam_right_wrist"], "cam_right_wrist"),
+                mode="RGB",
+            ).resize((320, 240), resample=Image.Resampling.BILINEAR)
+            high = high.resize((320, 256), resample=Image.Resampling.BILINEAR)
+            left = left.resize((160, 128), resample=Image.Resampling.BILINEAR)
+            right = right.resize((160, 128), resample=Image.Resampling.BILINEAR)
+            wrist_row = np.concatenate(
+                [np.asarray(left, dtype=np.uint8), np.asarray(right, dtype=np.uint8)],
+                axis=1,
+            )
+            return np.concatenate(
+                [np.asarray(high, dtype=np.uint8), wrist_row], axis=0
+            )
+
         if images.get("fixed") is None or images.get("wrist") is None:
             raise ValueError(
-                "request images must contain either ['front'] or both ['fixed', 'wrist']"
+                "request images must contain ['front'], ['fixed', 'wrist'], or "
+                "['cam_high', 'cam_left_wrist', 'cam_right_wrist']"
             )
         fixed = Image.fromarray(self._as_hwc_rgb(images["fixed"], "fixed"), mode="RGB")
         wrist = Image.fromarray(self._as_hwc_rgb(images["wrist"], "wrist"), mode="RGB")
@@ -397,6 +532,9 @@ class AHAWAMPolicy:
         if self._observation is None:
             raise RuntimeError("Call update_observation_window before get_action.")
 
+        if self.model_variant == "fastwam":
+            return self._get_fastwam_action()
+
         image_tensor = self._observation["image_tensor"]
         state_vector = self._observation["state_vector"]
 
@@ -423,6 +561,40 @@ class AHAWAMPolicy:
 
         action_tensor = pred["action_chunk"].unsqueeze(0)
         action = self._denormalize_action(action_tensor)[0]
+        if action.shape[-1] != self.action_dim:
+            raise ValueError(
+                f"Model returned {action.shape[-1]} action dimensions; expected {self.action_dim}"
+            )
+        if not np.all(np.isfinite(action)):
+            raise ValueError("Model action contains NaN or Inf")
+        return action
+
+    def _get_fastwam_action(self) -> np.ndarray:
+        """Run FastWAM's native current-frame-to-action inference path."""
+        image_tensor = self._observation["image_tensor"]
+        state_vector = self._observation["state_vector"]
+        proprio = self._normalize_state(state_vector)
+        prompt = self._DEFAULT_PROMPT.format(task=self.current_instruction)
+        context, context_mask = self._resolve_text_condition(prompt)
+
+        with torch.no_grad():
+            pred = self.model.infer_action(
+                prompt=None if context is not None else prompt,
+                input_image=image_tensor,
+                action_horizon=self.action_horizon,
+                proprio=proprio,
+                context=context,
+                context_mask=context_mask,
+                negative_prompt=self.negative_prompt,
+                text_cfg_scale=self.text_cfg_scale,
+                num_inference_steps=self.num_inference_steps,
+                sigma_shift=self.sigma_shift,
+                seed=self.seed,
+                rand_device=self.rand_device,
+                tiled=self.tiled,
+            )
+
+        action = self._denormalize_action(pred["action"].unsqueeze(0))[0]
         if action.shape[-1] != self.action_dim:
             raise ValueError(
                 f"Model returned {action.shape[-1]} action dimensions; expected {self.action_dim}"
@@ -605,14 +777,6 @@ class AHAWAMPolicy:
         )
         latents[:, :, 0:1] = first_frame_latents
 
-        infer_timesteps, infer_deltas = (
-            self.model.infer_video_scheduler.build_inference_schedule(
-                num_inference_steps=self.preview_num_inference_steps,
-                device=self.model.device,
-                dtype=latents.dtype,
-                shift_override=self.sigma_shift,
-            )
-        )
         temporal_ids = (
             torch.arange(latent_t, device=self.model.device, dtype=torch.long)
             * int(self.model.vae.temporal_downsample_factor)
@@ -636,22 +800,17 @@ class AHAWAMPolicy:
             else None
         )
         temporal_ids = temporal_ids + current_frame_index
-        for step_t, step_delta in zip(infer_timesteps, infer_deltas):
-            timestep = step_t.unsqueeze(0).to(
-                device=self.model.device, dtype=latents.dtype
-            )
-            pred_flow = self._predict_future_video_flow(
-                latents=latents,
-                timestep=timestep,
-                context=context,
-                context_mask=context_mask,
-                temporal_position_ids=temporal_ids,
-                history_video_kv_cache=history_video_kv_cache,
-            )
-            latents = self.model.infer_video_scheduler.step(
-                pred_flow, step_delta, latents
-            )
-            latents[:, :, 0:1] = first_frame_latents
+        latents = denoise_future_video_latents(
+            model=self.model,
+            latents=latents,
+            first_frame_latents=first_frame_latents,
+            context=context,
+            context_mask=context_mask,
+            temporal_position_ids=temporal_ids,
+            history_video_kv_cache=history_video_kv_cache,
+            num_inference_steps=self.preview_num_inference_steps,
+            sigma_shift=self.sigma_shift,
+        )
 
         frames = self.model._decode_latents(latents, tiled=self.tiled)
         if advance_preview_history:
@@ -699,48 +858,15 @@ class AHAWAMPolicy:
         temporal_position_ids: torch.Tensor,
         history_video_kv_cache: Optional[list[dict[str, torch.Tensor]]] = None,
     ) -> torch.Tensor:
-        expert = self.model.video_expert
-        pre = expert.pre_dit(
-            x=latents,
+        return predict_future_video_flow(
+            model=self.model,
+            latents=latents,
             timestep=timestep,
             context=context,
             context_mask=context_mask,
-            action=None,
             temporal_position_ids=temporal_position_ids,
-            fuse_vae_embedding_in_latents=True,
-            clean_prefix_frames=1,
-        )
-        tokens = pre["tokens"]
-        attention_mask = expert.build_video_to_video_mask(
-            video_seq_len=int(tokens.shape[1]),
-            video_tokens_per_frame=int(pre["meta"]["tokens_per_frame"]),
-            device=tokens.device,
-        )
-        if history_video_kv_cache is not None:
-            prefix_len = int(history_video_kv_cache[0]["k"].shape[1])
-            attention_mask = torch.cat(
-                [
-                    torch.ones(
-                        (int(tokens.shape[1]), prefix_len),
-                        dtype=torch.bool,
-                        device=tokens.device,
-                    ),
-                    attention_mask,
-                ],
-                dim=1,
-            )
-        tokens = self.model.mot.forward_video_with_history(
-            video_tokens=tokens,
-            video_freqs=pre["freqs"],
-            video_t_mod=pre["t_mod"],
-            video_context_payload={
-                "context": pre["context"],
-                "mask": pre["context_mask"],
-            },
-            video_attention_mask=attention_mask,
             history_video_kv_cache=history_video_kv_cache,
         )
-        return expert.post_dit(tokens, pre)
 
     def _append_standalone_preview_history(
         self,
@@ -944,4 +1070,21 @@ class AHAWAMPolicy:
         raise FileNotFoundError(
             f"No AHAWAM deploy config found at '{policy_path}'. "
             "Pass a YAML config file or place 'deploy.yml' in the directory."
+        )
+
+
+class FastWAMPolicy(AHAWAMPolicy):
+    """FastWAM-specific name for the shared real-robot policy wrapper."""
+
+    def __init__(self, policy_path: str, task_name: Optional[str] = None):
+        super().__init__(policy_path=policy_path, task_name=task_name)
+        if self.model_variant != "fastwam":
+            raise ValueError(
+                "FastWAMPolicy requires a deploy config that resolves to model=fastwam."
+            )
+
+    def generate_future_video(self, *args, **kwargs):
+        del args, kwargs
+        raise NotImplementedError(
+            "FastWAM action inference intentionally skips future-video generation."
         )

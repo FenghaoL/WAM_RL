@@ -1,0 +1,55 @@
+# @package _global_
+# 阶段 1：在装载机(loader)数据上全量微调 AHA-WAM（产出「教师」权重，供阶段 2 蒸馏）
+# 用官方 robotwin_ahawam.pt(14维/3相机) 做形状自适应初始化：
+#   - action_encoder/head (14->5)、proprio_encoder (14->6) 由 checkpoint_shape_adapt 处理
+#   - 相机无 per-camera 层，3->1 不影响权重
+
+defaults:
+  - override /data: loader
+  - override /model: ahawam
+  - _self_
+
+batch_size: 2
+num_workers: 16
+history_aware_batching: true
+
+# 官方全量权重做初始化（step 归零，走形状自适应加载）
+init_checkpoint: /data/wzy/AHA-WAM/checkpoints/AHA-WAM-RoboTwin2.0/robotwin_ahawam.pt
+
+model:
+  mot_checkpoint_mixed_attn: false
+  # 我们没有 RoboTwin 的 ActionDiT backbone；完整权重由 init_checkpoint 提供
+  action_dit_pretrained_path: null
+  skip_dit_load_from_pretrain: true
+  # 关键：允许把 14维/3相机 的 checkpoint 加载进 5维/1相机 模型（否则 proprio 层 strict 报错）
+  checkpoint_shape_adapt: true
+  action_obs_downsample_factor: 1
+  chunk_kv_editor_num_queries: 32
+  num_history_frames: 6
+  action_video_read_mode: current_only
+  video_rope_frame_stride: ${data.train.action_video_freq_ratio}
+  loss:
+    lambda_action_prior: 1.0
+
+output_dir: /data/wzy/AHA-WAM/runs/${hydra:runtime.choices.task}-${now:%Y-%m-%d}_${now:%H-%M-%S}
+
+wandb:
+  enabled: true
+  workspace: null
+  project: ahawam
+  name: loader_ahawam
+  group: null
+  mode: offline
+
+lr_scheduler_type: "cosine"
+learning_rate: 5e-5
+warmup_ratio: 0.01
+num_epochs: 2
+max_steps: null
+log_every: 10
+save_every: 600
+eval_every: 601
+
+gradient_accumulation_steps: 1
+weight_decay: 1e-2
+resume: null
