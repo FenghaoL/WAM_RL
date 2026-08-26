@@ -196,6 +196,10 @@ none     (不给历史)      : 10.763 dB
 
 ## 6. 更重要的一点：在线动作推理根本不生成视频
 
+> 完整的时序拆解、实测耗时、以及和论文的逐条对照，见
+> [`../PIPELINE_TIMING_ZH.md`](../PIPELINE_TIMING_ZH.md)。
+
+
 看 [`AHAWAM.prefill_video`](../../../src/ahawam/models/wan22/ahawam.py#L372) 就清楚了：
 它只把**当前这一帧**编码进 video K/V cache，然后
 `infer_action_chunk` 通过 chunk KV editor 去读它。

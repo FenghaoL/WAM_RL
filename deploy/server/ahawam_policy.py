@@ -271,9 +271,37 @@ class AHAWAMPolicy:
             self.text_embedding_cache_dir = resolved_cache_dir
 
         model_cfg = OmegaConf.create(OmegaConf.to_container(hydra_cfg.model, resolve=True))
-        load_text_encoder = bool(
-            cfg.get("load_text_encoder", self.text_embedding_cache_dir is None)
-        )
+
+        # text_embedding_mode:
+        #   cache  - disk cache only; an unknown instruction is an error (default,
+        #            matches the historical behaviour and needs no text encoder)
+        #   online - always encode with the T5 encoder; any instruction works
+        #   hybrid - use the disk cache when it has the instruction, otherwise
+        #            encode online; new embeddings are memoised in RAM and, when
+        #            text_embedding_cache_write is true, written back to the cache dir
+        self.text_embedding_mode = str(cfg.get("text_embedding_mode", "cache")).lower()
+        if self.text_embedding_mode not in {"cache", "online", "hybrid"}:
+            raise ValueError(
+                "`text_embedding_mode` must be one of cache/online/hybrid, "
+                f"got {self.text_embedding_mode!r}."
+            )
+        self.text_embedding_cache_write = bool(cfg.get("text_embedding_cache_write", False))
+        needs_encoder = self.text_embedding_mode in {"online", "hybrid"}
+
+        if self.text_embedding_mode == "cache" and self.text_embedding_cache_dir is None:
+            raise ValueError(
+                "`text_embedding_mode: cache` requires `text_embedding_cache_dir`."
+            )
+        if self.text_embedding_mode == "online":
+            # Ignore any configured cache dir so every instruction takes the same path.
+            self.text_embedding_cache_dir = None
+
+        load_text_encoder = bool(cfg.get("load_text_encoder", needs_encoder))
+        if needs_encoder and not load_text_encoder:
+            raise ValueError(
+                f"`text_embedding_mode: {self.text_embedding_mode}` requires "
+                "`load_text_encoder: true` so unknown instructions can be encoded."
+            )
         if not load_text_encoder and self.text_embedding_cache_dir is None:
             raise ValueError(
                 "`load_text_encoder=false` requires `text_embedding_cache_dir`."
@@ -702,35 +730,85 @@ class AHAWAMPolicy:
     def _soft_reset_for_new_observation(self) -> None:
         self._episode_prefilled = False
 
+    def _encode_text_condition_online(
+        self, prompt: str
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Encode one instruction with the model's own T5 encoder.
+
+        Returns unbatched tensors shaped like the on-disk cache payload so both
+        paths can share the same memo dict and the same downstream code.
+        """
+        encode_t0 = time.perf_counter()
+        with torch.no_grad():
+            context, context_mask = self.model.encode_prompt(prompt)
+        context = context[0].detach().to(dtype=self.model.torch_dtype).cpu()
+        context_mask = context_mask[0].detach().bool().cpu()
+        logger.info(
+            "Encoded instruction online in %.3fs: %r",
+            time.perf_counter() - encode_t0,
+            prompt,
+        )
+        return context.contiguous(), context_mask.contiguous()
+
+    def _load_text_condition_from_disk(
+        self, digest: str
+    ) -> Optional[tuple[torch.Tensor, torch.Tensor]]:
+        if self.text_embedding_cache_dir is None:
+            return None
+        cache_path = self.text_embedding_cache_dir / (
+            f"{digest}.t5_len{self.context_len}.wan22ti2v5b.pt"
+        )
+        if not cache_path.is_file():
+            return None
+        payload = torch.load(cache_path, map_location="cpu", weights_only=True)
+        context = payload["context"].detach().to(dtype=self.model.torch_dtype)
+        context_mask = payload["mask"].detach().bool()
+        if context.ndim != 2 or context_mask.ndim != 1:
+            raise ValueError(
+                f"Invalid text cache shapes in {cache_path}: "
+                f"context={tuple(context.shape)} mask={tuple(context_mask.shape)}"
+            )
+        # Match precompute semantics: zero the padded positions, then treat the
+        # whole sequence as valid.
+        context[~context_mask] = 0.0
+        context_mask = torch.ones_like(context_mask)
+        return context.contiguous(), context_mask.contiguous()
+
+    def _persist_text_condition(
+        self, digest: str, context: torch.Tensor, context_mask: torch.Tensor
+    ) -> None:
+        if not self.text_embedding_cache_write or self.text_embedding_cache_dir is None:
+            return
+        cache_path = self.text_embedding_cache_dir / (
+            f"{digest}.t5_len{self.context_len}.wan22ti2v5b.pt"
+        )
+        if cache_path.exists():
+            return
+        try:
+            torch.save({"context": context, "mask": context_mask}, cache_path)
+            logger.info("Wrote text embedding cache entry: %s", cache_path)
+        except OSError as err:  # a read-only cache dir must not kill the server
+            logger.warning("Could not write %s: %s", cache_path, err)
+
     def _resolve_text_condition(
         self, prompt: str
     ) -> tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
-        if self.text_embedding_cache_dir is None:
-            return None, None
-
         digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
         cached = self._text_context_cache.get(digest)
         if cached is None:
-            cache_path = self.text_embedding_cache_dir / (
-                f"{digest}.t5_len{self.context_len}.wan22ti2v5b.pt"
-            )
-            if not cache_path.is_file():
-                raise FileNotFoundError(
-                    "No cached text embedding for this exact instruction. "
-                    f"Expected: {cache_path}. Run scripts/precompute_text_embeds.py "
-                    "before using a new instruction."
-                )
-            payload = torch.load(cache_path, map_location="cpu", weights_only=True)
-            context = payload["context"].detach().to(dtype=self.model.torch_dtype)
-            context_mask = payload["mask"].detach().bool()
-            if context.ndim != 2 or context_mask.ndim != 1:
-                raise ValueError(
-                    f"Invalid text cache shapes in {cache_path}: "
-                    f"context={tuple(context.shape)} mask={tuple(context_mask.shape)}"
-                )
-            context[~context_mask] = 0.0
-            context_mask = torch.ones_like(context_mask)
-            cached = (context.contiguous(), context_mask.contiguous())
+            cached = self._load_text_condition_from_disk(digest)
+            if cached is None:
+                if self.text_embedding_mode == "cache":
+                    cache_path = self.text_embedding_cache_dir / (
+                        f"{digest}.t5_len{self.context_len}.wan22ti2v5b.pt"
+                    )
+                    raise FileNotFoundError(
+                        "No cached text embedding for this exact instruction. "
+                        f"Expected: {cache_path}. Run scripts/precompute_text_embeds.py, "
+                        "or set text_embedding_mode: hybrid to encode it online."
+                    )
+                cached = self._encode_text_condition_online(prompt)
+                self._persist_text_condition(digest, *cached)
             self._text_context_cache[digest] = cached
         context, context_mask = cached
         return (

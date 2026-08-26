@@ -10,8 +10,19 @@ num_epochs: 4
 max_steps: null
 log_every: 1
 save_every: 1
+# eval_every is derived from steps_per_epoch by train_entry.py using
+# eval_times_per_epoch below; this literal is only a fallback.
 eval_every: 0
+eval_times_per_epoch: 4
 eval_num_inference_steps: 10
+# Averaged validation loss is computed over a FIXED, evenly-strided subset of the
+# val set so the curve is comparable across steps. Per rank; 4 ranks -> 4x this many.
+eval_num_val_batches: 8
+# Action error needs a full infer() per sample (~4 s), so it is averaged over a
+# smaller slice than the loss. Per rank; 4 ranks -> 4x this many.
+# NOTE: AHAWAM.infer returns actions only (no video), so there are no PSNR/SSIM
+# metrics for this model -- action_l1/action_l2 are the generation-quality numbers.
+eval_num_action_batches: 4
 save_at_end: false
 gradient_accumulation_steps: 1
 mixed_precision: bf16
@@ -107,4 +118,16 @@ data:
         - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
         - _target_: torchvision.transforms.Resize
           size: [240, 320]
-  val: null
+  val:
+    <<: *so101_dataset
+    # Held-out recordings, never seen during training.
+    dataset_dirs:
+      - data/so101_ahawam_square_v1/01_pick_up_white_block/20260814_170524_val
+      - data/so101_ahawam_square_v1/03_put_white_block_on_paper_roll/20260814_171122_val
+    is_training_set: false
+    # 0 => use every episode in the dirs above (see base_lerobot_dataset.py:100).
+    # Any positive value would re-split these dirs and silently drop most of them.
+    val_set_proportion: 0.0
+    # Must reuse the TRAINING normalisation stats, otherwise val loss is not
+    # comparable to train loss.
+    pretrained_norm_stats: runs/so101_ahawam_square_v1/assets/dataset_stats.json

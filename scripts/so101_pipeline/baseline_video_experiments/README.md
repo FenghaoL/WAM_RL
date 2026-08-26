@@ -12,6 +12,7 @@
 配套文档：
 
 - [PATH_AUDIT_ZH.md](PATH_AUDIT_ZH.md) —— 链路一致性审计，**建议先读这个**
+- [HISTORY_EXPLAINED_ZH.md](HISTORY_EXPLAINED_ZH.md) —— "历史"到底是什么形态、怎么输入、部署里怎么开关
 - [WHY_SLOW_ZH.md](WHY_SLOW_ZH.md) —— 为什么 int4 更慢、为什么 MiniMax 比 Wan 慢 200 倍、这类模型能不能进 WAM
 - [HOW_TO_USE_ZH.md](HOW_TO_USE_ZH.md) —— 后续怎么继续用这套代码
 

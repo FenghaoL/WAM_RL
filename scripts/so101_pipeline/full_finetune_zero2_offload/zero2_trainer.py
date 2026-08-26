@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import torch
+
 from ahawam.trainer import Wan22Trainer
 from ahawam.utils.logging_config import get_logger
 
@@ -21,6 +23,12 @@ class Zero2WeightOnlyTrainer(Wan22Trainer):
         )
         self.zero2_save_training_state = bool(
             kwargs["cfg"].get("zero2_save_training_state", False)
+        )
+        self.eval_num_val_batches = int(
+            kwargs["cfg"].get("eval_num_val_batches", 0) or 0
+        )
+        self.eval_num_action_batches = int(
+            kwargs["cfg"].get("eval_num_action_batches", 0) or 0
         )
         super().__init__(*args, **kwargs)
         plugin = getattr(self.accelerator.state, "deepspeed_plugin", None)
@@ -50,6 +58,122 @@ class Zero2WeightOnlyTrainer(Wan22Trainer):
             )
             self.model.load_checkpoint(str(base_path), optimizer=None)
         super()._load_weights_before_prepare()
+
+    def _fixed_val_indices(self):
+        """A fixed, rank-disjoint slice of the val set, identical at every eval.
+
+        Two properties matter here. (1) Step-invariance: the stock trainer draws a
+        fresh random index per rank per eval, so the curve moves because the sample
+        moved, not because the model did. (2) Unbiasedness: a plain stride would
+        land on the same phase of every episode (index 0 is always an episode start,
+        history_len 0), so we use a seeded permutation instead.
+        """
+        n = len(self.val_dataset)
+        if n == 0 or self.eval_num_val_batches <= 0:
+            return []
+        world = max(1, self.accelerator.num_processes)
+        rank = self.accelerator.process_index
+        wanted = min(self.eval_num_val_batches * world, n)
+        generator = torch.Generator(device="cpu").manual_seed(int(self.seed))
+        order = torch.randperm(n, generator=generator).tolist()
+        return order[:wanted][rank::world]
+
+    @torch.no_grad()
+    def _averaged_val_metrics(self):
+        """Mean metrics over the fixed subset.
+
+        Teacher-forced loss for every sample (one forward each, cheap). Action error
+        additionally for the first `eval_num_action_batches` of them, because that
+        needs a full `infer()` -- and for AHAWAM `infer` returns actions only, no
+        video, so there are no PSNR/SSIM numbers to collect here.
+        """
+        indices = self._fixed_val_indices()
+        if not indices:
+            return {}
+
+        model = self.accelerator.unwrap_model(self.model)
+        was_training = model.dit.training
+        model.eval()
+
+        totals: dict[str, float] = {}
+        counts: dict[str, int] = {}
+
+        def accumulate(key, value):
+            if isinstance(value, torch.Tensor):
+                if value.numel() != 1:
+                    return
+                value = float(value.float().item())
+            if isinstance(value, (int, float)):
+                totals[key] = totals.get(key, 0.0) + float(value)
+                counts[key] = counts.get(key, 0) + 1
+
+        for position, index in enumerate(indices):
+            sample = self._to_batched_eval_sample(self.val_dataset[index])
+            sample["_eval_dataset"] = self.val_dataset
+            with self.accelerator.autocast():
+                loss, loss_dict = model.training_loss(sample)
+            accumulate("loss", loss)
+            for key, value in (loss_dict or {}).items():
+                accumulate(str(key), value)
+
+            if position < self.eval_num_action_batches:
+                with self.accelerator.autocast():
+                    pred = model.infer(
+                        **model._build_eval_infer_kwargs(
+                            sample=sample,
+                            eval_num_inference_steps=self.eval_num_inference_steps,
+                        )
+                    )
+                action_metrics = model._evaluate_action_metrics(
+                    sample=sample, pred_action=pred.get("action")
+                )
+                for key, value in action_metrics.items():
+                    accumulate(str(key), value)
+
+        if was_training:
+            self._set_dit_only_train_mode()
+        if not totals:
+            return {}
+
+        out: dict[str, float] = {}
+        for key, total in totals.items():
+            local = torch.tensor(
+                total / max(1, counts[key]),
+                device=self.accelerator.device,
+                dtype=torch.float32,
+            ).reshape(1)
+            out[key] = float(self.accelerator.gather_for_metrics(local).mean().item())
+        world = max(1, self.accelerator.num_processes)
+        out["num_loss_samples"] = float(len(indices) * world)
+        out["num_action_samples"] = float(
+            min(len(indices), self.eval_num_action_batches) * world
+        )
+        return out
+
+    def evaluate(self):
+        """Base-trainer single-sample metrics, plus much less noisy averaged ones."""
+        metrics = super().evaluate()
+        if metrics is None:
+            return None
+        averaged = self._averaged_val_metrics()
+        if not averaged:
+            return metrics
+
+        # Keep the single-sample values for continuity, but let the headline
+        # `val_loss` / `action_*` be the averaged ones -- those are what the
+        # trainer prints and ships to wandb.
+        for key in ("val_loss", "action_l1", "action_l2"):
+            if key in metrics:
+                metrics[f"{key}_single_sample"] = metrics[key]
+        metrics["val_loss"] = averaged.pop("loss")
+        metrics["val_num_loss_samples"] = averaged.pop("num_loss_samples", 0.0)
+        metrics["val_num_action_samples"] = averaged.pop("num_action_samples", 0.0)
+        for key in ("action_l1", "action_l2"):
+            if key in averaged:
+                metrics[key] = averaged.pop(key)
+        for key, value in averaged.items():
+            metrics[f"avg_{key}"] = value
+        return metrics
 
     def save_checkpoint(self):
         step_tag = f"step_{self.global_step:06d}"

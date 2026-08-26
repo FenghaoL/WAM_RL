@@ -1,108 +1,80 @@
 # 后续怎么用这套代码
 
-这个目录里的东西是**可重复跑的对照实验框架**，不是一次性脚本。
-核心思路只有一句：**先把评测窗口固定下来落盘，之后所有模型都打这同一批窗口**，
-这样不同 checkpoint、甚至不同架构的模型，数字才可以直接比。
+**只有一个入口，直接跑，不用传参数：**
+
+```bash
+bash scripts/so101_pipeline/baseline_video_experiments/run_experiment.sh
+```
+
+要改什么，只改 `run_experiment.sh` 顶部【配置区】里的变量。
+它会依次做三件事，中间产物都落在 `OUTPUT_ROOT` 下：
+
+```
+1. export_reference_samples.py  挑评测窗口 + 导出真值  -> $OUTPUT_ROOT/samples/
+2. wan22_base/run_video_branch_preview.py  每个 ckpt 生成视频 -> $OUTPUT_ROOT/<名字>/
+3. compare_runs.py              合并成对比表 + 并排视频 -> $OUTPUT_ROOT/comparison/
+```
+
+第 1 步只在窗口还不存在时跑。**同一个 `OUTPUT_ROOT` 下所有 run 打的是同一批窗口**，
+所以数字可以直接横向比；第 3 步会把这个目录里跑过的所有 run 都合进表里。
 
 ```
 scripts/so101_pipeline/baseline_video_experiments/
-├── export_reference_samples.py        # 第 1 步：挑窗口 + 导出 GT（只跑一次）
+├── run_experiment.sh                  ← 唯一入口，改这个
+├── export_reference_samples.py        第 1 步
+├── wan22_base/run_video_branch_preview.py   第 2 步
+├── compare_runs.py                    第 3 步
 ├── common/
-│   ├── sample_selection.py            # 挑窗口的逻辑
-│   └── reporting.py                   # 指标 / 对比图 / summary（不依赖 ahawam 和 torch）
-├── wan22_base/
-│   ├── run_video_branch_preview.py    # 第 2 步 A：AHA-WAM 视频分支，权重可换
-│   └── run_video_branch_preview.sh    # 一键跑多个 checkpoint
-├── minimax_h3/
-│   ├── setup_env.sh                   # 建 minimax_h3 conda 环境（只跑一次）
-│   ├── run_minimax_h3_preview.py      # 第 2 步 B：MiniMax-H3 图生视频（int8 / int4）
-│   └── run_minimax_h3_preview.sh
-├── compare_runs.py                    # 第 3 步：合并所有 run 出对比表 + 并排视频
-├── verify_video_path_equivalence.py   # 独立工具：验证 preview == 训练视频链路
-├── PATH_AUDIT_ZH.md                   # 链路一致性审计（先读这个）
-├── WHY_SLOW_ZH.md                     # int4/MiniMax 为什么慢，能不能进 WAM
-├── README.md                          # 实验结果 + 指标缩写对照 + 模型大小/显存
-└── HOW_TO_USE_ZH.md                   # 本文
+│   ├── sample_selection.py            挑窗口的逻辑
+│   └── reporting.py                   指标 / 对比图 / summary
+├── minimax_h3/                        MiniMax-H3 基线（独立 conda 环境，见第 3 节）
+├── verify_video_path_equivalence.py   工具：验证 preview == 训练视频链路
+├── PATH_AUDIT_ZH.md                   链路一致性审计
+├── HISTORY_EXPLAINED_ZH.md            历史 K/V 是什么、怎么输入、怎么开关
+├── WHY_SLOW_ZH.md                     int4/MiniMax 为什么慢
+├── README.md                          实验结果 + 指标缩写对照 + 模型大小/显存
+└── HOW_TO_USE_ZH.md                   本文
 ```
+
+## 配置区里最常改的几项
+
+| 变量 | 作用 |
+| --- | --- |
+| `RUN_DIR` | 训练 run 的 `model` 目录（要有 `config.yaml` 和 `checkpoints/weights/`） |
+| `CHECKPOINTS` | 要评测哪些。写 step 名自动到 `$RUN_DIR/checkpoints/weights/` 找；也可以写完整 `.pt` 路径；写 `wan22-base` 就是未训练的原始 Wan2.2 对照 |
+| `OUTPUT_ROOT` | 结果放哪。**同一个 root 共用窗口、结果自动汇总** |
+| `NAME_PREFIX` | 输出目录前缀，避免不同 run 的同名 step 撞车（如 `ahawambase_`） |
+| `GPUS` | 用哪些卡，一张卡跑一个 checkpoint，多的排队 |
+| `DATASET_DIRS` | 留空 = 用训练配置里的目录；填了 = 覆盖（比如打验证集）。归一化统计永远沿用训练 run 的，不会重算 |
+| `NUM_SAMPLES` | 挑几个窗口，按任务平均分 |
+| `STEPS` / `SEED` | 去噪步数 / 随机种子。同一 seed 下各 checkpoint 拿到同一份初始噪声 |
+| `HISTORY_MODES` | `online` / `training` / `none` / `wan_native`，逗号分隔；第一个用于并排视频 |
+| `FORCE_REEXPORT` | `1` = 强制重挑窗口（会让旧结果不可比） |
+
+脚本顶部还写了三个常用配方（多 checkpoint / 加 Wan2.2 对照 / 打验证集），照着改就行。
 
 ---
 
 ## 最常见的几件事
 
-### 1. 我训了个新 checkpoint，想看它的视频分支怎么样
+### 1. 我训了个新 checkpoint / 换数据 / 换卡
 
-编辑 `wan22_base/run_video_branch_preview.sh` 里的 `CONDITIONS` 数组，加一行：
+全都在 `run_experiment.sh` 的配置区改，然后 `bash` 一下。见上面那张表。
 
-```bash
-CONDITIONS=(
-  "wan22_base|wan22-base"
-  "ahawam_pretrained|checkpoints/AHA-WAM-Pretrained/AHA-WAM-pretrained.pt"
-  "so101_finetuned|runs/.../weights/step_004896.pt"
-  "my_new_run|runs/.../weights/step_009792.pt"      # <- 加这行
-)
-```
+想绕过入口脚本、手动跑单个 python 脚本也可以，三个脚本的参数
+和配置区变量是一一对应的，`--help` 能看到全部开关。
 
-然后：
+### 2. 关于评测窗口
 
-```bash
-bash scripts/so101_pipeline/baseline_video_experiments/wan22_base/run_video_branch_preview.sh
-```
+挑选逻辑在 `common/sample_selection.py`：只取不含 padding 的窗口，
+按 `task → 历史深度 → episode` 三层轮转，所以 24 个样本会是每个任务 12 个、
+覆盖不同 episode、不同录制 session、不同历史长度。想改口味就改 `_order_within_task`。
 
-格式是 `<输出目录名>|<权重>`。`<权重>` 有两种写法：
+数据集目录写了多个（多个录制 session）时直接用，不用改任何东西。
+样本目录名里的 `s0/s1/s2` 就是第几个 session
+（`episode_index` 在每个 session 里都从 0 重新开始，光看 episode 号会重名）。
 
-- 字面量 `wan22-base` → 不加载任何 AHA-WAM checkpoint，
-  视频专家直接用 `Wan-AI/Wan2.2-TI2V-5B` 官方权重（也就是"没训练过"的起点）；
-- 一个 `.pt` 路径 → 正常加载那个 checkpoint。
-
-已经跑过的 condition 会被覆盖重跑。如果只想跑新加的那个，
-把别的行注释掉，最后 `compare_runs.py` 那步仍然会把全部 `summary.json` 合起来。
-
-单独跑一个也行：
-
-```bash
-python scripts/so101_pipeline/baseline_video_experiments/wan22_base/run_video_branch_preview.py \
-  --config runs/so101_g05_square_v1/full_zero3/<run>/model/config.yaml \
-  --samples-dir runs/so101_g05_square_v1/baseline_experiments/samples \
-  --output runs/so101_g05_square_v1/baseline_experiments/my_new_run \
-  --weights runs/.../weights/step_009792.pt \
-  --run-name my_new_run \
-  --history-modes online,training,none \
-  --steps 20 --seed 42 --device cuda:0
-```
-
-常用开关：
-
-| 开关 | 作用 |
-| --- | --- |
-| `--history-modes` | 逗号分隔，可选 `none` / `training`（RoPE 间隔 12）/ `online`（RoPE 间隔 10）/ `wan_native`；第一个是"主"模式，会被 `compare_runs.py` 拿去做并排视频 |
-| `--steps` | 去噪步数，默认 20 |
-| `--seed` | 每个样本用 `seed + 序号`，所以同一个 seed 下不同 checkpoint 拿到的是同一份初始噪声 |
-| `--limit N` | 只跑 manifest 里前 N 个窗口，调试用 |
-
-`wan_native` 是个特殊模式：它把视频专家临时切回 Wan2.2 自己的推理设置
-（`video_attention_mask_mode="bidirectional"`、从 0 开始的连续 RoPE、不给历史），
-用来回答"原生 Wan2.2 在这批数据上能做到什么"。
-只对 `--weights wan22-base` 有意义，对训练过的 checkpoint 用它等于故意错配。
-它和别的模式**不要写在同一个 `--history-modes` 里**，单独跑一次
-（`run_video_branch_preview.sh` 里的 `RUN_WAN22_NATIVE=1` 就是干这个的）。
-
-### 2. 我想换一批评测窗口（换数据集 / 换数量）
-
-```bash
-python scripts/so101_pipeline/baseline_video_experiments/export_reference_samples.py \
-  --config runs/so101_g05_square_v1/full_zero3/<run>/model/config.yaml \
-  --output runs/so101_g05_square_v1/baseline_experiments/samples_v2 \
-  --num-samples 32
-```
-
-然后把两个 run 脚本里的 `SAMPLES_DIR` 指过去。
-**换了窗口以后，所有模型都要重跑**，否则数字不可比。
-旧窗口目录别删，它就是那批结果的凭据。
-
-挑选逻辑在 `common/sample_selection.py`：
-只取不含 padding 的窗口，按 `task → 历史深度 → episode` 三层轮转，
-所以 16 个样本会是 4 个 task 各 4 个、覆盖不同 episode 和不同历史长度。
-想改口味就改 `_order_within_task`。
+**换了窗口，所有模型都要重跑**，否则数字不可比。旧窗口目录别删，它是那批结果的凭据。
 
 ### 3. 我想跑 MiniMax-H3
 
@@ -206,82 +178,25 @@ python scripts/so101_pipeline/baseline_video_experiments/compare_runs.py \
 `--no-video` 可以只出表格（快很多）。
 这个脚本只用 numpy/PIL/imageio，`ahawam` 和 `minimax_h3` 两个环境里都能跑。
 
-### 5. 我想一次比较同一个 run 的多个 checkpoint（多卡并行）
+### 5. 在留出验证集上评（而不是训练集）
 
-单张卡跑一个 checkpoint 大约 10 分钟（模型加载占大头），所以多个 checkpoint
-直接一卡一个并行最省事。**先导出窗口，再并行**——窗口必须是同一批：
-
-```bash
-R=runs/<你的 run>/model
-OUT=runs/<你的数据集>/baseline_experiments
-
-# 只跑一次
-python scripts/so101_pipeline/baseline_video_experiments/export_reference_samples.py \
-  --config "$R/config.yaml" --output "$OUT/samples" --num-samples 24
-
-# 一个 checkpoint 一张卡
-i=1
-for step in 001720 002580 003440; do
-  CUDA_VISIBLE_DEVICES=$i python scripts/so101_pipeline/baseline_video_experiments/wan22_base/run_video_branch_preview.py \
-    --config "$R/config.yaml" --samples-dir "$OUT/samples" \
-    --output "$OUT/step_$step" --weights "$R/checkpoints/weights/step_$step.pt" \
-    --run-name "step_$step" --device cuda:0 --steps 20 --seed 42 \
-    --history-modes online,training,none &
-  i=$((i+1))
-done
-wait
-
-python scripts/so101_pipeline/baseline_video_experiments/compare_runs.py \
-  --runs "$OUT"/step_*/summary.json --output "$OUT/comparison"
-```
-
-注意 `--device cuda:0` 配合 `CUDA_VISIBLE_DEVICES=$i`：每个进程只看得见一张卡，
-所以它自己的 `cuda:0` 就是物理第 `$i` 张。峰值显存约 19 GiB，一张 40GB 卡放一个进程绰绰有余。
-
-**先确认目标卡是空的**（`nvidia-smi`）——在线部署的 action server 也会占卡。
-
-### 6. 数据集是多个目录（多个录制 session）怎么办
-
-直接用，不用改任何东西。`dataset_dirs` 列多少个目录，窗口挑选都会跨它们做轮转，
-样本目录名里的 `s0/s1/s2...` 就是第几个 session
-（`episode_index` 在每个 session 里都从 0 重新开始，所以光看 episode 号会重名）。
-
-> 这一点在 2026-08-14 之前是个 bug：旧代码只在第一个子数据集里查 task 名，
-> 多目录数据集下会把后面 session 的样本全部标错任务。现在已修。
-
-### 7. 我想在留出验证集上评（而不是训练集）
-
-不用改配置文件，两个开关就够：
+在 `run_experiment.sh` 里改两处：
 
 ```bash
-VAL1=data/<数据集>/<任务A>/<session>_val
-VAL2=data/<数据集>/<任务B>/<session>_val
-
-python scripts/so101_pipeline/baseline_video_experiments/export_reference_samples.py \
-  --config "$R/config.yaml" \
-  --dataset-dirs "$VAL1" "$VAL2" --val-set-proportion 0 \
-  --output "$OUT_VAL/samples" --num-samples 24
-
-# 每个 checkpoint 也要带上同样的两个开关
-python scripts/so101_pipeline/baseline_video_experiments/wan22_base/run_video_branch_preview.py \
-  --config "$R/config.yaml" \
-  --dataset-dirs "$VAL1" "$VAL2" --val-set-proportion 0 \
-  --samples-dir "$OUT_VAL/samples" --output "$OUT_VAL/step_003440" \
-  --weights "$R/checkpoints/weights/step_003440.pt" --run-name step_003440 \
-  --device cuda:0 --steps 20 --seed 42 --history-modes online,training,none
+OUTPUT_ROOT="runs/<数据集>/baseline_experiments_val"   # 换个新的，别和训练集窗口混
+DATASET_DIRS=(
+  data/<数据集>/<任务A>/<session>_val
+  data/<数据集>/<任务B>/<session>_val
+)
 ```
 
-| 开关 | 为什么必须 |
-| --- | --- |
-| `--dataset-dirs` | 换成留出目录，但**其余一切照搬训练配置**——分辨率、帧率、历史长度、以及最关键的 `pretrained_norm_stats` |
-| `--val-set-proportion 0` | 配置里默认 `0.05`，会再从每个目录切走 5% 的 episode。留出目录本身就是验证集，不需要再切，传 0 才是用满 |
+脚本会自动带上 `--val-set-proportion 0`（配置里默认 0.05，会再切走 5% 的 episode；
+留出目录本身就是验证集，不需要再切）。
 
-**千万不要在验证集上重算归一化统计。** 那等于偷偷改了评分标准，
-训练/验证的数字就不可比了。脚本会在开头把实际生效的
-`pretrained_norm_stats` 打印出来，跑之前扫一眼日志确认它指向训练集的那份。
+**千万不要在验证集上重算归一化统计。** 那等于偷偷改了评分标准，训练/验证的数字就不可比。
+脚本开头会把实际生效的 `pretrained_norm_stats` 打印出来，跑之前扫一眼确认它指向训练集那份。
 
-输出目录建议和训练集的分开（`baseline_experiments/` vs `baseline_experiments_val/`），
-两边的 `comparison/comparison.md` 并排看就是泛化差距。
+两边的 `comparison/comparison.md` 并排看，就是泛化差距。
 
 ---
 

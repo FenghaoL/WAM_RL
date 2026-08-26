@@ -80,6 +80,17 @@ def main() -> None:
         cfg.max_steps = steps_per_epoch * int(cfg.num_epochs)
         cfg.save_every = steps_per_epoch
         cfg.save_at_end = False
+        # Derive the eval cadence from the real epoch length so the wandb curve has
+        # a fixed number of points per epoch regardless of dataset size.
+        eval_times = int(cfg.get("eval_times_per_epoch", 0) or 0)
+        if eval_times > 0:
+            if cfg.data.get("val") is None:
+                raise ValueError(
+                    "eval_times_per_epoch > 0 requires `data.val`; with `data.val: null` "
+                    "build_datasets() falls back to the TRAINING set (runtime.py:506), "
+                    "so the reported 'validation' loss would be measured on train data."
+                )
+            cfg.eval_every = max(1, steps_per_epoch // eval_times)
     else:
         if args.smoke_steps <= 0:
             raise ValueError("--smoke-steps must be positive")
@@ -98,7 +109,10 @@ def main() -> None:
             f"gradient_accumulation={cfg.gradient_accumulation_steps} "
             f"effective_batch={int(cfg.batch_size) * args.num_gpus * int(cfg.gradient_accumulation_steps)} "
             f"steps_per_epoch={steps_per_epoch} epochs={cfg.num_epochs} "
-            f"total_steps={cfg.max_steps} init={cfg.init_checkpoint}"
+            f"total_steps={cfg.max_steps} init={cfg.init_checkpoint} "
+            f"base_init={cfg.get('base_init_checkpoint')} "
+            f"eval_every={cfg.eval_every} "
+            f"eval_num_val_batches={cfg.get('eval_num_val_batches')}"
         )
 
     setup_logging(

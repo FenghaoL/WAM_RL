@@ -30,6 +30,11 @@ scripts/so101_pipeline/
 需要向别人复现“官方 ZeRO-2、四卡全量训练为何 OOM”时，使用 `zero2_repro/`。它是
 1-step 诊断，不是正式训练入口。
 
+想搞清楚"训练和部署各自在算什么、多久算一次、和论文是否一致"，读
+`PIPELINE_TIMING_ZH.md`。它有实测耗时，并指出了两处需要注意的地方：
+当前 `num_inference_steps=10` 让动作生成比实时慢 2.7%，以及
+`run_action_server.sh` 并没有开启仓库里那套异步双流。
+
 想横向比较不同 checkpoint（含未训练的 Wan2.2 初始化）或别的视频模型（MiniMax-H3）
 在同一批 SO101 窗口上的视频生成效果，用 `baseline_video_experiments/`。它先把评测
 窗口固定落盘，再让每个模型打同一批窗口，所以数字可以直接对比；

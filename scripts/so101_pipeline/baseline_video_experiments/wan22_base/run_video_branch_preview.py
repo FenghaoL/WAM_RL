@@ -176,6 +176,7 @@ def main() -> None:
         for mode in modes:
             sample = raw_sample
             restore_mask_mode: str | None = None
+            use_history_for_mode = mode in {"training", "online"}
             if mode == "wan_native":
                 # AHA-WAM runs the video expert with a per-frame-causal mask, a
                 # history K/V prefix and sparse temporal RoPE positions. Wan2.2 was
@@ -194,15 +195,23 @@ def main() -> None:
                     latent_frames, dtype=torch.long
                 )
             elif mode == "online":
-                sample = _replace_with_online_history(
-                    dataset,
-                    int(meta["sample_index"]),
-                    int(meta["episode_slot"]),
-                    raw_sample,
-                    history_count=int(cfg.model.num_history_frames),
-                    planner_control_stride=int(cfg.model.action_horizon),
-                    video_rope_frame_stride=int(cfg.model.video_rope_frame_stride),
-                )
+                # A window that starts at frame 0 of an episode has nothing behind
+                # it, and `_replace_with_online_history` refuses that case. Falling
+                # back to no history is the faithful behaviour, not a workaround:
+                # online, `_history_kv_entries` really is empty for the first
+                # planner tick of every episode.
+                if int(meta.get("history_steps_back", 1)) <= 0:
+                    use_history_for_mode = False
+                else:
+                    sample = _replace_with_online_history(
+                        dataset,
+                        int(meta["sample_index"]),
+                        int(meta["episode_slot"]),
+                        raw_sample,
+                        history_count=int(cfg.model.num_history_frames),
+                        planner_control_stride=int(cfg.model.action_horizon),
+                        video_rope_frame_stride=int(cfg.model.video_rope_frame_stride),
+                    )
             batched = _batch_sample(sample)
             print(f"[generate] {order + 1}/{len(samples)} {tag} mode={mode}", flush=True)
             try:
@@ -211,7 +220,7 @@ def main() -> None:
                     batched,
                     steps=args.steps,
                     seed=args.seed + order,
-                    use_history=mode in {"training", "online"},
+                    use_history=use_history_for_mode,
                     history_mode="training" if mode in {"none", "wan_native"} else mode,
                 )
             finally:

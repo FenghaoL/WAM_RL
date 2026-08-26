@@ -6,7 +6,7 @@ NUM_GPUS="${NUM_GPUS:-4}"
 OMP_NUM_THREADS="${OMP_NUM_THREADS:-16}"
 MIN_FREE_MIB="${MIN_FREE_MIB:-36000}"
 MAIN_PORT="${MAIN_PORT:-29561}"
-SETTINGS="scripts/so101_pipeline/full_finetune_zero2_offload/settings.yaml"
+SETTINGS="${SETTINGS:-scripts/so101_pipeline/full_finetune_zero2_offload/settings.yaml}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$REPO_ROOT"
@@ -41,12 +41,16 @@ python scripts/so101_pipeline/full_finetune_zero2_offload/preflight.py \
   --settings "$SETTINGS"
 
 RUN_NAME="${RUN_NAME:-formal-fastwam-zero2offload-bs4-acc1-4ep-$(date +%Y%m%d-%H%M%S)}"
-RUN_DIR="runs/so101_ahawam_square_v1/full_zero2_offload/$RUN_NAME"
+RUN_ROOT="${RUN_ROOT:-runs/so101_ahawam_square_v1/full_zero2_offload}"
+RUN_DIR="$RUN_ROOT/$RUN_NAME"
+mkdir -p "$RUN_ROOT"
 mkdir -p "$RUN_DIR"
 export TRITON_CACHE_DIR="$REPO_ROOT/$RUN_DIR/triton_cache"
 export WANDB_DIR="$REPO_ROOT/$RUN_DIR/wandb"
 mkdir -p "$TRITON_CACHE_DIR" "$WANDB_DIR" "$TORCH_EXTENSIONS_DIR"
-printf '%s\n' "$RUN_DIR" > runs/so101_ahawam_square_v1/latest_run.txt
+# Derive the pointer location from RUN_ROOT. Hardcoding square_v1 here made a
+# run on any other dataset overwrite that dataset's pointer.
+printf '%s\n' "$RUN_DIR" > "$(dirname "$RUN_ROOT")/latest_run.txt"
 
 python scripts/so101_pipeline/benchmark/gpu_monitor.py \
   --output "$RUN_DIR/gpu.csv" --interval 2.0 &
@@ -65,7 +69,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "run=$RUN_NAME GPUs=$GPU_IDS micro_batch=4 accum=1 epochs=4 OMP=$OMP_NUM_THREADS"
+# Do not restate batch/epoch here -- they live in $SETTINGS and the authoritative
+# values are printed by train_entry.py on the [schedule] line below.
+echo "run=$RUN_NAME settings=$SETTINGS GPUs=$GPU_IDS OMP=$OMP_NUM_THREADS"
 set +e
 accelerate launch \
   --config_file scripts/so101_pipeline/full_finetune_zero2_offload/accelerate.yaml \

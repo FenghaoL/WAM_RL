@@ -83,6 +83,24 @@ def main() -> None:
              "recordings with the training run's own geometry and norm stats.",
     )
     parser.add_argument(
+        "--window-stride",
+        type=int,
+        help="How densely to place windows inside an episode, in control frames. "
+             "Default = one clip (48). Smaller = more windows per episode.",
+    )
+    parser.add_argument(
+        "--per-episode-start",
+        action="store_true",
+        help="Reserve one window at frame 0 of every episode, so no episode's "
+             "initial state goes unscored. Raises --num-samples if needed.",
+    )
+    parser.add_argument(
+        "--per-episode-end",
+        action="store_true",
+        help="Also reserve the last window every episode admits, covering its "
+             "final 3.2 s -- where the task actually completes.",
+    )
+    parser.add_argument(
         "--val-set-proportion",
         type=float,
         help="Override `data.train.val_set_proportion`. Pass 0 to use every episode, "
@@ -106,7 +124,13 @@ def main() -> None:
     print(f"[data] pretrained_norm_stats = {cfg.data.train.pretrained_norm_stats}", flush=True)
     dataset, _ = build_datasets(cfg.data, cfg.model)
 
-    selections = select_so101_samples(dataset, args.num_samples)
+    selections = select_so101_samples(
+        dataset,
+        args.num_samples,
+        per_episode_start=args.per_episode_start,
+        per_episode_end=args.per_episode_end,
+        window_stride=args.window_stride,
+    )
     args.output.mkdir(parents=True, exist_ok=True)
 
     control_fps = 15.0
@@ -139,6 +163,7 @@ def main() -> None:
             "episode_length": int(selection["episode_length"]),
             "history_frames": int(selection["history_frames"]),
             "history_steps_back": int(selection["history_steps_back"]),
+            "episode_relative_frame": int(selection.get("relative", 0)),
             "history_rope_indices": torch.as_tensor(
                 sample["video_history_frame_indices"]
             ).reshape(-1).tolist(),

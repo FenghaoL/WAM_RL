@@ -44,22 +44,58 @@ def _spread(items: list[Any]) -> list[Any]:
     return result
 
 
-def build_candidates(dataset: Any) -> dict[str, list[dict[str, Any]]]:
-    """Enumerate every padding-free window that has at least one history frame."""
+def build_candidates(
+    dataset: Any,
+    *,
+    min_history_steps: int = 1,
+    window_stride: int | None = None,
+    include_episode_end: bool = False,
+) -> dict[str, list[dict[str, Any]]]:
+    """Enumerate every padding-free window.
+
+    `min_history_steps=1` (the default) keeps only windows that have at least one
+    history frame behind them. Pass `0` to also admit the window that starts at
+    frame 0 of an episode -- the robot's actual initial state, which by definition
+    has no history. That is a real deployment condition: the online policy's
+    `_history_kv_entries` is empty for the first planner tick of every episode.
+    Admitting k=0 also rescues short episodes (>= num_frames instead of
+    >= num_frames + horizon), which would otherwise be skipped entirely.
+
+    `window_stride` (in control frames) sets how densely windows are placed
+    inside an episode; it defaults to one whole clip (48), which is what the
+    history spacing uses. A smaller stride yields more windows per episode.
+    History is unaffected: history frames always sit at `sample_idx - 48*j`
+    whatever the window offset, so a window at any offset still gets
+    `offset // 48` valid history frames.
+
+    `include_episode_end` additionally emits the very last window an episode
+    admits (offset `length - num_frames`), which covers its final 3.2 s. The
+    stride grid usually misses it, and that tail is where the task actually
+    completes.
+    """
     starts = dataset.lerobot_dataset.episode_data_index["from"].tolist()
     ends = dataset.lerobot_dataset.episode_data_index["to"].tolist()
     horizon = int(dataset.num_frames - 1) * int(dataset.global_sample_stride)
     num_history = int(dataset.num_history_frames)
+    stride = int(window_stride) if window_stride else horizon
+    if stride <= 0:
+        raise ValueError(f"`window_stride` must be positive, got {window_stride}")
 
     candidates: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for episode_slot, (start, end) in enumerate(zip(starts, ends)):
         length = int(end) - int(start)
         latest_relative = length - int(dataset.num_frames)
-        if latest_relative < horizon:
+        if latest_relative < 0:
             continue
-        max_k = latest_relative // horizon
-        for k in range(1, max_k + 1):
-            relative = k * horizon
+        if latest_relative // horizon < min_history_steps:
+            continue
+        offsets = list(range(0, latest_relative + 1, stride))
+        if include_episode_end and latest_relative not in offsets:
+            offsets.append(latest_relative)
+        for relative in offsets:
+            k = relative // horizon
+            if k < int(min_history_steps):
+                continue
             sample_index = int(start) + relative
             # `dataset_dirs` may list several recording sessions, and the global
             # index runs across their concatenation. Looking the row up in
@@ -83,6 +119,7 @@ def build_candidates(dataset: Any) -> dict[str, list[dict[str, Any]]]:
                     "source_frame": int(raw_item["frame_index"].item()),
                     "episode_length": length,
                     "task": task,
+                    "relative": relative,
                     "history_steps_back": k,
                     "history_frames": min(k, num_history),
                 }
@@ -108,24 +145,81 @@ def _order_within_task(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return ordered
 
 
-def select_so101_samples(dataset: Any, count: int) -> list[dict[str, Any]]:
-    """Round-robin across tasks, then across history depth and episode."""
+def select_so101_samples(
+    dataset: Any,
+    count: int,
+    *,
+    per_episode_start: bool = False,
+    per_episode_end: bool = False,
+    window_stride: int | None = None,
+    min_history_steps: int | None = None,
+) -> list[dict[str, Any]]:
+    """Round-robin across tasks, then across history depth and episode.
+
+    With `per_episode_start=True` the selection first reserves one window at
+    frame 0 of *every* episode, so no episode's initial state is left unscored,
+    then fills the remaining budget with the usual diverse round-robin. `count`
+    is raised to fit the reserved windows if it was set too low.
+
+    `min_history_steps` controls the fill pool and defaults to 1, or to 0 when
+    `per_episode_start` is on -- asking for episode starts means opting into
+    history-free windows, so the rest of the pool should admit them too.
+    """
     if count <= 0:
         raise ValueError(f"`count` must be positive, got {count}")
-    candidates = build_candidates(dataset)
-    if not candidates:
-        raise ValueError("No padding-free SO101 window has a usable history frame.")
+    if min_history_steps is None:
+        min_history_steps = 0 if per_episode_start else 1
+    num_frames = int(dataset.num_frames)
+
+    selected: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    if per_episode_start or per_episode_end:
+        edges = build_candidates(
+            dataset,
+            min_history_steps=0,
+            window_stride=window_stride,
+            include_episode_end=per_episode_end,
+        )
+        reserved = []
+        for items in edges.values():
+            for x in items:
+                is_start = x["relative"] == 0
+                is_end = x["relative"] == int(x["episode_length"]) - num_frames
+                if (per_episode_start and is_start) or (per_episode_end and is_end):
+                    reserved.append(x)
+        for item in sorted(
+            reserved, key=lambda x: (x["task"], x["session"], x["source_episode"], x["relative"])
+        ):
+            if int(item["sample_index"]) in seen:
+                continue
+            selected.append(item)
+            seen.add(int(item["sample_index"]))
+        if selected and count < len(selected):
+            print(
+                f"[select] count={count} 装不下 {len(selected)} 个 episode 首/尾窗口，"
+                f"自动提高到 {len(selected)}",
+                flush=True,
+            )
+            count = len(selected)
+
+    candidates = build_candidates(
+        dataset, min_history_steps=min_history_steps, window_stride=window_stride
+    )
+    if not candidates and not selected:
+        raise ValueError("No padding-free SO101 window is available.")
 
     lanes = {task: _order_within_task(items) for task, items in candidates.items()}
     tasks = sorted(lanes)
-    selected: list[dict[str, Any]] = []
     position = 0
     while len(selected) < count:
         progressed = False
         for task in tasks:
             if position < len(lanes[task]) and len(selected) < count:
-                selected.append(lanes[task][position])
+                item = lanes[task][position]
                 progressed = True
+                if int(item["sample_index"]) not in seen:
+                    selected.append(item)
+                    seen.add(int(item["sample_index"]))
         if not progressed:
             break
         position += 1
