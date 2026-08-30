@@ -23,6 +23,9 @@ from ahawam.runtime import (
 from ahawam.utils import misc
 from ahawam.utils.logging_config import setup_logging
 from scripts.so101_pipeline.config_utils import load_training_config
+from scripts.so101_pipeline.hil_human_only_dataset import (
+    summarize_human_dataset_dirs,
+)
 from scripts.so101_pipeline.full_finetune_zero2_offload.zero2_trainer import (
     Zero2WeightOnlyTrainer,
 )
@@ -31,11 +34,11 @@ from scripts.so101_pipeline.full_finetune_zero2_offload.zero2_trainer import (
 HERE = Path(__file__).resolve().parent
 
 
-def selected_frame_count(data_cfg, seed: int) -> tuple[int, int, int]:
+def _selected_standard_frames(dataset_dirs, val_set_proportion: float, seed: int):
     total_frames = 0
     selected_frames = 0
     selected_episodes = 0
-    for dataset_dir in data_cfg.dataset_dirs:
+    for dataset_dir in dataset_dirs:
         root = Path(str(dataset_dir))
         rows = [
             json.loads(line)
@@ -47,11 +50,41 @@ def selected_frame_count(data_cfg, seed: int) -> tuple[int, int, int]:
         total_frames += sum(int(row["length"]) for row in rows)
         indices = np.arange(len(rows))
         np.random.default_rng(seed).shuffle(indices)
-        split_index = int(len(rows) * (1.0 - float(data_cfg.val_set_proportion)))
+        split_index = int(len(rows) * (1.0 - float(val_set_proportion)))
         selected = indices[:split_index]
         selected_episodes += len(selected)
         selected_frames += sum(int(rows[int(index)]["length"]) for index in selected)
     return selected_frames, selected_episodes, total_frames
+
+
+def selected_frame_count(data_cfg, seed: int) -> dict[str, int | str]:
+    if data_cfg.get("demo_dataset_dirs") is None:
+        frames, episodes, total_frames = _selected_standard_frames(
+            data_cfg.dataset_dirs, data_cfg.val_set_proportion, seed
+        )
+        return {
+            "natural_frames": frames,
+            "logical_episodes": episodes,
+            "raw_frames": total_frames,
+            "demo_frames": frames,
+            "human_frames": 0,
+            "sampling_strategy": "natural",
+        }
+
+    demo_frames, demo_episodes, demo_raw_frames = _selected_standard_frames(
+        data_cfg.demo_dataset_dirs, data_cfg.val_set_proportion, seed
+    )
+    human = summarize_human_dataset_dirs(data_cfg.correction_dataset_dirs)
+    human_frames = int(human["human_frames"])
+    return {
+        "natural_frames": demo_frames + human_frames,
+        "logical_episodes": demo_episodes + int(human["human_segments"]),
+        "raw_frames": demo_raw_frames + int(human["raw_frames"]),
+        "demo_frames": demo_frames,
+        "human_frames": human_frames,
+        "human_segments": int(human["human_segments"]),
+        "sampling_strategy": str(data_cfg.get("sampling_strategy", "natural")),
+    }
 
 
 def main() -> None:
@@ -69,11 +102,22 @@ def main() -> None:
     if bool(cfg.freeze_video_dit):
         raise ValueError("Full fine-tuning requires `freeze_video_dit: false`.")
 
-    frames, episodes, total_frames = selected_frame_count(
-        cfg.data.train, int(cfg.seed)
-    )
+    counts = selected_frame_count(cfg.data.train, int(cfg.seed))
+    frames = int(counts["natural_frames"])
+    episodes = int(counts["logical_episodes"])
+    total_frames = int(counts["raw_frames"])
+    epoch_samples = frames
+    if counts["sampling_strategy"] == "balanced_2_2":
+        if int(cfg.batch_size) != 4:
+            raise ValueError("balanced_2_2 requires batch_size=4.")
+        source_samples_per_global_step = 2 * args.num_gpus
+        global_steps = math.ceil(
+            max(int(counts["demo_frames"]), int(counts["human_frames"]))
+            / source_samples_per_global_step
+        )
+        epoch_samples = global_steps * args.num_gpus * int(cfg.batch_size)
     steps_per_epoch = math.ceil(
-        math.ceil(frames / (int(cfg.batch_size) * args.num_gpus))
+        math.ceil(epoch_samples / (int(cfg.batch_size) * args.num_gpus))
         / int(cfg.gradient_accumulation_steps)
     )
     if args.smoke_steps is None:
@@ -105,6 +149,8 @@ def main() -> None:
         print(
             "[schedule] "
             f"train_episodes={episodes} train_frames={frames}/{total_frames} "
+            f"demo_frames={counts['demo_frames']} human_frames={counts['human_frames']} "
+            f"sampling={counts['sampling_strategy']} epoch_samples={epoch_samples} "
             f"num_gpus={args.num_gpus} micro_batch={cfg.batch_size} "
             f"gradient_accumulation={cfg.gradient_accumulation_steps} "
             f"effective_batch={int(cfg.batch_size) * args.num_gpus * int(cfg.gradient_accumulation_steps)} "
@@ -141,4 +187,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -917,7 +917,11 @@ class AHAWAM(AHAWAMChunkBase):
             loss_video_per_sample.device,
             dtype=loss_video_per_sample.dtype,
         )
-        loss_video = (loss_video_per_sample * video_weight).mean()
+        loss_video, video_supervised_fraction = self._reduce_video_loss(
+            loss_video_per_sample=loss_video_per_sample,
+            video_weight=video_weight,
+            video_supervision_mask=sample.get("video_supervision_mask"),
+        )
         loss_action_prior = self._compute_weighted_action_loss(
             pred_action=pred_action_prior,
             target_action=target_action,
@@ -934,6 +938,7 @@ class AHAWAM(AHAWAMChunkBase):
             "loss_action": self.loss_lambda_action_prior
             * float(loss_action_prior.detach().item()),
             "history_len": _history_len_metric,
+            "video_supervised_fraction": video_supervised_fraction,
         }
 
     def _training_loss_action_offset(
@@ -1187,7 +1192,11 @@ class AHAWAM(AHAWAMChunkBase):
             loss_video_per_sample.device,
             dtype=loss_video_per_sample.dtype,
         )
-        loss_video = (loss_video_per_sample * video_weight).mean()
+        loss_video, video_supervised_fraction = self._reduce_video_loss(
+            loss_video_per_sample=loss_video_per_sample,
+            video_weight=video_weight,
+            video_supervision_mask=sample.get("video_supervision_mask"),
+        )
         loss_action_prior = self._compute_weighted_action_loss(
             pred_action=pred_action_prior,
             target_action=target_action,
@@ -1205,7 +1214,42 @@ class AHAWAM(AHAWAMChunkBase):
             * float(loss_action_prior.detach().item()),
             "history_len": _history_len_metric,
             "mean_offset": float(offsets.float().mean().item()),
+            "video_supervised_fraction": video_supervised_fraction,
         }
+
+    @staticmethod
+    def _reduce_video_loss(
+        *,
+        loss_video_per_sample: torch.Tensor,
+        video_weight: torch.Tensor,
+        video_supervision_mask: torch.Tensor | None,
+    ) -> tuple[torch.Tensor, float]:
+        """Average video loss over samples that actually have video labels.
+
+        The ordinary path remains byte-for-byte equivalent to ``mean()``.  A
+        HUMAN correction shorter than one full prediction window can set its
+        mask to false: it still supplies visual/action context, but contributes
+        no direct video-generation target and does not dilute the loss scale of
+        the other samples in the local batch.
+        """
+        weighted = loss_video_per_sample * video_weight
+        if video_supervision_mask is None:
+            return weighted.mean(), 1.0
+        mask = torch.as_tensor(
+            video_supervision_mask,
+            device=weighted.device,
+            dtype=weighted.dtype,
+        ).reshape(-1)
+        if int(mask.numel()) != int(weighted.shape[0]):
+            raise ValueError(
+                "video_supervision_mask batch mismatch: "
+                f"{mask.numel()} vs {weighted.shape[0]}."
+            )
+        denominator = mask.sum()
+        # When a batch is entirely action-only, retain a differentiable zero so
+        # the joint forward/backward path and distributed graph stay identical.
+        reduced = (weighted * mask).sum() / denominator.clamp(min=1.0)
+        return reduced, float(mask.mean().detach().item())
 
     def _compute_weighted_action_loss(
         self,

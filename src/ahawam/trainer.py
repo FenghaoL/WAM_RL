@@ -24,7 +24,11 @@ from torch.utils.data import DataLoader
 from .utils.fs import ensure_dir
 from .utils.logging_config import get_logger
 from .utils.pytorch_utils import set_global_seed
-from .utils.samplers import HistoryAwareResumableEpochSampler, ResumableEpochSampler
+from .utils.samplers import (
+    BalancedTwoSourceEpochSampler,
+    HistoryAwareResumableEpochSampler,
+    ResumableEpochSampler,
+)
 
 logger = get_logger(__name__)
 
@@ -284,7 +288,16 @@ class Wan22Trainer:
 
     def _build_loader(self, dataset, worker_init_fn=None):
         sampler_cls = ResumableEpochSampler
-        if self.history_aware_batching:
+        sampling_strategy = str(getattr(dataset, "sampling_strategy", "natural"))
+        if sampling_strategy == "balanced_2_2":
+            if self.history_aware_batching:
+                raise ValueError(
+                    "balanced_2_2 and history_aware_batching cannot both define "
+                    "batch composition; set history_aware_batching=false."
+                )
+            sampler_cls = BalancedTwoSourceEpochSampler
+            logger.info("Using exact per-local-batch 2-demo + 2-correction sampler.")
+        elif self.history_aware_batching:
             sampler_cls = HistoryAwareResumableEpochSampler
             logger.info("Using history-aware train sampler.")
         self.train_sampler = sampler_cls(
@@ -344,9 +357,12 @@ class Wan22Trainer:
 
         num_processes = max(int(self.accelerator.num_processes), 1)
         global_batch_size = max(self.batch_size * num_processes, 1)
-        micro_steps_per_epoch = max(
-            ceil(len(self.train_dataset) / global_batch_size), 1
+        epoch_samples = (
+            len(self.train_sampler)
+            if hasattr(self, "train_sampler")
+            else len(self.train_dataset)
         )
+        micro_steps_per_epoch = max(ceil(epoch_samples / global_batch_size), 1)
         opt_steps_per_epoch = max(
             ceil(micro_steps_per_epoch / self.gradient_accumulation_steps),
             1,
@@ -608,7 +624,12 @@ class Wan22Trainer:
             )
         num_processes = max(int(self.accelerator.num_processes), 1)
         global_batch_size = max(self.batch_size * num_processes, 1)
-        return max(ceil(len(self.train_dataset) / global_batch_size), 1)
+        epoch_samples = (
+            len(self.train_sampler)
+            if hasattr(self, "train_sampler")
+            else len(self.train_dataset)
+        )
+        return max(ceil(epoch_samples / global_batch_size), 1)
 
     def _align_weight_only_resume_progress(self, step: int):
         step = max(int(step), 0)
@@ -1080,6 +1101,7 @@ class Wan22Trainer:
                 self.epoch += 1
                 self.batch_in_epoch = 0
                 self.train_sampler.clear_resume_batch_offset()
+                self.train_sampler.set_epoch_offset(self.epoch)
                 data_iter = iter(self.train_loader)
                 data_ready_time = time.perf_counter()
                 last_step_end_time = data_ready_time

@@ -111,7 +111,7 @@ class RobotVideoDataset(torch.utils.data.Dataset):
         self._image_offset_to_sample_position = {
             int(offset): i for i, offset in enumerate(image_sample_indices)
         }
-        self.lerobot_dataset = BaseLerobotDataset(
+        self.lerobot_dataset = self._build_lerobot_dataset(
             dataset_dirs=dataset_dirs,
             shape_meta=OmegaConf.to_container(shape_meta, resolve=True),
             obs_size=num_frames,
@@ -211,6 +211,10 @@ class RobotVideoDataset(torch.utils.data.Dataset):
 
             processor.set_normalizer_from_stats(dataset_stats)
             self.lerobot_dataset.set_processor(processor)
+
+    def _build_lerobot_dataset(self, **kwargs) -> BaseLerobotDataset:
+        """Factory hook for segment-aware logical views of LeRobot datasets."""
+        return BaseLerobotDataset(**kwargs)
 
     def __len__(self):
         return len(self.lerobot_dataset)
@@ -525,6 +529,10 @@ class RobotVideoDataset(torch.utils.data.Dataset):
         sample = None
         for attempt in range(self.max_padding_retry + 1):
             sample = self.lerobot_dataset[sample_idx]
+            # BaseLerobotDataset may recover from a decode error by returning a
+            # different valid logical index.  Keep history/RoPE/cache metadata
+            # aligned with the sample that was actually loaded.
+            sample_idx = int(sample.get("idx", sample_idx))
 
             if not self.skip_padding_as_possible:
                 break
@@ -605,6 +613,9 @@ class RobotVideoDataset(torch.utils.data.Dataset):
             "proprio_is_pad": sample["proprio_is_pad"],
             "_sample_idx": sample_idx,
         }
+        for optional_key in ("video_supervision_mask", "data_source"):
+            if optional_key in sample:
+                data[optional_key] = sample[optional_key]
         if self._action_offset_enabled:
             data["action_offset"] = torch.tensor(action_offset, dtype=torch.long)
             data["chunk_obs_images"] = chunk_obs_images

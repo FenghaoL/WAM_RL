@@ -8,7 +8,7 @@ GPU_ID=0
 # Keep pickle TCP private. The robot computer should connect through an SSH
 # tunnel; see online_deploy/README.md.
 SERVER_HOST="127.0.0.1"
-PORT=12000
+PORT=12001
 MAX_RETURN_ACTIONS=8
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"

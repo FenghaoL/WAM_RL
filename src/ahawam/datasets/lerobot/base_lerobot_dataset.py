@@ -184,6 +184,15 @@ class BaseLerobotDataset(torch.utils.data.Dataset):
     def __len__(self):
         return self.multi_dataset.num_frames
 
+    def _map_sample_index(self, sample_idx: int) -> int:
+        """Map a public dataset index to the concatenated LeRobot storage index.
+
+        Most datasets use the identity mapping.  Logical-view datasets (for
+        example, a view containing only human-intervention spans) can override
+        this hook without duplicating the retry and preprocessing machinery.
+        """
+        return int(sample_idx)
+
     def _get_additional_data(self, sample, lerobot_sample):
         return sample
 
@@ -197,7 +206,8 @@ class BaseLerobotDataset(torch.utils.data.Dataset):
         last_exception: Optional[Exception] = None
         while attempt < MAX_GETITEM_ATTEMPT:
             try:
-                lerobot_sample = self.multi_dataset[sample_idx]
+                storage_idx = self._map_sample_index(sample_idx)
+                lerobot_sample = self.multi_dataset[storage_idx]
                 lerobot_sample = self._split_lerobot_sample(lerobot_sample)
                 break
             except Exception as err:

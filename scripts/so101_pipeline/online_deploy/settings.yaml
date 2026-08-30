@@ -1,7 +1,7 @@
 # Final SO101 G05 square-task deployment configuration.
 # 000860 001720 002580 003440
-checkpoint_path: runs/so101_ahawam_plug/full_zero2_offload_ahawam_base/formal-plug-ahawambase-zero2offload-bs4-acc1-4ep-3gpu-20260825-145746/model/checkpoints/weights/step_004868.pt
-dataset_stats_path: runs/so101_ahawam_plug/assets/dataset_stats.json
+checkpoint_path: runs/so101_ahawam_plug_all/full_zero2_offload_ahawam_base/formal-plugall-ahawambase-zero2offload-bs4-acc1-4ep-3gpu-20260827-020601/model/checkpoints/weights/step_007984.pt
+dataset_stats_path: runs/so101_ahawam_plug_all/assets/dataset_stats.json
 text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
 load_text_encoder: false
 project_root: .
@@ -21,7 +21,7 @@ hydra_patch:
     max_action_offset: 7
     action_obs_downsample_factor: 1
     chunk_kv_editor_num_queries: 32
-    num_history_frames: 0 #6
+    num_history_frames: 6 #6
     action_video_read_mode: current_only
     video_rope_frame_stride: 4
   data:

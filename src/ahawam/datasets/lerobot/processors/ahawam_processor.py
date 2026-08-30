@@ -275,6 +275,13 @@ class AHAWAMProcessor(BaseProcessor):
 
         sample["idx"] = data["idx"]
 
+        # Optional supervision/source metadata used by mixed demonstration +
+        # human-correction training.  Keeping this pass-through here avoids
+        # coupling the generic processor to any particular collector schema.
+        for optional_key in ("video_supervision_mask", "data_source"):
+            if optional_key in data:
+                sample[optional_key] = data[optional_key]
+
         # sample = self.tokenizer(sample)
         
         return sample

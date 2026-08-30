@@ -8,10 +8,14 @@ import hashlib
 import json
 from pathlib import Path
 
+import numpy as np
 import torch
 
 from ahawam.datasets.lerobot.robot_video_dataset import DEFAULT_PROMPT
 from scripts.so101_pipeline.config_utils import load_training_config
+from scripts.so101_pipeline.hil_human_only_dataset import (
+    summarize_human_dataset_dirs,
+)
 
 
 def main() -> None:
@@ -21,7 +25,15 @@ def main() -> None:
     args = parser.parse_args()
     cfg = load_training_config(args.settings)
 
-    dataset_dirs = [("train", d) for d in cfg.data.train.dataset_dirs]
+    if cfg.data.train.get("demo_dataset_dirs") is None:
+        train_dirs = list(cfg.data.train.dataset_dirs)
+        correction_dirs = []
+        dataset_dirs = [("train", d) for d in train_dirs]
+    else:
+        train_dirs = list(cfg.data.train.demo_dataset_dirs)
+        correction_dirs = list(cfg.data.train.correction_dataset_dirs)
+        dataset_dirs = [("train_demo", d) for d in train_dirs]
+        dataset_dirs += [("train_hil_raw", d) for d in correction_dirs]
     if cfg.data.get("val") is not None:
         dataset_dirs += [("val", d) for d in cfg.data.val.dataset_dirs]
 
@@ -66,9 +78,24 @@ def main() -> None:
         f"datasets={len(dataset_dirs)} episodes={total_episodes} "
         f"frames={total_frames} unique_prompts={len(prompts)} {detail}"
     )
+    if correction_dirs:
+        human = summarize_human_dataset_dirs(correction_dirs)
+        lengths = list(human["segment_lengths"])
+        min_video_frames = int(
+            cfg.data.train.get("video_supervision_min_segment_frames", 49)
+        )
+        long_segments = sum(length >= min_video_frames for length in lengths)
+        short_segments = len(lengths) - long_segments
+        print(
+            "human_only_view "
+            f"segments={len(lengths)} frames={human['human_frames']} "
+            f"length_min={min(lengths)} length_median={int(np.median(lengths))} "
+            f"length_max={max(lengths)} video_action_segments={long_segments} "
+            f"action_only_segments={short_segments} autonomous_training_frames=0"
+        )
     if cfg.data.get("val") is not None:
-        train_dirs = {str(d) for d in cfg.data.train.dataset_dirs}
-        overlap = train_dirs & {str(d) for d in cfg.data.val.dataset_dirs}
+        all_train_dirs = {str(d) for d in train_dirs + correction_dirs}
+        overlap = all_train_dirs & {str(d) for d in cfg.data.val.dataset_dirs}
         if overlap:
             raise ValueError(
                 f"val dataset_dirs overlap the training set: {sorted(overlap)}. "
@@ -84,7 +111,22 @@ def main() -> None:
 
     raw_base = cfg.get("base_init_checkpoint")
     base_checkpoint = Path(str(raw_base)) if raw_base else None
-    checkpoint = Path(str(cfg.init_checkpoint))
+
+    # A run either starts fresh from `init_checkpoint` or continues from `resume`;
+    # the trainer treats the two as mutually exclusive (trainer.py:109). Validate
+    # whichever one this run will actually load.
+    raw_init = cfg.get("init_checkpoint")
+    raw_resume = cfg.get("resume")
+    if raw_init and raw_resume:
+        raise ValueError(
+            "`init_checkpoint` and `resume` are mutually exclusive; set only one."
+        )
+    if not raw_init and not raw_resume:
+        raise ValueError(
+            "Set either `init_checkpoint` (fresh start) or `resume` (continue a run)."
+        )
+    checkpoint = Path(str(raw_init or raw_resume))
+    checkpoint_role = "init_checkpoint" if raw_init else "resume"
     stats = Path(str(cfg.data.train.pretrained_norm_stats))
     cache = Path(str(cfg.data.train.text_embedding_cache_dir))
     if base_checkpoint is not None and not base_checkpoint.is_file():
@@ -107,7 +149,7 @@ def main() -> None:
             raise ValueError(f"Malformed text cache: {path}")
     print(
         f"base_checkpoint={base_checkpoint or '<none, single-stage init>'} "
-        f"init_checkpoint={checkpoint} "
+        f"{checkpoint_role}={checkpoint} "
         f"stats={stats} text_cache={cache} status=ready"
     )
 

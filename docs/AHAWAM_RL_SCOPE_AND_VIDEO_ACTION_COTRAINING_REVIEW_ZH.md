@@ -3,6 +3,7 @@
 > 检索截止：2026-08-24  
 > 目标：重新检查“只搜 WAM/VLA + RL”造成的文献遗漏，并回答 AHA-WAM 在 SO101 插入任务上应当更新外挂 actor、ActionDiT、VideoDiT，还是联合更新。  
 > 配套阅读：[插入 RL 文献全景](./AHAWAM_INSERTION_RL_LITERATURE_REVIEW_ZH.md)、[HALO-WA 迁移指南](./HALO_WA_RL_AND_AHAWAM_MIGRATION_GUIDE_ZH.md)。
+> 当前 SO101 插头任务的训练轮次、HG-DAgger 采集协议与消融方案见：[从 π*0.6 / RECAP 到 SO101 插头插入](./PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md)。
 
 ---
 
@@ -323,18 +324,18 @@ AHA latent/ref action ──► 小 actor ──► 修正动作
 
 对 replay 中每个 action chunk 估计 advantage：
 
-\[
+$$
 w_t=\operatorname{clip}\left(\exp(A_t/\beta), w_{\min}, w_{\max}\right),
-\]
+$$
 
 然后：
 
-\[
+$$
 L_{\text{actor}}
 =
 \mathbb E[w_t L_{\text{flow}}(o_t,a_{t:t+H})]
 +\lambda_{\text{anchor}}L_{\text{base/rehearsal}}.
-\]
+$$
 
 优点是兼容原 ActionDiT 训练接口；缺点是低 advantage 数据会被弱化，数据效率取决于 critic 校准。
 
@@ -342,9 +343,9 @@ L_{\text{actor}}
 
 给 ActionDiT 增加一个 positive/negative embedding 或 condition token：
 
-\[
+$$
 I_t=\mathbb 1[A_t>\epsilon].
-\]
+$$
 
 训练时保留全部数据，测试时固定 `I=positive`。这比简单成功过滤更能利用失败数据，也更适合将 intervention 强制标为 positive。
 
@@ -352,9 +353,9 @@ I_t=\mathbb 1[A_t>\epsilon].
 
 比较当前策略 chunk、WAM 原始 chunk、人类 intervention chunk、residual-RL chunk：
 
-\[
+$$
 a^*=\arg\max_{a\in\mathcal C}Q(o,a),
-\]
+$$
 
 仅当 Q margin 足够可信时才以 (a^*) 为 flow/BC target。它接近 Max-Q、IDQL 和 candidate ranking。
 
@@ -364,11 +365,11 @@ a^*=\arg\max_{a\in\mathcal C}Q(o,a),
 
 如果目标是“提高视频生成精度”，最合理的训练信号通常不是 RL reward，而是在线真实未来视频：
 
-\[
+$$
 L_{\text{video}}
 =L_{\text{flow/reconstruction}}(\hat{x}_{t+1:t+H},x_{t+1:t+H})
 +\lambda_{\text{latent}}\|z_{\text{new}}-z_{\text{base}}\|^2.
-\]
+$$
 
 [WAM-RL](https://arxiv.org/abs/2606.17906) 的世界模型也是在成功在线轨迹上做 video SFT，并用 latent KL anchor 保持 actor 接口稳定；reward/policy gradient 主要优化 action model，而不是直接用成功奖励推 VideoDiT 像素。
 
@@ -611,9 +612,9 @@ AHA latent    → error/success
 
 用 residual/RLT actor 进行小幅真实探索：
 
-\[
+$$
 a_{exec}=a_{AHA}+g_{contact}\operatorname{clip}(\Delta a,-b,b).
-\]
+$$
 
 只在 near-contact phase 开启，接管立即取消旧 chunk。收集到比 AHA 更高价值的轨迹后：
 
