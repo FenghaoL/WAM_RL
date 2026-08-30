@@ -133,7 +133,7 @@ ZeRO-2 分片 optimizer state 和 gradient；A800 具有足够显存，所以不
 
 ## 8. 直接运行
 
-先在训练机器进入仓库并激活已安装 AHA-WAM 依赖的环境，然后二选一运行；脚本不需要参数。
+先在训练机器进入仓库并激活已安装 AHA-WAM 依赖的环境，然后二选一运行；脚本不需要参数。两个入口会先从 public Hugging Face Dataset 匿名补齐预训练权重、02/04、HIL、固定 stats 和文本缓存，再运行原有 preflight。远端路径和上传方法见[训练资产目录与自动下载](./AHAWAM_HF_TRAINING_ASSETS_ZH.md)。
 
 自然拼接：
 

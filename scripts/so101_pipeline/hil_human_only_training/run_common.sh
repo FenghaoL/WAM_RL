@@ -72,6 +72,8 @@ export OMP_NUM_THREADS
 export HF_DATASETS_CACHE="${HF_DATASETS_CACHE:-$REPO_ROOT/runs/cache/huggingface/datasets_v2}"
 export TORCH_EXTENSIONS_DIR="${TORCH_EXTENSIONS_DIR:-$REPO_ROOT/runs/cache/torch_extensions}"
 
+"$PYTHON_BIN" scripts/so101_pipeline/hil_human_only_training/prepare_training_assets.py
+
 "$PYTHON_BIN" scripts/so101_pipeline/full_finetune_zero2_offload/preflight.py \
   --settings "$SETTINGS"
 
