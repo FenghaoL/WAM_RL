@@ -8,6 +8,9 @@ SETTINGS="${SETTINGS:-scripts/so101_pipeline/full_finetune_zero2_offload/setting
 OUT_DIR="${OUT_DIR:-runs/so101_ahawam_square_v1/val_eval}"
 NUM_SAMPLES="${NUM_SAMPLES:-200}"
 STEPS="${STEPS:-10}"
+# Which physical GPUs to spread checkpoints over. Defaults to all four; set
+# EVAL_GPUS=0,1,2 to leave a card free for someone else.
+EVAL_GPUS="${EVAL_GPUS:-0,1,2,3}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$REPO_ROOT"
@@ -29,7 +32,8 @@ PIDS=()
 for i in "${!CKPTS[@]}"; do
   ckpt="${CKPTS[$i]}"
   tag="$(basename "$ckpt" .pt)"
-  gpu=$(( i % 4 ))
+  IFS=',' read -r -a _EVAL_GPU_LIST <<< "$EVAL_GPUS"
+  gpu="${_EVAL_GPU_LIST[$(( i % ${#_EVAL_GPU_LIST[@]} ))]}"
   echo "  GPU$gpu <- $tag"
   CUDA_VISIBLE_DEVICES=$gpu python scripts/so101_pipeline/val_eval/eval_checkpoint.py \
     --checkpoint "$ckpt" \

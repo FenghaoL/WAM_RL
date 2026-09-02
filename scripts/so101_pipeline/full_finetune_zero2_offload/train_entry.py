@@ -59,6 +59,24 @@ def _selected_standard_frames(dataset_dirs, val_set_proportion: float, seed: int
 
 def selected_frame_count(data_cfg, seed: int) -> dict[str, int | str]:
     if data_cfg.get("demo_dataset_dirs") is None:
+        # Human-correction-only training: the dataset exposes just the HUMAN
+        # segments of each HIL recording, so epoch length must come from the
+        # segment summary. Counting episodes.jsonl lengths would use the raw
+        # frame totals instead and silently inflate an "epoch" ~2.4x.
+        if str(data_cfg.get("_target_", "")).endswith(
+            "SO101HumanCorrectionRobotVideoDataset"
+        ):
+            human = summarize_human_dataset_dirs(data_cfg.dataset_dirs)
+            human_frames = int(human["human_frames"])
+            return {
+                "natural_frames": human_frames,
+                "logical_episodes": int(human["human_segments"]),
+                "raw_frames": int(human["raw_frames"]),
+                "demo_frames": 0,
+                "human_frames": human_frames,
+                "human_segments": int(human["human_segments"]),
+                "sampling_strategy": "human_only",
+            }
         frames, episodes, total_frames = _selected_standard_frames(
             data_cfg.dataset_dirs, data_cfg.val_set_proportion, seed
         )

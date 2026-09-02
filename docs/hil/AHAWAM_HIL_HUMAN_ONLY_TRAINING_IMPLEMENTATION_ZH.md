@@ -133,7 +133,7 @@ ZeRO-2 分片 optimizer state 和 gradient；A800 具有足够显存，所以不
 
 ## 8. 直接运行
 
-先在训练机器进入仓库并激活已安装 AHA-WAM 依赖的环境，然后二选一运行；脚本不需要参数。两个入口会先从 public Hugging Face Dataset 匿名补齐预训练权重、02/04、HIL、固定 stats 和文本缓存，再运行原有 preflight。远端路径和上传方法见[训练资产目录与自动下载](./AHAWAM_HF_TRAINING_ASSETS_ZH.md)。
+先在训练机器进入仓库并激活已安装 AHA-WAM 依赖的环境，然后二选一运行；脚本不需要参数。两个入口会先从 public Hugging Face Dataset 匿名补齐预训练权重、02/04、HIL、固定 stats 和文本缓存，再运行原有 preflight。远端路径和上传方法见[训练资产目录与自动下载](../training/AHAWAM_HF_TRAINING_ASSETS_ZH.md)。
 
 自然拼接：
 
@@ -167,11 +167,11 @@ balanced_2_2: steps_per_epoch=1497 total_steps=7485
 
 ## 9. 关键实现文件
 
-- [`hil_human_only_dataset.py`](../scripts/so101_pipeline/hil_human_only_dataset.py)：HUMAN segment 扫描、logical episode、边界 clamp/mask 和 mixed dataset；
-- [`samplers.py`](../src/ahawam/utils/samplers.py)：严格 2:2 shuffled-cycle sampler；
-- [`ahawam.py`](../src/ahawam/models/wan22/ahawam.py)：逐样本 video supervision mask；
-- [`settings.yaml`](../scripts/so101_pipeline/hil_human_only_training/settings.yaml)：两实验共享配置；
-- [`run_natural_5ep.sh`](../scripts/so101_pipeline/hil_human_only_training/run_natural_5ep.sh) 与 [`run_balanced_2plus2_5ep.sh`](../scripts/so101_pipeline/hil_human_only_training/run_balanced_2plus2_5ep.sh)：无参数入口。
+- [`hil_human_only_dataset.py`](../../scripts/so101_pipeline/hil_human_only_dataset.py)：HUMAN segment 扫描、logical episode、边界 clamp/mask 和 mixed dataset；
+- [`samplers.py`](../../src/ahawam/utils/samplers.py)：严格 2:2 shuffled-cycle sampler；
+- [`ahawam.py`](../../src/ahawam/models/wan22/ahawam.py)：逐样本 video supervision mask；
+- [`settings.yaml`](../../scripts/so101_pipeline/hil_human_only_training/settings.yaml)：两实验共享配置；
+- [`run_natural_5ep.sh`](../../scripts/so101_pipeline/hil_human_only_training/run_natural_5ep.sh) 与 [`run_balanced_2plus2_5ep.sh`](../../scripts/so101_pipeline/hil_human_only_training/run_balanced_2plus2_5ep.sh)：无参数入口。
 
 ## 10. 已完成验证
 

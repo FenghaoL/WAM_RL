@@ -8,7 +8,7 @@
 
 - [AHA-WAM 强化学习范围与联合优化综述](./AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md)
 - [AHA-WAM 插入与 RL 文献综述](./AHAWAM_INSERTION_RL_LITERATURE_REVIEW_ZH.md)
-- [AHA-WAM 架构全解](./AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md)
+- [AHA-WAM 架构全解](../architecture/AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md)
 
 ---
 
@@ -509,7 +509,7 @@ IWR 的论文和项目页公开了：
 - policy pause/reset/resume；
 - 每帧 intervention 标记。
 
-它的 policy engine 和默认 recorder 仍不是为 AHA-WAM 设计：AHA 一次返回 8-step chunk，接管时需要清空本地 queue、使在途 TCP reply 失效，交还前还要 hard reset 服务端历史。LeRobot v0.6 的 correction-only 与按文件大小自动轮转的 continuous mode 也都不能原样替代当前插头任务的完整逻辑 episode/outcome。具体复用边界、schema 和部署端实现见[SO101 + AHA-WAM 在线接管数据采集交接](./SO101_AHAWAM_HIL_DATA_COLLECTION_IMPLEMENTATION_HANDOFF_ZH.md)。
+它的 policy engine 和默认 recorder 仍不是为 AHA-WAM 设计：AHA 一次返回 8-step chunk，接管时需要清空本地 queue、使在途 TCP reply 失效，交还前还要 hard reset 服务端历史。LeRobot v0.6 的 correction-only 与按文件大小自动轮转的 continuous mode 也都不能原样替代当前插头任务的完整逻辑 episode/outcome。具体复用边界、schema 和部署端实现见[SO101 + AHA-WAM 在线接管数据采集交接](../hil/SO101_AHAWAM_HIL_DATA_COLLECTION_IMPLEMENTATION_HANDOFF_ZH.md)。
 
 ### 8.5 RLDG
 
@@ -573,7 +573,7 @@ RLDG 的 connector/FMB 实验显示：
 
 ### 10.1 磁盘中的实际训练数据
 
-当前 [`settings_plug_all.yaml`](../scripts/so101_pipeline/full_finetune_zero2_offload/settings_plug_all.yaml)列出的训练集为：
+当前 [`settings_plug_all.yaml`](../../scripts/so101_pipeline/full_finetune_zero2_offload/settings_plug_all.yaml)列出的训练集为：
 
 | 类型 | episodes | frames | 每条长度范围 | 平均长度 |
 |---|---:|---:|---:|---:|
@@ -628,7 +628,7 @@ rollout -> 新数据 -> value -> advantage -> 重训 policy
 num_history_frames: 6
 ```
 
-而当前 [`online_deploy/settings.yaml`](../scripts/so101_pipeline/online_deploy/settings.yaml)写的是：
+而当前 [`online_deploy/settings.yaml`](../../scripts/so101_pipeline/online_deploy/settings.yaml)写的是：
 
 ```yaml
 num_history_frames: 0 #6

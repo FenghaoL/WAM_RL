@@ -173,6 +173,17 @@ class Zero2WeightOnlyTrainer(Wan22Trainer):
                 metrics[key] = averaged.pop(key)
         for key, value in averaged.items():
             metrics[f"avg_{key}"] = value
+
+        # Surface the branch split on the console too. `val_loss` is the sum of a
+        # video-prediction term and an action term, and late in training the video
+        # term dominates -- so a rising val_loss can coexist with an action branch
+        # that is still improving. Only the action branch drives the robot.
+        action_term = metrics.get("avg_loss_action")
+        video_term = metrics.get("avg_loss_video")
+        if action_term is not None:
+            metrics["val_loss_action"] = float(action_term)
+        if video_term is not None:
+            metrics["val_loss_video"] = float(video_term)
         return metrics
 
     def save_checkpoint(self):

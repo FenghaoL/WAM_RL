@@ -59,7 +59,7 @@
 
 ### 0.3 最关键的三个现实判断
 
-1. **AHA 当前不是可直接拿来做 MPC/RL rollout 的 action-conditioned simulator。** 当前配置 [`configs/model/ahawam.yaml`](../configs/model/ahawam.yaml) 明确是 `video_dit_config.action_conditioned: false`。代码虽然预留了 action embedding，但当前配置、checkpoint 和部署路径没有证明其学会了 `候选动作 → 对应未来`。所以不能把“会生成未来视频”自动等同于“可反事实评估任意动作”。
+1. **AHA 当前不是可直接拿来做 MPC/RL rollout 的 action-conditioned simulator。** 当前配置 [`configs/model/ahawam.yaml`](../../configs/model/ahawam.yaml) 明确是 `video_dit_config.action_conditioned: false`。代码虽然预留了 action embedding，但当前配置、checkpoint 和部署路径没有证明其学会了 `候选动作 → 对应未来`。所以不能把“会生成未来视频”自动等同于“可反事实评估任意动作”。
 2. **SO101 与论文常用 Franka/KUKA 并不只差价格。** 大量插入 RL 使用任务空间速度/位姿增量、腕部 F/T 和 1 kHz 阻抗控制；SO101 常见接口是有齿隙和延迟的位置伺服。成功率不能横向照搬，探索边界、安全层和被动柔顺反而是第一等设计变量。
 3. **插入要分阶段。** 自由空间靠近是视觉和长时程规划问题；接触后的搜索/对准/压入是高频、部分可观测、受动力学支配的问题。用一个固定 8 步 chunk 同时解决两者，通常不是最好的控制尺度。
 
@@ -636,7 +636,7 @@ latency and timestamp
 | 执行器 | 低成本位置舵机、齿隙/延迟/柔顺未知 | Franka/KUKA 工业级控制 | 探索更小，需被动柔顺/治具 |
 | 数据 | SO101 自有任务数据 | 大规模 robot data + 自动 reset | 训练预算与重置是瓶颈 |
 
-仓库默认 [`configs/model/ahawam.yaml`](../configs/model/ahawam.yaml) 仍是 `action_horizon: 64`、`action_chunk_size: 16`；先前 SO101 部署方案是 horizon 40、chunk 8。实验时必须以实际启动配置为准，并把 config snapshot 写进每个 rollout，避免文档参数与运行参数不一致。
+仓库默认 [`configs/model/ahawam.yaml`](../../configs/model/ahawam.yaml) 仍是 `action_horizon: 64`、`action_chunk_size: 16`；先前 SO101 部署方案是 horizon 40、chunk 8。实验时必须以实际启动配置为准，并把 config snapshot 写进每个 rollout，避免文档参数与运行参数不一致。
 
 ### 10.2 推荐的两条并行 baseline
 

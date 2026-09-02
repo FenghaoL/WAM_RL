@@ -1269,6 +1269,12 @@ class Wan22Trainer:
                                 description += " action_l2=%.4f" % metrics["action_l2"]
                             if "action_l1" in metrics:
                                 description += " action_l1=%.4f" % metrics["action_l1"]
+                            for key, label in (
+                                ("val_loss_action", "val_loss_action"),
+                                ("val_loss_video", "val_loss_video"),
+                            ):
+                                if key in metrics:
+                                    description += " %s=%.4f" % (label, metrics[key])
                             if "history_len" in metrics:
                                 description += " history_len=%.4f" % metrics[
                                     "history_len"

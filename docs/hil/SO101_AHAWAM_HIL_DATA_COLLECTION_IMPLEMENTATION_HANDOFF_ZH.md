@@ -7,9 +7,9 @@
 
 配套阅读：
 
-- [从 π*0.6 / RECAP 到 SO101 插头插入的实验方案](./PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md)
-- [AHA-WAM 架构：从数学到代码](./AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md)
-- [AHA-WAM RL 范围与 video/action 联合优化重审](./AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md)
+- [从 π*0.6 / RECAP 到 SO101 插头插入的实验方案](../research/PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md)
+- [AHA-WAM 架构：从数学到代码](../architecture/AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md)
+- [AHA-WAM RL 范围与 video/action 联合优化重审](../research/AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md)
 
 ---
 
@@ -225,7 +225,7 @@ AUTONOMOUS --pause--> PAUSED --correction--> CORRECTING
 
 ### 3.1 现有远程接口
 
-当前 robot-side client 是 [`ahawam_tcp_client.py`](../scripts/so101_pipeline/online_deploy/ahawam_tcp_client.py)：
+当前 robot-side client 是 [`ahawam_tcp_client.py`](../../scripts/so101_pipeline/online_deploy/ahawam_tcp_client.py)：
 
 - 采用 length-prefixed pickle TCP；
 - `health()`、`reset(instruction)`、`infer()`、`video_preview()`、`infer_with_video()`；
@@ -254,7 +254,7 @@ b = [0, 90, 90, 0, 0, 0]
 
 ### 3.2 当前动作时间尺度
 
-[`settings.yaml`](../scripts/so101_pipeline/online_deploy/settings.yaml)目前配置：
+[`settings.yaml`](../../scripts/so101_pipeline/online_deploy/settings.yaml)目前配置：
 
 - `action_horizon: 40`；
 - `action_chunk_size: 8`；
@@ -271,9 +271,9 @@ $$
 
 ### 3.3 AHA 服务端是有状态的
 
-[`AHAWAMPolicy.get_action()`](../deploy/server/ahawam_policy.py)读取 `next_chunk_index`；每次 action 推理会沿用预填充 video 状态。达到配置的 chunk 数后才触发新的 planner/video refresh。
+[`AHAWAMPolicy.get_action()`](../../deploy/server/ahawam_policy.py)读取 `next_chunk_index`；每次 action 推理会沿用预填充 video 状态。达到配置的 chunk 数后才触发新的 planner/video refresh。
 
-[`_hard_reset()`](../deploy/server/ahawam_policy.py)会清理：
+[`_hard_reset()`](../../deploy/server/ahawam_policy.py)会清理：
 
 - model history；
 - `_inference_state`；
@@ -326,7 +326,7 @@ HG / IWR / RECAP / RL view
 Remove the power adapter from the holder and plug it into the power strip.
 ```
 
-但当前 [`run_action_server.sh`](../scripts/so101_pipeline/online_deploy/run_action_server.sh)中的默认 `INSTRUCTION` 仍是：
+但当前 [`run_action_server.sh`](../../scripts/so101_pipeline/online_deploy/run_action_server.sh)中的默认 `INSTRUCTION` 仍是：
 
 ```text
 Pick up the white block.
@@ -885,7 +885,7 @@ mask = intervention_future & ~action_is_pad
 
 IWR 时依据当前 sampler 和 future source 构造相应 mask/权重。
 
-当前 [`_compute_weighted_action_loss()`](../src/ahawam/models/wan22/ahawam.py)已经先得到 `[B, T]` 的逐时间步 MSE，但只支持 `action_is_pad`，尚未接收 expert/source mask。因此未来改动很局部：
+当前 [`_compute_weighted_action_loss()`](../../src/ahawam/models/wan22/ahawam.py)已经先得到 `[B, T]` 的逐时间步 MSE，但只支持 `action_is_pad`，尚未接收 expert/source mask。因此未来改动很局部：
 
 ```python
 valid = (~action_is_pad) & action_supervision_mask

@@ -1,6 +1,6 @@
 # AHA-WAM 架构全解：从向量数学到训练、推理与源码
 
-> 适用代码版本：本仓库 `ahawam-code` 分支，检查时提交为 `6af7e85`。
+> 适用代码版本：本仓库当前工作树，检查时 HEAD 为 `f30640c`。SO101 数字另根据当前未提交的训练/部署 yaml 复核。
 >
 > 这是一份“从零开始、以当前源码为准”的架构教材。论文用于解释设计意图，源码用于判定实际行为。凡是论文表述与当前代码不完全一致的地方，本文都会明确区分。
 
@@ -45,22 +45,22 @@ AHA-WAM 不是“先生成一段未来 RGB 视频，再从视频反推动作”�
 
 | 层次 | 文件 | 作用 |
 |---|---|---|
-| 配置 | [`configs/model/ahawam.yaml`](../configs/model/ahawam.yaml) | 两个 DiT、scheduler、chunk 和 OVCR 的默认超参数 |
-| 实例化 | [`src/ahawam/runtime.py`](../src/ahawam/runtime.py) | 组装 VAE、文本编码器、Video DiT、Action DiT、MoT 和 AHA-WAM |
-| 数据 | [`robot_video_dataset.py`](../src/ahawam/datasets/lerobot/robot_video_dataset.py) | 采样视频/动作、拼相机、offset、history、文本缓存 |
-| 预处理 | [`ahawam_processor.py`](../src/ahawam/datasets/lerobot/processors/ahawam_processor.py) | 图像变换、动作/状态归一化与维度合并 |
-| 视频 VAE | [`wan_video_vae.py`](../src/ahawam/models/wan22/wan_video_vae.py) | RGB 与 48 通道时空 latent 之间的映射 |
-| Video DiT | [`wan_video_dit.py`](../src/ahawam/models/wan22/wan_video_dit.py) | 视频 patch、3D RoPE、时间调制、视频流预测 |
-| Action DiT | [`action_dit.py`](../src/ahawam/models/wan22/action_dit.py) | 动作 token、1D RoPE、chunk mask、动作流预测 |
-| 双专家耦合 | [`mot.py`](../src/ahawam/models/wan22/mot.py) | 逐层 Q/K/V、缓存、混合注意力及 OVCR K/V editor |
-| 公共 WAM | [`base_wam.py`](../src/ahawam/models/wan22/base_wam.py) | 输入构造、VAE、文本、本体状态、scheduler、通用推理 |
-| chunk 框架 | [`ahawam_chunk_base.py`](../src/ahawam/models/wan22/ahawam_chunk_base.py) | chunk 观测、query encoder、两阶段推理、动作去噪 |
-| AHA-WAM 本体 | [`ahawam.py`](../src/ahawam/models/wan22/ahawam.py) | OVCR 主训练、offset、rolling memory 与部署语义 |
-| scheduler | [`scheduler_continuous.py`](../src/ahawam/models/wan22/schedulers/scheduler_continuous.py) | 线性 flow path、shift、损失权重、Euler 更新 |
-| 训练器 | [`trainer.py`](../src/ahawam/trainer.py) | 冻结规则、AdamW、Accelerate/DeepSpeed、训练循环 |
-| 在线封装 | [`deploy/server/ahawam_policy.py`](../deploy/server/ahawam_policy.py) | 图像/状态归一化、prefill、动作块、反归一化 |
-| 异步运行 | [`deploy/server/async_runtime.py`](../deploy/server/async_runtime.py) | 视频刷新与动作请求的线程调度 |
-| 双 GPU 服务 | [`wam_policy_server.py`](../deploy/server/wam_policy_server.py) | video worker 和 action worker 通过最新 K/V 状态通信 |
+| 配置 | [`configs/model/ahawam.yaml`](../../configs/model/ahawam.yaml) | 两个 DiT、scheduler、chunk 和 OVCR 的默认超参数 |
+| 实例化 | [`src/ahawam/runtime.py`](../../src/ahawam/runtime.py) | 组装 VAE、文本编码器、Video DiT、Action DiT、MoT 和 AHA-WAM |
+| 数据 | [`robot_video_dataset.py`](../../src/ahawam/datasets/lerobot/robot_video_dataset.py) | 采样视频/动作、拼相机、offset、history、文本缓存 |
+| 预处理 | [`ahawam_processor.py`](../../src/ahawam/datasets/lerobot/processors/ahawam_processor.py) | 图像变换、动作/状态归一化与维度合并 |
+| 视频 VAE | [`wan_video_vae.py`](../../src/ahawam/models/wan22/wan_video_vae.py) | RGB 与 48 通道时空 latent 之间的映射 |
+| Video DiT | [`wan_video_dit.py`](../../src/ahawam/models/wan22/wan_video_dit.py) | 视频 patch、3D RoPE、时间调制、视频流预测 |
+| Action DiT | [`action_dit.py`](../../src/ahawam/models/wan22/action_dit.py) | 动作 token、1D RoPE、chunk mask、动作流预测 |
+| 双专家耦合 | [`mot.py`](../../src/ahawam/models/wan22/mot.py) | 逐层 Q/K/V、缓存、混合注意力及 OVCR K/V editor |
+| 公共 WAM | [`base_wam.py`](../../src/ahawam/models/wan22/base_wam.py) | 输入构造、VAE、文本、本体状态、scheduler、通用推理 |
+| chunk 框架 | [`ahawam_chunk_base.py`](../../src/ahawam/models/wan22/ahawam_chunk_base.py) | chunk 观测、query encoder、两阶段推理、动作去噪 |
+| AHA-WAM 本体 | [`ahawam.py`](../../src/ahawam/models/wan22/ahawam.py) | OVCR 主训练、offset、rolling memory 与部署语义 |
+| scheduler | [`scheduler_continuous.py`](../../src/ahawam/models/wan22/schedulers/scheduler_continuous.py) | 线性 flow path、shift、损失权重、Euler 更新 |
+| 训练器 | [`trainer.py`](../../src/ahawam/trainer.py) | 冻结规则、AdamW、Accelerate/DeepSpeed、训练循环 |
+| 在线封装 | [`deploy/server/ahawam_policy.py`](../../deploy/server/ahawam_policy.py) | 图像/状态归一化、prefill、动作块、反归一化 |
+| 异步运行 | [`deploy/server/async_runtime.py`](../../deploy/server/async_runtime.py) | 视频刷新与动作请求的线程调度 |
+| 双 GPU 服务 | [`wam_policy_server.py`](../../deploy/server/wam_policy_server.py) | video worker 和 action worker 通过最新 K/V 状态通信 |
 
 ---
 
@@ -332,7 +332,7 @@ Video 和 Action hidden 不同，但 Q/K/V 都是 3072 维，因此能够 joint 
 
 ### 3.1 Action DiT 如何从 Video DiT 初始化
 
-[`preprocess_action_dit_backbone.py`](../scripts/preprocess_action_dit_backbone.py) 不是简单随机初始化：
+[`preprocess_action_dit_backbone.py`](../../scripts/preprocess_action_dit_backbone.py) 不是简单随机初始化：
 
 - `action_encoder` 和最终 `head` 不从视频模型复制，因为输入/输出是动作维度；
 - 其余同名 backbone 张量从 Video DiT 复制；
@@ -384,44 +384,160 @@ $$
 
 ### 4.3 视频采样和动作采样的频率不同
 
-`action_video_freq_ratio=r` 表示每 (r) 个动作时间步取一帧视频。若 `num_frames=65,r=8`：
+先把“帧”分成三种，否则很容易把 49、13 和 4 当成同一个时间轴：
 
-- 动作/状态窗口含 65 个状态和 64 个动作；
-- 视频下标为 `0,8,...,64`，共 9 帧；
-- VAE 后为 (1+(9-1)/4=3) 个 latent frames；
-- 每帧 120 tokens，所以 Video DiT 共 360 tokens。
+1. **控制时间步/原始相机帧**：SO101 数据以 15 Hz 记录，索引为 $n=0,1,2,\ldots$。相邻两个状态之间有一个动作。
+2. **送入主 Video DiT 监督片段的 RGB 帧**：数据 loader 每隔 $r$ 个原始时间步取一帧。
+3. **VAE latent frame**：因果视频 VAE 在时间上又以 4 倍压缩 RGB 帧。
 
-这正是“视频低频、动作高频”的数据级体现。
+所以“每 $r$ 个动作时间步取一帧”不是说相机只会拍这些帧，也不是说机械臂每 $r$ 步才执行一次动作。它是数据 loader 对**主视频生成监督**的降采样。源码直接构造：
 
-### 4.4 文本为何常从缓存读取
-
-数据集把任务改写为：
-
-```text
-A video recorded from a robot's point of view executing the following instruction: {task}
+```python
+video_sample_indices = list(range(0, num_frames, action_video_freq_ratio))
 ```
 
-然后使用 SHA-256 查找预计算的 UMT5 context。默认训练配置为 128 个 4096 维 token。代码把无效 token 的 embedding 清零，随后又把 mask 设为全 1，以保持 Wan2.2 的条件行为。部署支持：
-
-- `cache`：只允许已缓存指令；
-- `online`：保留 UMT5，在线编码任意指令；
-- `hybrid`：先查缓存，缺失时在线编码。
-
-### 4.5 chunk 对齐观测
-
-每个 action chunk 需要其开始时刻的最新图像和 proprio。设动作 horizon (T_a=64)，chunk (c=16)，则 chunk 起点是
+设原始窗口有 $T_{raw}$ 个状态/图像时刻，其中有 $T_{raw}-1$ 个动作，则
 
 $$
-0,16,32,48.
+T_{RGB}=1+\frac{T_{raw}-1}{r},
+\qquad
+F_v=1+\frac{T_{RGB}-1}{4}
+=1+\frac{T_{raw}-1}{4r}.
 $$
 
-若 64 动作对应 8 个视频 transition，则每个视频 transition 有 8 个动作；chunk 间隔 16 动作，因此选取视频帧下标
+仓库用 assert 要求这些除法整除。例如原配置 `num_frames=65,r=8`：
+
+```text
+原始时间轴       0,1,2,...,64       -> 65 个 state/image 时刻
+动作区间         [0->1],...,[63->64] -> 64 个 action
+主视频采样索引   0,8,16,...,64      -> 9 帧 RGB
+VAE latent 时间长度  1+(9-1)/4         -> 3 latent frames
+Video DiT token       3*120             -> 360 tokens
+```
+
+这里的 `0,8,...,64` 就是“选取视频帧下标”：在已经记录的高频时间轴上，选哪些时刻组成 Video DiT 的低频训练 clip。这样做是为了在保持几秒物理 horizon 的同时降低 Video DiT token 数和显存/计算量。
+
+#### 4.3.1 当前 SO101 的真实数字
+
+当前训练和部署配置的关键量是：
+
+```text
+控制频率 f_c              15 Hz
+num_frames                 49
+action_video_freq_ratio r   4
+action_horizon T_a         40
+action_chunk_size c         8
+max_action_offset           7
+```
+
+于是一个 loader 原始窗口的时间关系是：
+
+```text
+原始 state/image        49 个：0..48
+原始 action             48 个：0..47
+整个原始窗口物理时长  48/15 = 3.2 s
+主视频 RGB            13 帧：0,4,8,...,48
+主视频有效帧率       15/4 = 3.75 Hz
+相邻采样 RGB 的间隔    4/15 ≈ 0.267 s
+VAE latent frames          1+(13-1)/4 = 4
+Video DiT tokens          4*120 = 480
+```
+
+注意：4 个 latent frames 不是 4 张普通 RGB 图。它们是能被 VAE 解码回 13 张 RGB 的压缩时空表示。第一个 latent 对应已知首帧的条件表示；之后每新增一个 latent 时间位置，VAE 时间上覆盖一组 4 个低频 RGB transition。因此不应说“一个 latent frame 就是一张真实图像”。
+
+#### 4.3.2 action window 和 action chunk 是什么
+
+**action window/horizon** 是一串待学习的高频动作向量，不是一个动作。当前 SO101 每步是 6 维，所以目标窗口为
 
 $$
-0,2,4,6.
+A\in\mathbb R^{40\times6}.
 $$
 
-这些图像分别经 VAE 变成 `[B,N,48,1,24,20]`，再变成每 chunk 的视觉观测 token。
+训练时先采样
+
+$$
+\delta\sim\operatorname{Uniform}\{0,1,\ldots,7\},
+$$
+
+再从 48 个原始动作中取
+
+$$
+A^{\delta}=A[\delta:\delta+40].
+$$
+
+例如 $\delta=3$ 时，监督的是原时间轴上索引 `3..42` 的 40 个动作，物理时长约 $40/15=2.67$ s。它再分成 5 个 chunk：
+
+$$
+[3:11],\ [11:19],\ [19:27],\ [27:35],\ [35:43].
+$$
+
+每个 chunk 包含 8 个 6 维动作，对应 $8/15\approx0.533$ s。在线接口的一次 `phase="action"` 返回的正是这样一个 `[8,6]` 动作块，而不是一次返回全部 40 步。
+
+### 4.4 文本 context 为何从缓存读取
+
+这里的“文本 context 缓存”不是 Transformer 逐层推理用的 K/V cache。它是**冻结 UMT5 文本编码器的最终 hidden states**：
+
+$$
+\text{prompt string}
+\xrightarrow{\text{tokenizer+UMT5}}
+C_{text}\in\mathbb R^{128\times4096}.
+$$
+
+数据集把完整 prompt 做 SHA-256，用 hash 找到
+
+```text
+{sha256}.t5_len128.wan22ti2v5b.pt
+```
+
+文件中的 `context` 和 `mask`。这个 context 之后同时供 Video DiT 和 Action DiT 的 cross-attention 使用。
+
+当前 dataset 读出后还会先用原 mask 把 padding 位置的 embedding 清零，然后把传给 DiT 的 mask 改为全 1。这是为了保持 Wan2.2 的历史条件行为：注意力可“看到”固定长度 128 的位置，但 padding 位置的 value 是零。因此要比较 cache 与 online 路径，不能只比 UMT5 输出，也要确保这一步后处理一致。
+
+这**不是 WAM 或 AHA-WAM 在数学上必须具有的特性**，而是当前工程配置中一个等价的计算/显存优化：
+
+- UMT5 是冻结的，同一 prompt 在 `eval` 下的编码结果不会变；
+- 机器人数据中同一任务文本会重复几千次，每个 batch 重跑 UMT5 没有信息收益；
+- `configs/model/ahawam.yaml` 默认 `load_text_encoder: false`，因而训练/部署不需要把这个大文本编码器常驻 GPU；
+- 从磁盘读一份 128×4096 的已编码张量，并在进程内做小型 LRU/字典缓存，比重复文本前向便宜。
+
+VLA 也不是“不需要文本编码”。很多 VLA 把 tokenizer/LLM/VLM 包在模型里在线前向，因为它们的语言主干要微调、prompt 高度多变，或需要让视觉 token 和文本 token 在同一 LLM 中联合演化。如果一个 VLA 也使用冻结、独立的文本 encoder，并且任务文本集合有限，它同样可以预计算。
+
+缓存只在以下前提下与在线编码等价：UMT5 权重、tokenizer、prompt 模板、`context_len` 和预处理都不变。如果要微调文本 encoder，旧 cache 不仅过期，还会切断到 encoder 的梯度，就不能用。
+
+部署封装因此提供三种模式：
+
+- `cache`：只允许已缓存的精确 prompt，可不加载 UMT5；
+- `online`：保留 UMT5，每条指令在线编码；
+- `hybrid`：命中则读 cache，未命中则在线编码并可回写。
+
+### 4.5 chunk 对齐观测：它与主视频降采样不是一回事
+
+每个 action chunk 开始时需要当时的最新图像和 proprio。无 offset 的简单例子中，若 $T_a=64,c=16$，chunk 起点为 `0,16,32,48`。若 64 个动作对应 8 个主视频 transition，每个 transition 有 8 个动作，则这四个时刻在降采样视频中是帧下标 `0,2,4,6`。
+
+但当前 SO101 启用了 action offset，loader 不强迫 chunk 观测落在 `0,4,8,...,48` 这些主视频帧上。它会预先向底层数据集申请所有可能的 chunk-start 原始图像。对某个已采样的 $\delta$，真正用的是
+
+$$
+\delta+[0,8,16,24,32].
+$$
+
+例如 $\delta=3$ 时，`chunk_obs_images` 来自原时间轴 `3,11,19,27,35`。这些图像分别给 5 个 action chunk 做 OVCR 条件。同一训练样本的主 Video DiT 监督 clip 仍然固定用 `0,4,...,48`。两者的职责不同：
+
+- `0,4,...,48`：低频未来视频生成/世界建模监督；
+- `delta+[0,8,...,32]`：每个动作块开始时的高频闭环观测。
+
+这些 chunk 图像各自经 VAE 变成 `[B,N,48,1,24,20]`，再经视觉投影和 query pooling 变成 OVCR 使用的观测 token。
+
+### 4.6 `video transition` 到底是什么
+
+`video transition` 只是**两张相邻的已采样 RGB 帧之间的时间区间**，不是 Video DiT 一次调用的输出，也不是一个 predicted latent。
+
+例如 13 张采样 RGB 有 12 个 transition：
+
+$$
+(0\to4),(4\to8),\ldots,(44\to48).
+$$
+
+每个 transition 跨过 4 个 15 Hz 控制区间，约 0.267 s。VAE 每 4 个这样的低频 transition 新增一个 latent 时间位置，因此 12 transitions 对应首 latent 之后的 3 个 latent 时间位置。这是时间计数与压缩关系，不代表 Video DiT 只做 3 次前向。
 
 ---
 
@@ -847,6 +963,30 @@ $$
 
 论文写“logit-normal noise time”，而本次检查的当前 scheduler 是“uniform $u$ + rational shift + time weight”。这是实现差异，不应把两者混写。
 
+### 9.7 训练时两个 DiT 要不要重复去噪？
+
+**当前主训练路径不做多步去噪 loop。**一个 minibatch/一个 optimizer step 中，代码对已知 GT 视频 latent 和 GT 动作分别采一个随机噪声时间，合成该时间点的带噪样本，然后让联合 MoT 主干做一次前向：
+
+$$
+\begin{aligned}
+z_{\sigma_v}&=(1-\sigma_v)z_0+\sigma_v\epsilon_v,\\
+a_{\sigma_a}&=(1-\sigma_a)a_0+\sigma_a\epsilon_a,\\
+(\hat v_v,\hat v_a)&=f_\theta(z_{\sigma_v},a_{\sigma_a},
+\sigma_v,\sigma_a,C),\\
+\mathcal L&=\|\hat v_v-(\epsilon_v-z_0)\|^2
++\|\hat v_a-(\epsilon_a-a_0)\|^2.
+\end{aligned}
+$$
+
+从统计上看，不同 batch 会抽到从接近干净到接近纯噪声的不同 $\sigma$，经过许多个 optimizer step 学到整条路径上的速度场。训练不需要把这个 batch 从噪声真正还原到 GT，因为 GT 已知，目标速度 $\epsilon-y$ 可直接计算。
+
+对“一次前向”需要两个限定：
+
+- 它指当前视频 clip 与当前 action window 穿过 30 层 Video/Action experts 的一次联合主前向，不是“只算一层”；
+- 启用 `num_history_frames>0` 时，历史观测还会先在 `no_grad` 下另做一次 Video DiT cache prefill。它是历史条件构建，不是对当前噪声样本反复去噪。
+
+Action 的 `per_chunk` 模式会让 5 个 chunk 抽到不同 $\sigma_a$，但仍是把整个 `[B,40,6]` 动作窗口一次送进主干，不是 5 个 chunk 各自跑一个训练去噪 loop。
+
 ---
 
 ## 10. horizon-adaptive offset training 到底做什么
@@ -940,7 +1080,43 @@ $$
 
 默认论文/部署常用 10 步。每步都必须重算 Action DiT Q/K/V，因为动作 latent 在变；planner K/V 在同一 chunk 内不变，可复用。
 
-### 12.3 当前 AHA 类不累计 action history K/V
+### 12.3 为什么推理要多次，训练却只要一次？
+
+推理时没有 GT $y_0$，只有初始噪声 $y_{\sigma_0}\sim\mathcal N(0,I)$。模型只能在“当前位置、当前时间”预测局部速度，因此要数值积分 ODE：
+
+$$
+y_{k+1}=y_k+(\sigma_{k+1}-\sigma_k)
+v_\theta(y_k,\sigma_k,C),
+\qquad \sigma_0=1>\cdots>\sigma_K=0.
+$$
+
+每更新一次 $y_k$，下一次都要在新位置重新问模型速度。所以多步不是“推理噪声比训练噪声更大”这一个原因，更准确地说，是训练在学速度场，推理在用这个速度场求一条从噪声到数据的轨迹。
+
+所以训练和推理的**网络函数与 flow 方向是一致的**，但**调用程序不一样**：训练用 GT 构造一个随机路径点来监督；生成推理则把同一网络当成 ODE 速度函数反复调用。而常规 AHA action 部署又进一步把未来视频生成省略了，只用 Video DiT 的 current-frame 表征缓存。
+
+步数越多通常积分误差越小，但延迟线性增长，而且并不保证在分布外观测上单调变好。当前动作设为 10 步，是速度与质量折中。
+
+#### 12.3.1 当前部署到底调用几次两个 DiT
+
+| 场景 | Video DiT | Action DiT | 输出 |
+|---|---:|---:|---|
+| 主训练的当前 clip/window | 1 次联合主前向 | 1 次联合主前向 | video/action flow 预测与 loss |
+| 普通在线 `phase="video"` | 1 次 current-frame prefill | 0 | 当前帧逐层 planner K/V |
+| 普通在线一个 `phase="action"` | 0 次完整 Video DiT；OVCR 仅改 cache | 10 次（当前 yaml） | `[8,6]` 动作块 |
+| 显式调用未来视频 preview | 20 次（当前 yaml） | 0 | 13 张 RGB，含已知当前帧 |
+
+上表的“Video DiT 1 次”是一次穿过完整 30 层的前向，不是一个 block。显式 preview 则初始化 4 个 latent 时间位置，把第一个覆盖为已知当前图像 latent，只让其余未来部分从噪声逐步改变：
+
+$$
+[z_{current},\epsilon_1,\epsilon_2,\epsilon_3]
+\xrightarrow{20\text{ steps}}
+[z_{current},\hat z_1,\hat z_2,\hat z_3]
+\xrightarrow{VAE\ decode}13\text{ RGB frames}.
+$$
+
+每一步 Video DiT 更新后代码都重新把第一 latent 覆盖为干净 `first_frame_latents`，保证已观测首帧不被去噪漂移。这个 preview 是诊断接口，普通 SO101 action server 不会在每个动作块前执行它。
+
+### 12.4 当前 AHA 类不累计 action history K/V
 
 基类具备“把已生成 clean action chunk 缓存给下一块”的设施，但 `AHAWAM._should_update_action_history()` 返回 `False`。当前 AHA 的 chunk 间依赖主要由：
 
@@ -951,7 +1127,7 @@ $$
 
 承担，而部署的逐块路径不保留已生成 action K/V。阅读基类时不要误把备用能力当成当前叶类行为。
 
-### 12.4 同步、单 GPU 异步和双 GPU 异步
+### 12.5 同步、单 GPU 异步和双 GPU 异步
 
 - 同步 policy：同一 Python 流中先 prefill，再逐 chunk action。
 - `AsyncAHAWAMRuntime`：一个运行时循环维护最新 video state 和动作请求，使用 latest-state buffer。
@@ -1007,7 +1183,29 @@ Action hidden               [B,40,1024]
 输出 flow                   [B,40,6]
 ```
 
-一个现实中的配置风险：当前训练文件把 `num_history_frames` 设为 6，而打开的在线部署设置把它改成 0。这样部署能够运行，但训练时学到的 rolling-memory 条件在部署时被移除，属于明确的 train–deploy distribution shift。是否关闭 history 应通过对照实验决定，而不是把两种设置当作等价。
+对一个具体的 $\delta=3$ 样本，四条时间轴可以对在一起看：
+
+| 用途 | 原始 15 Hz 索引 | 数量 | 解释 |
+|---|---|---:|---|
+| 完整 loader 窗口 | `0,1,...,48` | 49 时刻 | 覆盖 3.2 s |
+| 主 Video RGB | `0,4,8,...,48` | 13 帧 | 给 video flow 监督 |
+| action 监督 | `3,4,...,42` | 40 动作 | $A[3:43]$ |
+| chunk-start 图像/state | `3,11,19,27,35` | 5 组 | 给 5 个 chunk 的 OVCR/proprio |
+| VAE 主 clip latent 时间位置 | 对应原始 `0,16,32,48` | 4 | 能 decode 回上述 13 帧 RGB |
+
+最后一行的 `0,4,8,12` 是 Video RoPE 使用的 latent 时间 offset（单位是降采样视频时间），不是原始 15 Hz 下的四帧索引。它们来自原始索引 `0,16,32,48` 再除以 ratio 4。
+
+当前打开的训练配置与部署 yaml 均为 `num_history_frames: 6`，因此本次检查未发现该项的 train–deploy 不一致。但 checkpoint 所用 resolved config 仍应以该 run 目录的保存副本为准，不能用后来手工改过的部署 yaml 反推训练条件。
+
+### 13.3 训练 clip 长度与在线一次预测帧数不能直接画等号
+
+训练时 `num_frames=49` 意味着 loader 需要 49 个原始 15 Hz 时刻，主视频分支从中取 13 帧并编成 4 latent frames。它定义的是**训练监督 horizon**，不是说当前在线 Video DiT 每次都生成 49 帧或 13 帧。
+
+当前三种路径分别是：
+
+- **训练**：看 13 张采样 RGB，VAE 得到 4 latent frames，第一帧干净、未来部分加噪，一次主前向估计 flow loss。
+- **普通 action 部署**：Video DiT 只看当前实拍图，即 1 RGB $\to$ 1 latent frame $\to$ 120 video tokens，做 cache prefill；不生成未来视频。
+- **显式 future-video preview**：`preview_num_frames=13`，输出 13 张采样 RGB（含当前帧），在 `preview_fps=15/4=3.75` 下覆盖 $(13-1)/3.75=3.2$ s。这正好与训练主 video clip 的物理 horizon 对齐，但它是单独调用的诊断生成路径。
 
 ---
 
@@ -1084,7 +1282,7 @@ AHA-WAM 对插入任务潜在有价值的部分：
 1. 同一孔位发生 1–5 mm / 1–5° 偏差时，VAE latent 与 OVCR query 是否可区分；
 2. `chunk=8` 在 15 Hz 下约 0.53 s，是否长到在接触阶段来不及纠错；
 3. 腕相机在拼图中只有 $128\times160$，插口像素是否足够大；
-4. 训练有 history=6、部署 history=0 是否伤害成功率；
+4. checkpoint 的 resolved `num_history_frames` 是否与部署一致，以及 history=6 相对 history=0 是否真有收益；
 5. 10 步 Action DiT 延迟加机械臂通信后，真实闭环频率是多少；
 6. 动作 z-score 是否让少量精密动作维度被大范围粗移动统计量淹没。
 
@@ -1125,6 +1323,18 @@ AHA-WAM 对插入任务潜在有价值的部分：
 ### Q8：AHA-WAM 是不是强化学习算法？
 
 不是。当前核心训练是监督数据上的 video/action flow matching。以后可以加 RL，但那是额外的 post-training objective 或 critic/reward 结构。
+
+### Q9：文本 cache 是因为 DiT 不能直接读文字吗？
+
+不是。DiT 本来就不直接读 Python 字符串，它需要数值 context token。这些 token 既可以在线由 UMT5 计算，也可以在 UMT5 冻结时预计算后读 cache。当前仓库默认后者是为了节省重复计算和显存，不是模型理论要求。
+
+### Q10：两个 DiT 在推理时是不是都要去噪多次？
+
+对一个“同时真正生成未来视频和动作”的一般生成设想，两个生成变量都可以需要多步积分。但当前 AHA-WAM 的常规 SO101 部署没有这样做：Video DiT 对当前干净图做一次 prefill，Action DiT 才对每个动作块做 10 步去噪。只有显式 future-video preview 调用 Video DiT 的 20 步去噪。
+
+### Q11：`action_video_freq_ratio=4` 是不是规定部署时每 4 个动作才看一次图？
+
+不能这样理解。它首先规定训练主视频 clip 怎样从 15 Hz 时间轴降采样，并影响 video RoPE 时间尺度和 preview fps。在线简单 policy 中，每次生成 8 步 action chunk 都会使用当时最新的 chunk observation 做 OVCR；而完整 Video DiT planner cache 何时刷新是服务调度问题。同步 wrapper 在 5 个 chunk 用完后重新 prefill，异步/双 GPU runtime 则可以按更新的观测独立发布 planner state。
 
 ---
 
@@ -1219,6 +1429,21 @@ execute(denormalize(a))
 
 快：chunk 内生成与执行
     Action DiT 多步 flow 去噪 -> 短动作块 -> 机器人执行
+```
+
+对当前 SO101，再把具体数字压成一行：
+
+```text
+49 个 15-Hz 原始时刻(3.2 s)
+ -> 主视频监督 13 RGB
+ -> VAE 4 latent frames
+ -> 训练一次 video/action 联合 flow 前向；
+
+在线则是 1 张当前 RGB
+ -> Video DiT 一次 planner prefill
+ -> 每块最新 RGB/proprio 经 OVCR
+ -> Action DiT 10 步积分
+ -> 8×6 动作块(约 0.533 s)。
 ```
 
 Video DiT 的意义不是“必须把未来视频画出来”，而是通过未来视频监督学习一个有动态含义的视觉规划表征；OVCR 的意义不是替代 planner，而是让这份慢表征跟上最新闭环状态；Action DiT 的意义是把条件分布建模成连续 flow，在短 horizon 内生成协调动作。

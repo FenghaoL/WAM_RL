@@ -18,7 +18,7 @@ set -eo pipefail
 # ============================== 配置区 ======================================
 
 # 训练 run 的目录，里面要有 config.yaml 和 checkpoints/weights/
-RUN_DIR="runs/so101_ahawam_plug/full_zero2_offload_ahawam_base/formal-plug-ahawambase-zero2offload-bs4-acc1-4ep-3gpu-20260825-145746/model"
+RUN_DIR="runs/so101_ahawam_padapter_v2/full_zero2_offload_ahawam_base/formal-padapterv2-sft-ahawambase-bs4-acc1-4ep-3gpu-20260901-001743/model"
 
 # 打哪一批数据。改这一个词就行。
 #   train -> 用 $RUN_DIR/config.yaml 里的训练集目录
@@ -27,8 +27,7 @@ RUN_DIR="runs/so101_ahawam_plug/full_zero2_offload_ahawam_base/formal-plug-ahawa
 PRESET="train"
 
 VAL_DIRS=(
-  data/so101_ahawam_plug/04_full_remove_and_insert/20260825_142447_val
-  data/so101_ahawam_plug/04_full_remove_and_insert/20260825_142844_val
+  data/so101_ahawam_power_adapter_v2/04_full_remove_and_insert/20260831_225142_val
 )
 
 # 结果放哪。同一个 OUTPUT_ROOT 下的所有 run 共用一批评测窗口，
@@ -44,19 +43,18 @@ VAL_DIRS=(
 #   也就是机器人的真实初始状态（这种窗口没有历史，和在线部署刚开始时一致）。
 #   顺带也救回那些太短、原本会被整条跳过的 episode。
 if [ "$PRESET" = "val" ]; then
-  # 4 条留出 episode。stride=48 正好等于一个窗口的长度，所以窗口首尾相接、
-  # 无缝铺满整条 episode；再加上首/尾保留，等于把每条 episode 从初始状态一直
-  # 走到任务结束都过一遍。
-  OUTPUT_ROOT="runs/so101_ahawam_plug/baseline_experiments_val"
+  # 10 条留出 episode。stride=48 = 一个窗口的长度，窗口首尾相接铺满整条 episode；
+  # 再加首/尾保留，等于每条 episode 从初始状态一路走到任务结束都覆盖到。
+  OUTPUT_ROOT="runs/so101_ahawam_padapter_v2/baseline_experiments_val"
   DATASET_DIRS=("${VAL_DIRS[@]}")
-  NUM_SAMPLES=26
+  NUM_SAMPLES=41
   WINDOW_STRIDE=48
   PER_EPISODE_START=1
   PER_EPISODE_END=1
 else
-  OUTPUT_ROOT="runs/so101_ahawam_plug/baseline_experiments"
+  OUTPUT_ROOT="runs/so101_ahawam_padapter_v2/baseline_experiments"
   DATASET_DIRS=()
-  NUM_SAMPLES=24
+  NUM_SAMPLES=32
   WINDOW_STRIDE=48
   PER_EPISODE_START=0
   PER_EPISODE_END=0
@@ -64,20 +62,21 @@ fi
 
 # 给这一批 checkpoint 的输出目录加个前缀，避免和同名 step 撞车。
 # 例：前缀 "ahawambase_" + checkpoint "step_003440" -> 目录 ahawambase_step_003440
-NAME_PREFIX="plug_"
+NAME_PREFIX="padapterv2_"
 
 # 要评测哪些 checkpoint。写几个就跑几个，一张卡跑一个。
 #   - 只写 step 名  -> 自动到 $RUN_DIR/checkpoints/weights/<名>.pt 找
 #   - 写完整 .pt 路径 -> 直接用（可以是别的 run 的 checkpoint）
 #   - 写字面量 wan22-base -> 不加载任何 checkpoint，用 Wan2.2 官方原始权重当对照
 CHECKPOINTS=(
-  "step_002434"
-  "step_003651"
-  "step_004868"
+  "step_001332"
+  "step_002664"
+  "step_003996"
+  "step_005328"
 )
 
 # 用哪些卡（物理卡号）。写几张就并行几个 checkpoint，多出来的排队等。
-GPUS=(1 2 3)
+GPUS=(0 2 3)   # GPU1 被别的任务占满，只剩 2.8GB，跳过
 
 STEPS=20                             # 去噪步数
 SEED=42                              # 同一 seed 下各 checkpoint 拿到同一份初始噪声

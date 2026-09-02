@@ -236,11 +236,11 @@ speed_bin / path_length / max_tracking_error
 | chunk-KV editor | 1.23B | 将 chunk observation/query 写入视频 K/V，再供动作分支读取 |
 | VAE | 0.71B，冻结 | 图像/视频 latent 编解码 |
 
-来源见 [`baseline_video_experiments/README.md`](../scripts/so101_pipeline/baseline_video_experiments/README.md)。因此“只更新动作侧”在 AHA 中也可能是 2B 级别，并不等于训练一个几百万参数的小 head。
+来源见 [`baseline_video_experiments/README.md`](../../scripts/so101_pipeline/baseline_video_experiments/README.md)。因此“只更新动作侧”在 AHA 中也可能是 2B 级别，并不等于训练一个几百万参数的小 head。
 
 ### 4.2 ActionDiT 不是和视频解耦的独立策略
 
-在 [`mot.py`](../src/ahawam/models/wan22/mot.py) 的 `forward_prior_action_with_chunk_updated_kv` 中，每一层都会：
+在 [`mot.py`](../../src/ahawam/models/wan22/mot.py) 的 `forward_prior_action_with_chunk_updated_kv` 中，每一层都会：
 
 1. 用 VideoDiT block 产生 video K/V；
 2. 用 chunk query 和首帧 video K/V 构造 updated cache；
@@ -258,7 +258,7 @@ speed_bin / path_length / max_tracking_error
 
 ### 4.3 当前视频还不是反事实 simulator
 
-当前 [`configs/model/ahawam.yaml`](../configs/model/ahawam.yaml) 明确设置：
+当前 [`configs/model/ahawam.yaml`](../../configs/model/ahawam.yaml) 明确设置：
 
 ```yaml
 video_dit_config:
@@ -281,7 +281,7 @@ video_dit_config:
 
 ### 4.4 现有训练器已经支持一个有意义的 action-side baseline
 
-[`trainer.py`](../src/ahawam/trainer.py) 的 `freeze_video_dit=true` 会冻结 VideoDiT，但仍训练 MoT 中未冻结的 action/editor 路径，以及 proprio、视觉投影和 chunk query encoder。这个 baseline 是：
+[`trainer.py`](../../src/ahawam/trainer.py) 的 `freeze_video_dit=true` 会冻结 VideoDiT，但仍训练 MoT 中未冻结的 action/editor 路径，以及 proprio、视觉投影和 chunk query encoder。这个 baseline 是：
 
 > 固定世界表示，学习新的动作解码与视频—动作接口。
 

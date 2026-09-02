@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-HEADLINE = ["val_loss", "action_l2", "action_l1", "history_len"]
+HEADLINE = ["val_loss", "val_loss_action", "val_loss_video", "action_l2", "action_l1", "history_len"]
 
 
 def main() -> None:

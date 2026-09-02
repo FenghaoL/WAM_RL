@@ -3,7 +3,7 @@ set -eo pipefail
 # ============================================================================
 # SO101 full fine-tune, 4 epochs, tuned config for this box (4 x A100-40GB).
 # Derived from the 16-run sweep in scripts/so101_pipeline/tuning_bench/.
-# See docs/AHAWAM_ZERO2_TUNING_ZH.md for why each value is what it is.
+# See docs/training/AHAWAM_ZERO2_TUNING_ZH.md for why each value is what it is.
 #
 #   ACCUM=1  effective batch 16   ~8.0 h   lr 1e-5    (matches the ZeRO-3 baseline)
 #   ACCUM=2  effective batch 32   ~6.1 h   lr 1.4e-5  (default)

@@ -102,6 +102,21 @@ def main() -> None:
                 process_index=0,
             )
         row = {k: v for k, v in metrics.items() if isinstance(v, (int, float))}
+        # evaluate_validation keeps only val_*-prefixed entries from the loss dict,
+        # dropping the action/video split. Recompute it here: val_loss is their sum
+        # and late in training the video term dominates, so the total is a poor
+        # proxy for the action branch that actually drives the robot.
+        with torch.no_grad(), torch.autocast(device_type="cuda", dtype=torch.bfloat16):
+            _, loss_dict = model.training_loss(sample)
+        for key, value in (loss_dict or {}).items():
+            if isinstance(value, torch.Tensor):
+                if value.numel() != 1:
+                    continue
+                value = float(value.float().item())
+            if isinstance(value, (int, float)) and str(key) in {
+                "loss_action", "loss_video",
+            }:
+                row[f"val_{key}"] = float(value)
         row["index"] = index
         per_sample.append(row)
         print(f"[eval] {n+1}/{len(indices)} idx={index} "

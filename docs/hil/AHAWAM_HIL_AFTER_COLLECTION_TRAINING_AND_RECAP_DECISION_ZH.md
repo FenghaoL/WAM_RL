@@ -230,7 +230,7 @@ rich-v3 可以使用 raw，但必须遵循 [`SYSTEM_HOLD_TRAINING_HANDOFF_ZH.md`
 
 ### 4.2 当前源码已经实现什么
 
-[`ahawam.py`](../src/ahawam/models/wan22/ahawam.py) 的 `_compute_weighted_action_loss()` 生成 `[B,T]` 的逐 token MSE，并与 `action_is_pad` 相交。本轮 logical loader 在 HUMAN 边界处主动生成 pad mask，所以不必再让模型理解 collector 的 `control_source` 枚举；模型收到的所有非 pad correction action token 已经必然属于同一 HUMAN 段。video 侧另新增逐样本 `video_supervision_mask`，用于关闭短 correction 的直接 video loss。
+[`ahawam.py`](../../src/ahawam/models/wan22/ahawam.py) 的 `_compute_weighted_action_loss()` 生成 `[B,T]` 的逐 token MSE，并与 `action_is_pad` 相交。本轮 logical loader 在 HUMAN 边界处主动生成 pad mask，所以不必再让模型理解 collector 的 `control_source` 枚举；模型收到的所有非 pad correction action token 已经必然属于同一 HUMAN 段。video 侧另新增逐样本 `video_supervision_mask`，用于关闭短 correction 的直接 video loss。
 
 本轮已经实现第二条等价路线：
 
@@ -655,6 +655,6 @@ RoboCOIN-pretrained AHA-WAM
 
 - 数据字段、SYSTEM_HOLD 与 future mask：[`SYSTEM_HOLD_TRAINING_HANDOFF_ZH.md`](./SYSTEM_HOLD_TRAINING_HANDOFF_ZH.md)
 - 接管系统的实现背景：[`SO101_AHAWAM_HIL_DATA_COLLECTION_IMPLEMENTATION_HANDOFF_ZH.md`](./SO101_AHAWAM_HIL_DATA_COLLECTION_IMPLEMENTATION_HANDOFF_ZH.md)
-- π*0.6、HG、IWR 的前期实验规划：[`PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md`](./PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md)
-- AHA-WAM 数学与源码：[`AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md`](./AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md)
-- 更广的 RL 与 video/action 联合优化：[`AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md`](./AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md)
+- π*0.6、HG、IWR 的前期实验规划：[`PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md`](../research/PI06_RECAP_TO_SO101_PLUG_EXPERIMENT_PLAN_ZH.md)
+- AHA-WAM 数学与源码：[`AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md`](../architecture/AHAWAM_ARCHITECTURE_FROM_MATH_TO_CODE_ZH.md)
+- 更广的 RL 与 video/action 联合优化：[`AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md`](../research/AHAWAM_RL_SCOPE_AND_VIDEO_ACTION_COTRAINING_REVIEW_ZH.md)

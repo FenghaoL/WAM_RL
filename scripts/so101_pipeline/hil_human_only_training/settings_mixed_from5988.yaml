@@ -1,0 +1,154 @@
+# Shared settings for both 5-epoch HUMAN-only HIL experiments.
+# The two no-argument launchers set HIL_SAMPLING_STRATEGY to either `natural`
+# or `balanced_2_2`; the resolved value is saved in each run's config.yaml.
+base_task: robotwin_ahawam_offset
+
+output_dir: runs/so101_ahawam_plug_hil/mixed_from5988_zero2/manual
+batch_size: 4
+num_workers: 4
+learning_rate: 1.0e-5
+num_epochs: 1
+max_steps: null
+log_every: 1
+save_every: 1
+eval_every: 0
+eval_times_per_epoch: 4
+eval_num_inference_steps: 10
+eval_num_val_batches: 4
+eval_num_action_batches: 2
+save_at_end: false
+gradient_accumulation_steps: 1
+mixed_precision: bf16
+weight_decay: 1.0e-2
+freeze_video_dit: false
+# Exact 2:2 source batches and history-length batching both control batch
+# composition, so the latter is disabled for both experiments for comparability.
+history_aware_batching: false
+resume: null
+base_init_checkpoint: null
+# Continue from the BEST plug_all checkpoint (step 5988 held both the lowest
+# val_loss 0.2960 and the lowest action_l2 15.60 of that run), not from the
+# released pretrained base -- this is a short top-up, not a fresh finetune.
+init_checkpoint: runs/so101_ahawam_plug_all/full_zero2_offload_ahawam_base/formal-plugall-ahawambase-zero2offload-bs4-acc1-4ep-3gpu-20260827-020601/model/checkpoints/weights/step_005988.pt
+zero2_save_training_state: false
+
+wandb:
+  enabled: true
+  workspace: null
+  project: ahawam-so101-plug-hil
+  name: replaced-by-launcher
+  group: human-only-demo-plus-hgdagger-5ep
+  mode: online
+
+model:
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+  checkpoint_shape_adapt: true
+  mot_checkpoint_mixed_attn: true
+  action_horizon: 40
+  action_chunk_size: 8
+  max_action_offset: 7
+  num_history_frames: 6
+  video_rope_frame_stride: ${data.train.action_video_freq_ratio}
+
+data:
+  train: &mixed_dataset
+    _target_: scripts.so101_pipeline.hil_human_only_dataset.SO101DemoHumanCorrectionDataset
+    demo_dataset_dirs:
+      - data/so101_ahawam_plug/02_grasp_move_and_align/20260826_171857
+      - data/so101_ahawam_plug/02_grasp_move_and_align/20260827_010623
+      - data/so101_ahawam_plug/02_grasp_move_and_align/20260827_013826
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_003309
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_003802
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_104920
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_112744
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_130421
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_135107
+    correction_dataset_dirs:
+      - data/ahawam_hil_raw/so101_ahawam_power_adapter_hil_v1/20260829_004417
+      - data/ahawam_hil_raw/so101_ahawam_power_adapter_hil_v1/20260829_110214
+      - data/ahawam_hil_raw/so101_ahawam_power_adapter_hil_v1/20260829_112454
+      - data/ahawam_hil_raw/so101_ahawam_power_adapter_hil_v1/20260829_155403
+    sampling_strategy: natural
+    # A 49-frame segment contains the current frame plus all 48 future raw
+    # frames required by the 13-frame sampled video target.
+    video_supervision_min_segment_frames: 49
+    shape_meta:
+      images:
+        - key: fixed
+          raw_shape: [3, 480, 480]
+          shape: [3, 240, 320]
+        - key: wrist
+          raw_shape: [3, 480, 640]
+          shape: [3, 240, 320]
+      action:
+        - key: default
+          raw_shape: 6
+          shape: 6
+      state:
+        - key: default
+          raw_shape: 6
+          shape: 6
+    num_frames: 49
+    global_sample_stride: 1
+    action_video_freq_ratio: 4
+    video_size: [384, 320]
+    camera_key: null
+    val_set_proportion: 0.0
+    is_training_set: true
+    # Deliberately fixed across both runs: same SO101 joint coordinate system as
+    # D0 and the deployed reference checkpoint. A combined-stats run is a
+    # separate ablation, not silently folded into this comparison.
+    pretrained_norm_stats: runs/so101_ahawam_plug_all/assets/dataset_stats.json
+    skip_padding_as_possible: false
+    concat_multi_camera: so101
+    text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
+    video_latent_cache_dir: null
+    context_len: 128
+    max_action_offset: ${model.max_action_offset}
+    action_chunk_size: ${model.action_chunk_size}
+    action_horizon: ${model.action_horizon}
+    processor:
+      _target_: ahawam.datasets.lerobot.processors.ahawam_processor.AHAWAMProcessor
+      shape_meta: ${data.train.shape_meta}
+      num_obs_steps: ${data.train.num_frames}
+      num_output_cameras: 2
+      action_output_dim: 6
+      proprio_output_dim: 6
+      action_state_transforms: null
+      use_stepwise_action_norm: false
+      norm_default_mode: z-score
+      norm_exception_mode: null
+      action_state_merger:
+        _target_: ahawam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+      train_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size: [240, 320]
+      val_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size: [240, 320]
+  val:
+    _target_: scripts.so101_pipeline.so101_dataset.SO101RobotVideoDataset
+    dataset_dirs:
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_142447_val
+      - data/so101_ahawam_plug/04_full_remove_and_insert/20260825_142844_val
+    shape_meta: ${data.train.shape_meta}
+    num_frames: ${data.train.num_frames}
+    global_sample_stride: ${data.train.global_sample_stride}
+    action_video_freq_ratio: ${data.train.action_video_freq_ratio}
+    video_size: ${data.train.video_size}
+    camera_key: null
+    val_set_proportion: 0.0
+    is_training_set: false
+    pretrained_norm_stats: ${data.train.pretrained_norm_stats}
+    skip_padding_as_possible: false
+    concat_multi_camera: so101
+    text_embedding_cache_dir: ${data.train.text_embedding_cache_dir}
+    video_latent_cache_dir: null
+    context_len: ${data.train.context_len}
+    max_action_offset: ${model.max_action_offset}
+    action_chunk_size: ${model.action_chunk_size}
+    action_horizon: ${model.action_horizon}
+    processor: ${data.train.processor}
