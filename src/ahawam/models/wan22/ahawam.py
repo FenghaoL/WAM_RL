@@ -694,6 +694,12 @@ class AHAWAM(AHAWAMChunkBase):
     def training_loss(
         self, sample: dict[str, Any], tiled: bool = False
     ) -> tuple[torch.Tensor, dict[str, float]]:
+        from .ovcr_adapter import training_loss_with_anchor
+        return training_loss_with_anchor(self, sample, self._training_loss_impl, tiled)
+
+    def _training_loss_impl(
+        self, sample: dict[str, Any], tiled: bool = False
+    ) -> tuple[torch.Tensor, dict[str, float]]:
         inputs = self.build_inputs(sample, tiled=tiled)
         if self._has_action_offset(sample):
             return self._training_loss_action_offset(sample, inputs=inputs, tiled=tiled)
@@ -1259,6 +1265,8 @@ class AHAWAM(AHAWAMChunkBase):
         timestep_action: torch.Tensor,
         action_is_pad: torch.Tensor | None,
     ) -> torch.Tensor:
+        from .ovcr_adapter import capture_anchor_flow
+        capture_anchor_flow(self, pred_action, action_is_pad)
         action_loss_token = F.mse_loss(
             pred_action.float(), target_action.float(), reduction="none"
         ).mean(dim=2)

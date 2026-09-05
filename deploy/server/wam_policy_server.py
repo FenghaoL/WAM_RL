@@ -585,6 +585,11 @@ class AsyncPolicyBackend:
         # Load policy in-process (async needs direct model access)
         self.adapter = WAMPolicyAdapter(args)
         self.policy = self.adapter.policy
+        # Two TCP connections are required so image pushes continue while an
+        # action request blocks.  Their preprocessing touches the same policy
+        # scratch observation, so make the small conversion/readback section
+        # atomic without serializing the actual GPU worker.
+        self._preprocess_lock = threading.Lock()
 
         # Load async timing config if available
         import yaml as _yaml
@@ -608,6 +613,13 @@ class AsyncPolicyBackend:
         """Dispatch based on message type."""
         msg_type = request.get("type")
 
+        if msg_type == "health":
+            return {
+                "ok": True,
+                "type": "health",
+                "async_mode": True,
+                **self.adapter.metadata(),
+            }
         if msg_type == "reset":
             return self._handle_reset(request)
         elif msg_type == "image":
@@ -628,16 +640,18 @@ class AsyncPolicyBackend:
         if instruction:
             self.adapter._apply_instruction(instruction)
 
-        # Reset runtime (clears state, history, queues)
+        # Stop first. Resetting policy/history while the GPU thread is still in
+        # a video prefill can corrupt the episode or create two CUDA workers.
         prompt = instruction or self.adapter.instruction
+        was_started = self._async_started
+        if was_started:
+            self.runtime.stop()
         self.runtime.reset(prompt=prompt)
 
         # Also reset the adapter state
         self.adapter.reset(instruction=instruction)
 
-        if self._async_started:
-            # Restart GPU loop with new prompt
-            self.runtime.stop()
+        if was_started:
             self.runtime.start(prompt=prompt)
 
         logger.info("AsyncPolicyBackend reset (instruction=%r)", instruction)
@@ -646,9 +660,10 @@ class AsyncPolicyBackend:
     def _handle_image(self, request):
         """Push image for async video prefill."""
         images = request.get("images", {})
-        front = images.get("front")
-        if front is None:
-            return {"ok": False, "error": "image request must contain images['front']"}
+        try:
+            front = self.policy.prepare_camera_images(images)
+        except Exception as exc:
+            return {"ok": False, "error": f"invalid image request: {exc}"}
 
         # Start runtime on first image if not started
         if not self._async_started:
@@ -658,9 +673,11 @@ class AsyncPolicyBackend:
 
         # Preprocess image same way as adapter
         front = np.asarray(front, dtype=np.uint8)
-        img_arr = [front]
-        self.policy.update_observation_window(img_arr, np.zeros(self.args.action_dim, dtype=np.float32))
-        image_tensor = self.policy._observation["image_tensor"]
+        with self._preprocess_lock:
+            self.policy.update_observation_window(
+                [front], np.zeros(self.args.action_dim, dtype=np.float32)
+            )
+            image_tensor = self.policy._observation["image_tensor"]
 
         queued = self.runtime.push_image(image_tensor)
         return {"ok": True, "type": "image_ack", "queued": queued}
@@ -668,11 +685,14 @@ class AsyncPolicyBackend:
     def _handle_action_request(self, request):
         """Request an action chunk using latest video inference state."""
         images = request.get("images", {})
-        front = images.get("front")
         state = request.get("state")
 
-        if front is None or state is None:
-            return {"ok": False, "error": "action_request must contain images['front'] and state"}
+        if state is None:
+            return {"ok": False, "error": "action_request must contain state"}
+        try:
+            front = self.policy.prepare_camera_images(images)
+        except Exception as exc:
+            return {"ok": False, "error": f"invalid action_request images: {exc}"}
 
         if not self._async_started:
             return {"ok": False, "error": "async runtime not started; send an image first"}
@@ -684,10 +704,15 @@ class AsyncPolicyBackend:
         # Preprocess
         front = np.asarray(front, dtype=np.uint8)
         state = np.asarray(state, dtype=np.float32).reshape(-1)
-        img_arr = [front]
-        self.policy.update_observation_window(img_arr, state)
-        image_tensor = self.policy._observation["image_tensor"]
-        proprio = self.policy._normalize_state(state)
+        if state.shape[0] != self.args.action_dim:
+            return {
+                "ok": False,
+                "error": f"state dim must be {self.args.action_dim}, got {state.shape[0]}",
+            }
+        with self._preprocess_lock:
+            self.policy.update_observation_window([front], state)
+            image_tensor = self.policy._observation["image_tensor"]
+            proprio = self.policy._normalize_state(state)
 
         # Submit action request and wait for result
         self.runtime.request_action(image_tensor, proprio)
@@ -706,6 +731,7 @@ class AsyncPolicyBackend:
             "action_chunk": action_chunk,
             "model_latency_ms": result.latency_ms,
             "kv_version": result.kv_version,
+            "kv_age_ms": result.kv_age_ms,
         }
 
     def _handle_config(self, request):
@@ -1319,7 +1345,13 @@ class Server:
 
     def _handle_connection(self, conn, addr):
         logger.info("Client connected: %s", addr)
-        if not getattr(self.args, "dual_gpu_async", False):
+        # Async serving intentionally uses separate image and action sockets.
+        # Resetting on either connection would erase the other channel's KV
+        # state; async clients issue one explicit reset at episode start.
+        if not (
+            getattr(self.args, "dual_gpu_async", False)
+            or getattr(self.args, "async_mode", False)
+        ):
             reset_reply = self.backend.reset()
             if not reset_reply.get("ok", False):
                 logger.warning("Policy reset on client connection failed: %s", reset_reply)

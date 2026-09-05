@@ -198,6 +198,8 @@ def create_ahawam(
     checkpoint_shape_adapt: bool = False,
     model_dtype: torch.dtype = torch.bfloat16,
     device: str = "cuda",
+    ovcr_adapter=None,
+    ovcr_anchor_weight: float = 0.0,
 ):
     from .models.wan22.ahawam import (
         AHAWAM,
@@ -301,6 +303,14 @@ def create_ahawam(
         )
     model.max_action_offset = max_action_offset
     model.checkpoint_shape_adapt = bool(checkpoint_shape_adapt)
+    if ovcr_adapter is not None:
+        from .models.wan22.ovcr_adapter import configure_adapter
+        if isinstance(ovcr_adapter, DictConfig):
+            ovcr_adapter = OmegaConf.to_container(ovcr_adapter, resolve=True)
+        configure_adapter(model.mot.chunk_kv_cache_editor, ovcr_adapter)
+    if float(ovcr_anchor_weight) < 0:
+        raise ValueError("ovcr_anchor_weight must be nonnegative")
+    model.ovcr_anchor_weight = float(ovcr_anchor_weight)
     return model
 
 

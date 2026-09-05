@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Action-only online service. Edit these simple defaults when needed.
+# Synchronous 10-step service used for rich-v3 HIL/DAgger collection.
 DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/settings.yaml"
-INSTRUCTION="Pick up the white block."
+INSTRUCTION="Remove the power adapter from the holder and plug it into the power strip."
 GPU_ID=3
 # Keep pickle TCP private. The robot computer should connect through an SSH
 # tunnel; see online_deploy/README.md.

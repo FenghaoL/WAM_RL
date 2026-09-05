@@ -1,0 +1,138 @@
+# Plain SFT on so101_ahawam_cylinder_insertion_v1, from the released AHA-WAM
+# pretrained weights, 4 epochs, 3 GPUs.
+# The raw capture ships per-frame PNGs; videos must be encoded by
+# data/.../\_server_tools/finalize_on_server.sh before this config can load.
+# Task text is new for this repo, so its T5 embedding must be precomputed.
+output_dir: runs/so101_ahawam_cylinder_v1/full_zero2_offload_ahawam_base/manual
+batch_size: 4
+num_workers: 4
+learning_rate: 1.0e-5
+num_epochs: 4
+max_steps: null
+log_every: 1
+save_every: 1
+# eval_every is derived from steps_per_epoch by train_entry.py using
+# eval_times_per_epoch below; this literal is only a fallback.
+eval_every: 0
+eval_times_per_epoch: 4
+eval_num_inference_steps: 10
+# Averaged validation loss is computed over a FIXED, evenly-strided subset of the
+# val set so the curve is comparable across steps. Per rank; 4 ranks -> 4x this many.
+eval_num_val_batches: 8
+# Action error needs a full infer() per sample (~4 s), so it is averaged over a
+# smaller slice than the loss. Per rank; 4 ranks -> 4x this many.
+# NOTE: AHAWAM.infer returns actions only (no video), so there are no PSNR/SSIM
+# metrics for this model -- action_l1/action_l2 are the generation-quality numbers.
+eval_num_action_batches: 4
+save_at_end: false
+gradient_accumulation_steps: 1
+mixed_precision: bf16
+weight_decay: 1.0e-2
+freeze_video_dit: false
+resume: null
+# Single-stage initialization: the released AHA-WAM pretrained checkpoint is the
+# whole base. `base_init_checkpoint` stays null so no overlay is applied -- see
+# Zero2WeightOnlyTrainer._load_weights_before_prepare.
+base_init_checkpoint: null
+init_checkpoint: checkpoints/AHA-WAM-Pretrained/AHA-WAM-pretrained.pt
+
+# ZeRO-2 optimizer state is about 47 GiB per checkpoint on this model. The
+# formal run saves deployable weights only; enable this only for exact resume.
+zero2_save_training_state: false
+
+wandb:
+  enabled: true
+  workspace: null
+  project: ahawam-so101-cylinder-v1
+  name: so101-cylinder-v1-sft-4ep
+  group: cylinder-v1-sft-ahawam-pretrained-init
+  mode: online
+
+model:
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+  checkpoint_shape_adapt: true
+  mot_checkpoint_mixed_attn: true
+  action_horizon: 40
+  action_chunk_size: 8
+  max_action_offset: 7
+  num_history_frames: 6
+  video_rope_frame_stride: ${data.train.action_video_freq_ratio}
+
+data:
+  train: &so101_dataset
+    _target_: scripts.so101_pipeline.so101_dataset.SO101RobotVideoDataset
+    dataset_dirs:
+      - data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_014410
+      - data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_020841
+      - data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_023259
+      - data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_024404
+    shape_meta:
+      images:
+        - key: fixed
+          raw_shape: [3, 480, 480]
+          shape: [3, 240, 320]
+        - key: wrist
+          raw_shape: [3, 480, 640]
+          shape: [3, 240, 320]
+      action:
+        - key: default
+          raw_shape: 6
+          shape: 6
+      state:
+        - key: default
+          raw_shape: 6
+          shape: 6
+    num_frames: 49
+    global_sample_stride: 1
+    action_video_freq_ratio: 4
+    video_size: [384, 320]
+    camera_key: null
+    # 0 = use every training episode. A positive value re-splits each dir and
+    # int(n * 0.95) rounds a single-episode dir down to ZERO training episodes,
+    # which crashes with "Empty 'data_files': []". The held-out set lives in the
+    # *_val dirs below, so no internal holdout is needed.
+    val_set_proportion: 0.0
+    is_training_set: true
+    pretrained_norm_stats: runs/so101_ahawam_cylinder_v1/assets/dataset_stats.json
+    skip_padding_as_possible: false
+    concat_multi_camera: so101
+    text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache  # reused: same 2 prompts, cache keyed by prompt sha256
+    video_latent_cache_dir: null
+    context_len: 128
+    max_action_offset: ${model.max_action_offset}
+    action_chunk_size: ${model.action_chunk_size}
+    action_horizon: ${model.action_horizon}
+    processor:
+      _target_: ahawam.datasets.lerobot.processors.ahawam_processor.AHAWAMProcessor
+      shape_meta: ${data.train.shape_meta}
+      num_obs_steps: ${data.train.num_frames}
+      num_output_cameras: 2
+      action_output_dim: 6
+      proprio_output_dim: 6
+      action_state_transforms: null
+      use_stepwise_action_norm: false
+      norm_default_mode: z-score
+      norm_exception_mode: null
+      action_state_merger:
+        _target_: ahawam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+      train_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size: [240, 320]
+      val_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size: [240, 320]
+  val:
+    <<: *so101_dataset
+    # Held-out recordings, never seen during training.
+    dataset_dirs:
+      - data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_024009_val
+    is_training_set: false
+    # 0 => use every episode in the dirs above (see base_lerobot_dataset.py:100).
+    # Any positive value would re-split these dirs and silently drop most of them.
+    val_set_proportion: 0.0
+    # Must reuse the TRAINING normalisation stats, otherwise val loss is not
+    # comparable to train loss.
+    pretrained_norm_stats: runs/so101_ahawam_cylinder_v1/assets/dataset_stats.json

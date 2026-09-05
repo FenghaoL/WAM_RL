@@ -1788,6 +1788,9 @@ class AHAWAMChunkBase(BaseWAM):
             "step": step,
             "torch_dtype": str(self.torch_dtype),
         }
+        adapter = getattr(self.mot.chunk_kv_cache_editor, "adapter", None)
+        if adapter is not None:
+            payload["ovcr_adapter_config"] = adapter.config
         if self.proprio_encoder is not None:
             payload["proprio_encoder"] = self.proprio_encoder.state_dict()
         payload["action_obs_visual_proj"] = action_obs_visual_proj.state_dict()
@@ -1803,6 +1806,31 @@ class AHAWAMChunkBase(BaseWAM):
                 "`action_obs_visual_proj` must be initialized before loading a checkpoint."
             )
         payload = torch.load(path, map_location="cpu")
+        adapter_config = payload.get("ovcr_adapter_config")
+        if adapter_config is not None:
+            from .ovcr_adapter import configure_adapter
+            editor = self.mot.chunk_kv_cache_editor
+            adapter = getattr(editor, "adapter", None)
+            if adapter is None:
+                adapter = configure_adapter(editor, adapter_config)
+            elif adapter.config != adapter_config:
+                raise ValueError("Checkpoint OVCR adapter config differs from instantiated adapter")
+            prefix = "chunk_kv_cache_editor.adapter."
+            # Never silently drop partial/shape-mismatched adapter weights via
+            # the legacy base-model compatibility loader below.
+            adapter.load_state_dict({key[len(prefix):]: value for key, value in payload.get("mot", {}).items()
+                                     if key.startswith(prefix)}, strict=True)
+        elif any(".adapter." in key for key in payload.get("mot", {})):
+            raise ValueError("Adapter weights require ovcr_adapter_config metadata")
+        else:
+            # Loading a plain P0 into an already-adapted instance must not retain
+            # the previous policy's correction. Freshly configured adapters are
+            # already zero here, so the normal training initialization is unchanged.
+            adapter = getattr(self.mot.chunk_kv_cache_editor, "adapter", None)
+            if adapter is not None:
+                for block in adapter.blocks.values():
+                    nn.init.zeros_(block.up.weight)
+                    nn.init.zeros_(block.up.bias)
         adapt_shapes = bool(getattr(self, "checkpoint_shape_adapt", False))
         if "mot" in payload:
             if "action_branch_embedding" in payload["mot"]:

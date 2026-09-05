@@ -1,0 +1,41 @@
+# SO101 power-adapter-v2 AHA-WAM-Flash ODE distillation.
+#
+# The trainer state JSON is metadata only.  The actual teacher is the adjacent
+# weights/step_005328.pt file, and source_model_config reconstructs the exact
+# 6-D SO101 architecture and data pipeline used to train that teacher.
+source_trainer_state: runs/so101_ahawam_padapter_v2/full_zero2_offload_ahawam_base/formal-padapterv2-sft-ahawambase-bs4-acc1-4ep-3gpu-20260901-001743/model/checkpoints/step_005328_trainer_state.json
+source_model_config: runs/so101_ahawam_padapter_v2/full_zero2_offload_ahawam_base/formal-padapterv2-sft-ahawambase-bs4-acc1-4ep-3gpu-20260901-001743/model/config.yaml
+teacher_checkpoint: runs/so101_ahawam_padapter_v2/full_zero2_offload_ahawam_base/formal-padapterv2-sft-ahawambase-bs4-acc1-4ep-3gpu-20260901-001743/model/checkpoints/weights/step_005328.pt
+
+distillation:
+  teacher_num_inference_steps: 16
+  teacher_capture_step_indices: [0, 1, 2, 4, 8, 12, 16]
+  teacher_sigma_shift: null
+  student_capture_timestep_mode: per_chunk
+  student_default_action_inference_steps: 2
+
+# Official robotwin_ahawam_ode uses lr=2e-5 and five epochs.  The local
+# micro-batch is reduced to one because each rank holds a frozen teacher and a
+# student.  2 GPUs x 1 x grad-accum 8 gives an effective batch of 16.
+training:
+  batch_size: 1
+  num_workers: 2
+  gradient_accumulation_steps: 8
+  num_epochs: 5
+  learning_rate: 2.0e-5
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.05
+  weight_decay: 1.0e-2
+  max_grad_norm: 1.0
+  mixed_precision: bf16
+  log_every: 1
+  eval_times_per_epoch: 1
+  save_every_epochs: 1
+  seed: 42
+
+wandb:
+  enabled: true
+  project: ahawam-so101-padapter-v2-flash
+  group: ode2-distill-from-step005328
+  mode: offline
+

@@ -1,0 +1,7 @@
+# Single-GPU runtime is priority-scheduled but cannot interrupt a Video-DiT
+# kernel already in flight.  The measured 2 Hz smoke test kept state age below
+# 0.5 s, so 2 s permits several delayed frames while still failing closed when
+# the planner/image stream has actually stopped.
+action_priority: true
+max_video_kv_staleness_ms: 2000
+stop_join_timeout_s: 300

@@ -8,7 +8,7 @@
 | 文件 | 作用 |
 | --- | --- |
 | `settings.yaml` | checkpoint、stats、模型形状和视频参数，主要配置文件 |
-| `run_action_server.sh` | GPU 0、端口 12000，只返回动作，正常控制使用 |
+| `run_action_server.sh` | GPU 3、端口 12000，只返回动作，当前同步 DAgger 采集使用 |
 | `run_video_server.sh` | GPU 0、端口 12001，可同时返回动作和未来视频 |
 | `ahawam_tcp_client.py` | 机械臂端客户端、关节坐标转换和双相机拼接 |
 | `deployment_preflight.py` | 服务启动前检查 checkpoint、stats 和配置 |
@@ -21,9 +21,9 @@
 编辑 `settings.yaml`，最常改的是：
 
 ```yaml
-checkpoint_path: runs/.../step_xxxxxx.pt
-dataset_stats_path: runs/so101_g05_square_v1/assets/dataset_stats.json
-text_embedding_cache_dir: data/so101_g05_square_v1_text_embeds_cache
+checkpoint_path: runs/.../weights/step_005328.pt
+dataset_stats_path: runs/so101_ahawam_padapter_v2/assets/dataset_stats.json
+text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
 ```
 
 checkpoint 的模型形状必须与 `hydra_patch` 一致。当前是 SO101 6D、动作 horizon 40、
@@ -43,7 +43,8 @@ bash scripts/so101_pipeline/online_deploy/run_action_server.sh
 bash scripts/so101_pipeline/online_deploy/run_video_server.sh
 ```
 
-两个脚本默认都使用 GPU 0，不要同时启动。服务只监听 `127.0.0.1`，Windows 端通过
+动作脚本当前使用 GPU 3，视频脚本的 GPU 设置以其文件为准，不要同时启动。服务只监听
+`127.0.0.1`，Windows 端通过
 SSH 隧道访问，例如动作端口：
 
 ```powershell
@@ -60,7 +61,7 @@ ssh -N -L 12000:127.0.0.1:12000 fenghao@chickadee.engin.umich.edu
 ```python
 {
     "type": "infer",
-    "instruction": "Pick up the white block.",
+    "instruction": "Remove the power adapter from the holder and plug it into the power strip.",
     "state": np.ndarray((6,), np.float32),
     "images": {
         "fixed": np.ndarray((H, W, 3), np.uint8),

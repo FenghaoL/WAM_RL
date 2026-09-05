@@ -36,6 +36,8 @@ class LayerwiseChunkKVCacheEditor(nn.Module):
         self.attn_hidden_dim = int(attn_hidden_dim)
         self.use_delta_gate = bool(use_delta_gate)
         self.head_dim = self.attn_hidden_dim // self.num_heads
+        # Optional post-training module; absent in original checkpoints.
+        self.adapter = None
         self.layer_query_proj = nn.ModuleList(
             [
                 nn.Sequential(
@@ -95,6 +97,8 @@ class LayerwiseChunkKVCacheEditor(nn.Module):
             device=query_proj_weight.device,
             dtype=query_proj_weight.dtype,
         )
+        if self.adapter is not None:
+            chunk_queries = self.adapter.edit_queries(layer_idx, chunk_queries)
         batch_size, num_chunks, num_queries, _ = chunk_queries.shape
         first_frame_tokens = int(first_frame_keys.shape[1])
         query = self.layer_query_proj[layer_idx](chunk_queries).view(
@@ -136,6 +140,12 @@ class LayerwiseChunkKVCacheEditor(nn.Module):
         else:
             updated_k = base_k + delta_k
             updated_v = base_v + delta_v
+        if self.adapter is not None:
+            updated_k, updated_v = self.adapter.edit_cache(
+                layer_idx, chunk_queries,
+                routed.reshape(batch_size, num_chunks, num_queries, self.attn_hidden_dim),
+                decoded, updated_k, updated_v,
+            )
         return {
             "k": updated_k,
             "v": updated_v,

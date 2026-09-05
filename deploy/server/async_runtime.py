@@ -41,6 +41,7 @@ class ActionResult:
     """Result of an action chunk inference."""
     action_chunk: np.ndarray
     kv_version: int
+    kv_age_ms: float
     latency_ms: float
     timestamp: float = field(default_factory=time.perf_counter)
 
@@ -145,6 +146,7 @@ class AsyncAHAWAMRuntime:
         # Config
         self._action_priority = config.get("action_priority", True)
         self._max_staleness_ms = config.get("max_video_kv_staleness_ms", 500.0)
+        self._stop_join_timeout_s = float(config.get("stop_join_timeout_s", 300.0))
 
         # Stats
         self._stats = {
@@ -188,7 +190,13 @@ class AsyncAHAWAMRuntime:
         with self._condition:
             self._condition.notify_all()
         if self._gpu_thread is not None:
-            self._gpu_thread.join(timeout=5.0)
+            self._gpu_thread.join(timeout=self._stop_join_timeout_s)
+            if self._gpu_thread.is_alive():
+                raise RuntimeError(
+                    "Async GPU thread did not stop within "
+                    f"{self._stop_join_timeout_s:.1f}s. Refusing to start a second "
+                    "thread that could concurrently mutate the same CUDA model."
+                )
             self._gpu_thread = None
         logger.info(
             "AsyncAHAWAMRuntime stopped. Stats: %s", self._stats
@@ -347,6 +355,7 @@ class AsyncAHAWAMRuntime:
         result = ActionResult(
             action_chunk=action_chunk,
             kv_version=version,
+            kv_age_ms=staleness_ms,
             latency_ms=latency_ms,
         )
 
@@ -389,7 +398,12 @@ class AsyncAHAWAMRuntime:
         # Run video prefill
         t0 = time.perf_counter()
         try:
-            state = self._policy.prefill_video_only(image_tensor, self._prompt)
+            # ``self._prompt`` is the raw task instruction used for runtime
+            # bookkeeping.  AHAWAMPolicy.prefill_video_only(prompt=...) treats
+            # a non-None value as an already formatted model prompt.  Let the
+            # policy format its current instruction with DEFAULT_PROMPT so the
+            # lookup exactly matches the embeddings produced during training.
+            state = self._policy.prefill_video_only(image_tensor, prompt=None)
         except Exception:
             logger.exception("Video prefill failed!")
             return True
@@ -419,7 +433,6 @@ class AsyncAHAWAMRuntime:
         if self._running:
             raise RuntimeError("Cannot calibrate while runtime is running. Call stop() first.")
 
-        prompt = self._prompt or "calibration"
         video_times = []
         action_times = []
 
@@ -428,7 +441,7 @@ class AsyncAHAWAMRuntime:
 
             torch.cuda.synchronize()
             t0 = time.perf_counter()
-            state = self._policy.prefill_video_only(image_tensor, prompt)
+            state = self._policy.prefill_video_only(image_tensor, prompt=None)
             torch.cuda.synchronize()
             video_times.append((time.perf_counter() - t0) * 1000.0)
 

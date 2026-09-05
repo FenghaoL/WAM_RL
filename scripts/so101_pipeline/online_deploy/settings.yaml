@@ -1,7 +1,8 @@
-# Final SO101 G05 square-task deployment configuration.
-# 000860 001720 002580 003440
-checkpoint_path: runs/so101_ahawam_plug_hil/mixed_scratch_zero2/formal-mixed-scratch-demo-plus-dagger-bs4-4ep-3gpu-20260831-004343/model/checkpoints/weights/step_011036.pt
-dataset_stats_path: runs/so101_ahawam_plug_all/assets/dataset_stats.json
+# Synchronous rich-v3 DAgger collection policy: four-epoch power-adapter SFT.
+# The adjacent trainer-state JSON is metadata only. Deployment must load the
+# weights file below and keep 10-step inference for this non-distilled model.
+checkpoint_path: runs/so101_ahawam_padapter_v2/full_zero2_offload_ahawam_base/formal-padapterv2-sft-ahawambase-bs4-acc1-4ep-3gpu-20260901-001743/model/checkpoints/weights/step_005328.pt
+dataset_stats_path: runs/so101_ahawam_padapter_v2/assets/dataset_stats.json
 text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
 load_text_encoder: false
 project_root: .

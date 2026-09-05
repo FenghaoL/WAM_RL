@@ -34,6 +34,23 @@ def make_dummy_state(action_dim: int) -> np.ndarray:
     return np.zeros(action_dim, dtype=np.float32)
 
 
+def make_dummy_images(args: argparse.Namespace) -> dict[str, np.ndarray]:
+    """Build either a pre-composed frame or the SO101 raw-camera payload."""
+    if args.camera_payload == "front":
+        return {
+            "front": make_dummy_image(
+                args.image_height,
+                args.image_width,
+                args.image_mode,
+                args.seed,
+            )
+        }
+    return {
+        "fixed": make_dummy_image(480, 480, args.image_mode, args.seed),
+        "wrist": make_dummy_image(480, 640, args.image_mode, args.seed + 1),
+    }
+
+
 def connect(host: str, port: int, timeout_s: float) -> socket.socket:
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -45,7 +62,7 @@ def connect(host: str, port: int, timeout_s: float) -> socket.socket:
 def image_push_loop(args: argparse.Namespace, stop_event: threading.Event, stats: dict[str, int]) -> None:
     """Push latest camera frames on a dedicated TCP connection."""
     interval = 1.0 / args.image_push_fps
-    image = make_dummy_image(args.image_height, args.image_width, args.image_mode, args.seed)
+    images = make_dummy_images(args)
     pushed = 0
 
     try:
@@ -60,7 +77,7 @@ def image_push_loop(args: argparse.Namespace, stop_event: threading.Event, stats
             t0 = time.perf_counter()
             message = {
                 "type": "image",
-                "images": {"front": image},
+                "images": images,
                 "timestamp": time.time(),
             }
             try:
@@ -93,7 +110,7 @@ def main() -> int:
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    image = make_dummy_image(args.image_height, args.image_width, args.image_mode, args.seed)
+    images = make_dummy_images(args)
     state = make_dummy_state(args.action_dim)
 
     logger.info("Connecting action channel to %s:%d", args.host, args.port)
@@ -129,7 +146,7 @@ def main() -> int:
             t0 = time.perf_counter()
             message = {
                 "type": "action_request",
-                "images": {"front": image},
+                "images": images,
                 "state": state,
                 "timestamp": time.time(),
             }
@@ -224,6 +241,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--action-dim", type=int, default=14)
     parser.add_argument("--image-height", type=int, default=480)
     parser.add_argument("--image-width", type=int, default=640)
+    parser.add_argument(
+        "--camera-payload",
+        choices=("front", "so101-raw"),
+        default="front",
+        help="Send one composed front image or raw fixed+wrist SO101 images.",
+    )
     parser.add_argument("--image-mode", choices=("random", "gray"), default="gray")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--image-push-fps", type=float, default=30.0, help="Image push rate in Hz.")
