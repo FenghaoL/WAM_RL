@@ -20,7 +20,7 @@ from ahawam.runtime import (
 )
 from ahawam.utils import misc
 from ahawam.utils.logging_config import setup_logging
-from scripts.so101_pipeline.flash_distillation.config_builder import (
+from scripts.so101_pipeline.archive.flash_distillation.config_builder import (
     build_distillation_config,
 )
 from scripts.so101_pipeline.full_finetune_zero2_offload.train_entry import (

@@ -1,6 +1,6 @@
 # AHA-WAM 项目文档导航
 
-> 更新日期：2026-09-05
+> 更新日期：2026-09-07
 > 说明：文档已按 `architecture/`、`research/`、`hil/`、`training/`、`project/` 和专项 `ovcr_rl_token/` 分类；本页是统一导航入口。
 
 ### [项目中英文简历表述与岗位关键词](./project/AHAWAM_RESUME_PROJECT_DESCRIPTION_ZH_EN.md)
@@ -12,6 +12,8 @@
 ### [OVCR 小适配器与 RL Token：研究、实现和实验方案](./ovcr_rl_token/README.md)
 
 核查 RLT 原文及 AHA 代码，提供 Query、Value-only 和多 token K/V writer 三种可训练方案，说明任务 checkpoint、HUMAN 数据、P0 保持损失与实验命令；单独讨论 critic、异步 replay 和真正 RL 的扩展边界，并记录已完成的 CPU 验证。
+
+已完成的实验轮次：[power-adapter v2](./ovcr_rl_token/v2_experiments/README_ZH.md)；进行中：[cylinder v1（含 wandb 记录）](./ovcr_rl_token/cylinder_experiments/README_ZH.md)。
 
 ### [02+04 Demo 与 HUMAN Correction 两组 5-Epoch 训练实现](./hil/AHAWAM_HIL_HUMAN_ONLY_TRAINING_IMPLEMENTATION_ZH.md)
 
@@ -62,6 +64,12 @@
 解释 HALO-WA 的完整流程、强化学习模块与 AHA-WAM 的结构差异，并区分可以迁移的算法思想和不能直接复制的实现假设。
 
 ## 3. 插入、RL 与数据闭环研究
+
+### [插入实验中底座位姿是否变化：逐项核查](./research/INSERTION_RECEPTACLE_POSE_RANDOMIZATION_AUDIT_ZH.md)
+
+逐项区分 HALO-WA、RLT、HIL-SERL、RLDG、ViSk、EDRIAD、SHIELD、ACT 等工作究竟是
+移动母口、只随机公头/末端，还是论文没有说明；同时抽样审计本地 cylinder 数据，并给出
+反事实位置对、held-out 位姿和视觉消融的最低成本实验设计。
 
 ### [从 DAgger 到 WAM-specific Interactive Correction：文献、设计与迁移判断](./research/AHAWAM_DAGGER_METHODS_AND_WAM_SPECIFIC_DESIGN_ZH.md)
 

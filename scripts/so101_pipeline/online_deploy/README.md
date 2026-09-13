@@ -21,8 +21,8 @@
 编辑 `settings.yaml`，最常改的是：
 
 ```yaml
-checkpoint_path: runs/.../weights/step_005328.pt
-dataset_stats_path: runs/so101_ahawam_padapter_v2/assets/dataset_stats.json
+checkpoint_path: runs/.../weights/step_006572.pt
+dataset_stats_path: runs/so101_ahawam_cylinder_v1/assets/dataset_stats.json
 text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
 ```
 
@@ -61,7 +61,7 @@ ssh -N -L 12000:127.0.0.1:12000 fenghao@chickadee.engin.umich.edu
 ```python
 {
     "type": "infer",
-    "instruction": "Remove the power adapter from the holder and plug it into the power strip.",
+    "instruction": "Pick up the cylinder and insert it into the matching hole.",
     "state": np.ndarray((6,), np.float32),
     "images": {
         "fixed": np.ndarray((H, W, 3), np.uint8),

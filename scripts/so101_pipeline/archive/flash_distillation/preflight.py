@@ -13,7 +13,7 @@ import torch
 from omegaconf import OmegaConf
 
 from ahawam.datasets.lerobot.robot_video_dataset import DEFAULT_PROMPT
-from scripts.so101_pipeline.flash_distillation.config_builder import (
+from scripts.so101_pipeline.archive.flash_distillation.config_builder import (
     REPO_ROOT,
     build_distillation_config,
 )

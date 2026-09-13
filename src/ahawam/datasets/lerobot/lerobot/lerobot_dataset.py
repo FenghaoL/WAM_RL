@@ -658,6 +658,14 @@ class LeRobotDataset(torch.utils.data.Dataset):
             return get_hf_features_from_features(self.features)
 
     def _get_query_indices(self, idx: int, ep_idx: int) -> tuple[dict[str, list[int | bool]]]:
+        # Optional hook: a logical view (e.g. HIL takeover spans) may supply its own
+        # query timeline. Rows, timestamps and video frames all follow the returned
+        # indices, so every modality stays aligned. Returning None keeps the default.
+        remapper = getattr(self, "query_index_remapper", None)
+        if remapper is not None:
+            remapped = remapper(idx, self.delta_indices)
+            if remapped is not None:
+                return remapped
         ep_start = self.episode_data_index["from"][ep_idx]
         ep_end = self.episode_data_index["to"][ep_idx]
         query_indices = {

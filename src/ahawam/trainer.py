@@ -289,7 +289,18 @@ class Wan22Trainer:
     def _build_loader(self, dataset, worker_init_fn=None):
         sampler_cls = ResumableEpochSampler
         sampling_strategy = str(getattr(dataset, "sampling_strategy", "natural"))
-        if sampling_strategy == "balanced_2_2":
+        if sampling_strategy in {"balanced_3_1", "human_only"}:
+            from ahawam.utils.samplers import RatioTwoSourceEpochSampler
+            if self.history_aware_batching:
+                raise ValueError("Source ratio sampling requires history_aware_batching=false")
+            sampler_cls = RatioTwoSourceEpochSampler
+        elif sampling_strategy == "balanced_2_1":
+            from ahawam.utils.samplers import GlobalRatioTwoSourceEpochSampler
+            if self.history_aware_batching:
+                raise ValueError("Source ratio sampling requires history_aware_batching=false")
+            sampler_cls = GlobalRatioTwoSourceEpochSampler
+            logger.info("Using exact per-global-batch 2:1 demo/correction sampler.")
+        elif sampling_strategy == "balanced_2_2":
             if self.history_aware_batching:
                 raise ValueError(
                     "balanced_2_2 and history_aware_batching cannot both define "
@@ -933,6 +944,22 @@ class Wan22Trainer:
             "video_current_frame_index": video_current_frame_index,
         }
         batched_sample.update(optional_tensors)
+        # Keep boundary masks in offline validation as in the training loader.
+        # Dropping these silently supervises padded HUMAN actions/videos.
+        for key in ("action_is_pad", "image_is_pad", "proprio_is_pad"):
+            if key in sample and sample[key] is not None:
+                value = torch.as_tensor(sample[key], dtype=torch.bool)
+                if value.ndim == 1:
+                    value = value.unsqueeze(0)
+                if value.ndim != 2 or value.shape[0] != video.shape[0]:
+                    raise ValueError(f"{key} must be [T] or [B,T]")
+                batched_sample[key] = value
+        for key, dtype in (("video_supervision_mask", torch.bool), ("data_source", torch.long)):
+            if key in sample and sample[key] is not None:
+                value = torch.as_tensor(sample[key], dtype=dtype).reshape(-1)
+                if value.shape[0] != video.shape[0]:
+                    raise ValueError(f"{key} must be scalar or [B]")
+                batched_sample[key] = value
         return batched_sample
 
     @torch.no_grad()

@@ -1,0 +1,89 @@
+{
+  "audit_date": "2026-09-10",
+  "dataset_root": "data/ahawam_hil_raw/so101_ahawam_power_adapter_hil_v2",
+  "parquet_files": 70,
+  "frames": 26658,
+  "manifest_rows": 70,
+  "outcome_class_counts": {
+    "SUCCESS_WITH_INTERVENTION": 66,
+    "FAILURE": 3,
+    "AUTONOMOUS_SUCCESS": 1
+  },
+  "termination_counts": {
+    "": 70
+  },
+  "control_source_counts": {
+    "0": 9775,
+    "2": 11385,
+    "1": 5498
+  },
+  "flag_counts": {
+    "safety_clamped": 1026,
+    "dropped_tick": 13
+  },
+  "historical_model_latency_ms": {
+    "count": 1835,
+    "p50": 537.9636287689209,
+    "p90": 611.5011475980282,
+    "p95": 621.8678524717689,
+    "p99": 637.3132894188166
+  },
+  "historical_round_trip_ms": {
+    "count": 1835,
+    "p50": 630.5364,
+    "p90": 711.17122,
+    "p95": 730.84672,
+    "p99": 1395.2490780000003
+  },
+  "historical_loop_dt_ms": {
+    "count": 26658,
+    "p50": 67.77870178222656,
+    "p90": 68.3147590637207,
+    "p95": 68.4758144378662,
+    "p99": 68.76987297058105
+  },
+  "historical_policy_action_age_ms_all_sources": {
+    "count": 26658,
+    "p50": 0.0,
+    "p90": 1082.645947265625,
+    "p95": 1151.6726135253907,
+    "p99": 1355.3073229980469
+  },
+  "sample_schema": [
+    "observation.state",
+    "observation.state_arm",
+    "action",
+    "executed_action_arm",
+    "policy_action",
+    "human_action",
+    "policy_action_valid",
+    "human_action_valid",
+    "action_supervision_mask",
+    "control_source",
+    "phase",
+    "intervention",
+    "safety_clamped",
+    "policy_generation",
+    "policy_request_id",
+    "policy_request_valid",
+    "policy_chunk_id",
+    "policy_chunk_valid",
+    "action_index_in_chunk",
+    "takeover_segment_id",
+    "logical_episode_index",
+    "tick_index",
+    "monotonic_ns",
+    "wall_time_ns",
+    "camera_fixed_age_ms",
+    "camera_wrist_age_ms",
+    "policy_action_age_ms",
+    "loop_dt_ms",
+    "dropped_tick",
+    "timestamp",
+    "frame_index",
+    "episode_index",
+    "index",
+    "task_index"
+  ],
+  "scope_note": "Historical HIL logs only; not a current-serving latency benchmark. Manifest success may include intervention; no autonomous policy success rate inferred."
+}

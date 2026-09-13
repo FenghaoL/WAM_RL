@@ -1,8 +1,11 @@
-# Synchronous rich-v3 DAgger collection policy: four-epoch power-adapter SFT.
+# Synchronous rich-v3 DAgger collection policy: four-epoch cylinder-insertion SFT.
 # The adjacent trainer-state JSON is metadata only. Deployment must load the
 # weights file below and keep 10-step inference for this non-distilled model.
 checkpoint_path: runs/so101_ahawam_padapter_v2/full_zero2_offload_ahawam_base/formal-padapterv2-sft-ahawambase-bs4-acc1-4ep-3gpu-20260901-001743/model/checkpoints/weights/step_005328.pt
 dataset_stats_path: runs/so101_ahawam_padapter_v2/assets/dataset_stats.json
+# One shared cache for every task: entries are addressed by sha256 of the
+# prompt, so there is no per-dataset directory. This must match what the
+# run trained against -- settings_cylinder_v1.yaml uses this same path.
 text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
 load_text_encoder: false
 project_root: .
@@ -80,4 +83,4 @@ preview_num_frames: 13
 # separate from the 10-step action sampler used by the online control path.
 preview_num_inference_steps: 20
 preview_fps: 3.75
-preview_output_dir: runs/so101_g05_square_v1/online_previews
+preview_output_dir: runs/so101_ahawam_cylinder_v1/online_previews

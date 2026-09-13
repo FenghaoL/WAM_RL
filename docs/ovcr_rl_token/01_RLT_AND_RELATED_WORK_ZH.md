@@ -16,14 +16,14 @@ RLT 在 VLA 最后层 embeddings 后加可学习读出 token，用额外 Transfo
 
 用简写表示其关键接口：
 
-\[
+$$
 z_{RL}=E_\phi([\operatorname{sg}(Z),e_{RL}])_{last},\quad
 \hat Z_i=D_\phi(z_{RL},\operatorname{sg}(Z_{<i})),
-\]
+$$
 
-\[
+$$
 x=(z_{RL},s),\quad a\sim\pi_\theta(x,a^{ref}),\quad Q_\psi(x,a).
-\]
+$$
 
 注意这里 reference 是 **actor 的条件**；原文的 critic 数学定义并没有强制拼接 reference。此前项目材料把二者输入都笼统写成 latent/proprio/reference，需要以这个区别为准。
 

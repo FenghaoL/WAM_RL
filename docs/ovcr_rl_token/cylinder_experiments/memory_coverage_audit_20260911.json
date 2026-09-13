@@ -1,0 +1,88 @@
+{
+  "date": "2026-09-11",
+  "task": "cylinder_v1",
+  "basis": "Frozen HUMAN manifest segment lengths and demo episodes.jsonl, not a new raw parquet audit or realized batch log. All logical frame anchors, before source sampling, DDP padding and action offsets.",
+  "num_history_frames": 6,
+  "num_frames": 49,
+  "global_sample_stride": 1,
+  "history_stride_raw_frames": 48,
+  "manifest_path": "runs/ovcr_adapter_cylinder_v1/data_manifest.json",
+  "manifest_sha256": "5b0081ef874fc8d734eeff663ee3338979599cf3ab1ca1ff8d9f4921cefa5856",
+  "datasets": {
+    "human_train": {
+      "logical_episodes": 77,
+      "frames": 2393,
+      "length_min": 10,
+      "length_max": 150,
+      "history_valid_len_counts": {
+        "0": 2122,
+        "1": 195,
+        "2": 70,
+        "3": 6,
+        "4": 0,
+        "5": 0,
+        "6": 0
+      },
+      "history_zero_fraction": 0.8867530296698705,
+      "full_49_frame_window_anchors": 271
+    },
+    "demo_train": {
+      "logical_episodes": 94,
+      "frames": 19708,
+      "length_min": 137,
+      "length_max": 346,
+      "history_valid_len_counts": {
+        "0": 4512,
+        "1": 4512,
+        "2": 4505,
+        "3": 3936,
+        "4": 1864,
+        "5": 315,
+        "6": 64
+      },
+      "history_zero_fraction": 0.22894256139638725,
+      "full_49_frame_window_anchors": 15196
+    },
+    "human_val": {
+      "logical_episodes": 17,
+      "frames": 674,
+      "length_min": 15,
+      "length_max": 113,
+      "history_valid_len_counts": {
+        "0": 552,
+        "1": 105,
+        "2": 17,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0
+      },
+      "history_zero_fraction": 0.8189910979228486,
+      "full_49_frame_window_anchors": 122
+    },
+    "demo_val": {
+      "logical_episodes": 3,
+      "frames": 661,
+      "length_min": 212,
+      "length_max": 230,
+      "history_valid_len_counts": {
+        "0": 144,
+        "1": 144,
+        "2": 144,
+        "3": 144,
+        "4": 85,
+        "5": 0,
+        "6": 0
+      },
+      "history_zero_fraction": 0.2178517397881997,
+      "full_49_frame_window_anchors": 517
+    }
+  },
+  "demo_metadata_sha256": {
+    "data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_014410/meta/episodes.jsonl": "cdd7d4999b22bb15516800278c973fc897fc2b2ad9cdfd7640739ca522042e0e",
+    "data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_020841/meta/episodes.jsonl": "513e32e7b7468a08ac2b786a7e18376b0060e3af85ffa3e210fe3fee50162af5",
+    "data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_023259/meta/episodes.jsonl": "0320a4b847cd00150f037092588f07c36fbae95bbd30bfd7e0bf0e6f4a7af76f",
+    "data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_024404/meta/episodes.jsonl": "99fe0148fb7e87e1383b4902b968347d04a3e83dfc95b4e35861adcc3b26962e",
+    "data/so101_ahawam_cylinder_insertion_v1/01_pick_up_and_insert_cylinder/20260904_024009_val/meta/episodes.jsonl": "58acdf8e81341946cc005e8a54bd11daade45fb598301935fdf8eda5b18bebaa"
+  }
+}

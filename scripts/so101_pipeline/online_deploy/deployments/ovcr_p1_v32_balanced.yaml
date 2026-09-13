@@ -1,0 +1,101 @@
+# OVCR p1 v32: value-mode adapter, rank 32, frozen video DiT (step 2664).
+
+checkpoint_path: runs/ovcr_adapter_padapter_v2/p1_v32_balanced/model/checkpoints/weights/step_002664.pt
+dataset_stats_path: runs/so101_ahawam_padapter_v2/assets/dataset_stats.json
+# One shared, content-addressed cache for every task: entries are keyed by
+# sha256 of the prompt, so there is no per-dataset directory.
+text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
+load_text_encoder: false
+project_root: .
+
+hydra_config_name: deploy
+task: robotwin_ahawam_offset
+
+# What the launcher reads. Keeping GPU/port/instruction here rather than in the
+# shell script is what lets several models be served side by side without one
+# edit leaking into another.
+serving:
+  gpu_id: 0
+  port: 12001
+  host: 127.0.0.1
+  action_dim: 6
+  max_return_actions: 8
+  # Must be the task string this checkpoint trained on. Every run here had
+  # unique_prompts=1, so any other wording is conditioning it never saw.
+  instruction: "Remove the power adapter from the holder and plug it into the power strip."
+
+# Reconstruct the exact 6-D, 15 Hz model shape used by the completed run.
+hydra_patch:
+  model:
+    skip_dit_load_from_pretrain: true
+    action_dit_pretrained_path: null
+    checkpoint_shape_adapt: true
+    mot_checkpoint_mixed_attn: false
+    action_horizon: 40
+    action_chunk_size: 8
+    max_action_offset: 7
+    action_obs_downsample_factor: 1
+    chunk_kv_editor_num_queries: 32
+    num_history_frames: 6
+    action_video_read_mode: current_only
+    video_rope_frame_stride: 4
+    # OVCR adapter geometry must match training exactly or the checkpoint's
+    # adapter tensors will not map onto the model.
+    ovcr_adapter:
+      mode: value
+      rank: 32
+      num_tokens: 4
+      scale: 1.0
+      layers: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+  data:
+    train:
+      shape_meta:
+        images:
+          - key: fixed
+            raw_shape: [3, 480, 480]
+            shape: [3, 240, 320]
+          - key: wrist
+            raw_shape: [3, 480, 640]
+            shape: [3, 240, 320]
+        action:
+          - key: default
+            raw_shape: 6
+            shape: 6
+        state:
+          - key: default
+            raw_shape: 6
+            shape: 6
+      num_frames: 49
+      action_video_freq_ratio: 4
+      video_size: [384, 320]
+      processor:
+        shape_meta: ${data.train.shape_meta}
+        num_obs_steps: ${data.train.num_frames}
+        num_output_cameras: 2
+        action_output_dim: 6
+        proprio_output_dim: 6
+        action_state_transforms: null
+        use_stepwise_action_norm: false
+        norm_default_mode: z-score
+        norm_exception_mode: null
+
+device: cuda
+mixed_precision: bf16
+action_horizon: 40
+num_inference_steps: 10
+sigma_shift: null
+seed: 42
+text_cfg_scale: 1.0
+negative_prompt: ""
+rand_device: cpu
+tiled: false
+warmup_rounds: 0
+video_height: 384
+video_width: 320
+
+input_control_hz: 15.0
+action_video_freq_ratio: 4
+preview_num_frames: 13
+preview_num_inference_steps: 20
+preview_fps: 3.75
+preview_output_dir: runs/ovcr_adapter_padapter_v2/p1_v32_balanced/online_previews

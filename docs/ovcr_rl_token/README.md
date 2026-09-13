@@ -1,5 +1,7 @@
 # AHA-WAM：OVCR 小适配器与 RL Token 专项
 
+在线 RL 后续研究（2026-09-10）：[框架可行性、官方实现参数、噪声反演与实机实验协议](online_rl_feasibility/README_ZH.md)。包含历史 HIL 时延/来源审计；补充 RLT 公开复现、DSRL-SAC/NA 的计算差异，以及 FlowDAgger/UniSteer 对人工噪声监督的依据。
+
 审计日期：2026-09-05。范围：本地 AHA-WAM 代码、SO101 双 RGB 插入数据、RLT 原论文及相关一手资料。
 
 **建议先做 Value-only 与 Query correction 的配对实验，再试多 token K/V writer。第一轮使用 demo + HUMAN 的监督 flow loss，不需要 critic。** 如果路由纠正有效，再决定用奖励加权 flow 更新内部 adapter，还是增加独立 RLT actor–critic。两者都是可研究的方向，但成本和科学问题不同。
@@ -13,6 +15,13 @@
 | [03：训练和实验](03_TRAINING_AND_EXPERIMENTS_ZH.md) | 从哪个 ckpt 出发、用什么数据、命令、参数、消融、验收 |
 | [04：critic 与真正的 RL](04_CRITIC_AND_RL_ROADMAP_ZH.md) | BC/RL 区别、两条 RL 扩展、chunk TD、干预与异步 replay |
 | [05：验证记录](05_IMPLEMENTATION_AND_VALIDATION_ZH.md) | 文件清单、已执行检查、当前限制、后续工程缺口 |
+
+## 实验轮次
+
+| 轮次 | 目录 | 内容 |
+| --- | --- | --- |
+| power-adapter v2（2026-09-05 起） | [v2_experiments](v2_experiments/README_ZH.md) | V32/Q32/T4、1:1 全量纠正、从预训练重训四轮，以及机制复核与部署审计 |
+| cylinder v1（2026-09-08 起） | [cylinder_experiments](cylinder_experiments/README_ZH.md) | 同一套协议搬到 cylinder 任务，新增 wandb 在线记录与更大的固定验证子集 |
 
 ## 已实现方案
 

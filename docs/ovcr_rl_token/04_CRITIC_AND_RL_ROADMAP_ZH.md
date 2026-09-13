@@ -24,25 +24,25 @@
 
 可以借鉴 [IQL 的离线 value learning 与 advantage-weighted extraction](https://arxiv.org/abs/2110.06169)，但换成 AHA flow actor 后应标注为 IQL-inspired/AW-flow，而不是声称原 IQL 原样复现。一个可实现的候选为：
 
-\[
+$$
 \mathcal L_V=\mathbb E[\rho_\tau(\min_iQ_i(h,A)-V(h))],
 \quad \rho_\tau(u)=|\tau-\mathbf 1[u<0]|u^2,
-\]
+$$
 
-\[
+$$
 y=R^{(k)}+\gamma^k b\,V_{target}(h'),\qquad
 \mathcal L_Q=\sum_{i=1}^{2}\mathbb E[(Q_i(h,A)-y)^2],
-\]
+$$
 
-\[
+$$
 \hat A=\min_iQ_i(h,A)-V(h),\quad
 w=\operatorname{clip}(\exp(\hat A/\beta),w_{min},w_{max}),
-\]
+$$
 
-\[
+$$
 \mathcal L_\phi=\mathbb E[\operatorname{sg}(w)\,\mathcal L_{flow}(A;h,\phi)]
 +\lambda_a\mathcal L_{anchor}.
-\]
+$$
 
 第一轮可用 expectile τ=0.7、wmax=10、β 按 validation advantage 的尺度选取；这些是起始假设，不是已经适配 SO101 的最佳值。权重须先 stop-gradient，并监控 effective sample size、极端权重比例和 positive/negative 数据占比。
 
@@ -58,10 +58,10 @@ w=\operatorname{clip}(\exp(\hat A/\beta),w_{min},w_{max}),
 
 我们针对 AHA 提出的状态扩展为：
 
-\[
+$$
 h_t=[z_t,s_t,\operatorname{age}(M_t),\operatorname{phase}_t,
 \operatorname{committed\_actions}_t,\operatorname{valid\_queue\_mask}_t].
-\]
+$$
 
 actor 接口：\(A_t\sim\pi_\eta(h_t,A_t^{ref})\)。reference 必须是同一状态、同一基座、同一 cache generation 对应的 AHA chunk，不能从另一次 reset 后的策略随便补一个。
 
@@ -77,12 +77,12 @@ actor 接口：\(A_t\sim\pi_\eta(h_t,A_t^{ref})\)。reference 必须是同一状
 
 若 actor 是内部 adapter，直接最小化 \(-Q(h,A_\phi)\) 的梯度是：
 
-\[
+$$
 \nabla_\phi Q=
 \frac{\partial Q}{\partial A}
 \frac{\partial A}{\partial v_1,\ldots,v_J}
 \frac{\partial v_1,\ldots,v_J}{\partial \phi}.
-\]
+$$
 
 动作 A 来自 J 次 flow solver 更新，不能把某个时刻的 flow velocity 当作最终 action 输入 Q。现有 `infer_action_chunk` 等推理接口有 `@torch.no_grad()`，直接调用再写 `loss=-Q(...)` 不能训练内部 adapter。需要新增可微 sampler，并测试 solver、截断梯度、checkpointing、噪声固定和安全投影的梯度语义。
 
@@ -100,10 +100,10 @@ actor 接口：\(A_t\sim\pi_\eta(h_t,A_t^{ref})\)。reference 必须是同一状
 
 若在原始控制 tick 上定义 γ，某次决策实际经历 k 个 tick，则：
 
-\[
+$$
 R_t^{(k)}=\sum_{j=0}^{k-1}\gamma^j r_{t+j},\quad
 y_t=R_t^{(k)}+b_t\gamma^k\min_i Q_i^{target}(h_{t+k},A').
-\]
+$$
 
 不能把以 chunk 为单位定义的 γ 再乘一次 chunk 长度，也不能只把奖励求和却错误地使用 γ 而非 γᵏ。γ=0.99/tick 时，8-step 折扣约0.923；γ=0.99/chunk 是另一个时间偏好。建议先按任务真实耗时定义折扣半衰期 T½：\(\gamma_{tick}=2^{-1/(15T_{1/2})}\)，让不同 C 的比较保持同一真实时间偏好。
 

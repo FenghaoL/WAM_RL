@@ -40,21 +40,21 @@ flowchart TD
 
 省略 batch、chunk、head 下标，原每层 editor 可写为：
 
-\[
+$$
 U_l=W^q_l\operatorname{LN}(Q),\quad
 R_l=\operatorname{softmax}(U_lK_l^T/\sqrt d)V_l,
-\]
+$$
 
-\[
+$$
 W_l=\operatorname{softmax}(K_lR_l^T/\sqrt d),\quad
 D_l=W_lR_l,
-\]
+$$
 
-\[
+$$
 (\Delta K_l^0,\Delta V_l^0)=\operatorname{MLP}_l(D_l),\quad
 \bar K_l=K_l+\sigma(b_l)\Delta K_l^0,\quad
 \bar V_l=V_l+\sigma(b_l)\Delta V_l^0.
-\]
+$$
 
 `use_delta_gate=false` 时省略最后的 sigmoid。这个已有的 `delta_gate` 是原 editor 的参数，并不是新训练的人类干预预测器。
 
@@ -74,9 +74,9 @@ D_l=W_lR_l,
 
 实现：`OVCRAdapter(mode="query")`，每层一个 `ZeroResidual(4096,4096,32)`。
 
-\[
+$$
 Q'_l=Q+\alpha\,W^{up}_l\operatorname{SiLU}(W^{down}_l\operatorname{LN}(Q)).
-\]
+$$
 
 之后原两次 attention、原 delta MLP 和 Action DiT 全部照常计算。每层 adapter 不共享参数，但同层跨 batch/chunk 共享。
 
@@ -90,10 +90,10 @@ Q'_l=Q+\alpha\,W^{up}_l\operatorname{SiLU}(W^{down}_l\operatorname{LN}(Q)).
 
 实现：`OVCRAdapter(mode="value")`，每层 `ZeroResidual(3072,3072,32)`。
 
-\[
+$$
 K'_l=\bar K_l,\qquad
 V'_l=\bar V_l+\alpha\,W^{up}_l\operatorname{SiLU}(W^{down}_l\operatorname{LN}(D_l)).
-\]
+$$
 
 这个增量接在原 gate 之后，不再乘原来可能很小的 `sigmoid(delta_gate)`。它是对 **当前观测已经路由过的内容** 做低容量纠正，输入不是无条件的常数。
 
@@ -107,27 +107,27 @@ V'_l=\bar V_l+\alpha\,W^{up}_l\operatorname{SiLU}(W^{down}_l\operatorname{LN}(D_
 
 先投影当前 query 与 planner-conditioned routed query：
 
-\[
+$$
 X_l=[P^o_l\operatorname{LN}(Q);\;P^r_l\operatorname{LN}(R_l)]\in\mathbb R^{64\times r}.
-\]
+$$
 
 可学习 query bank `E_l` 读取 X，得到 m 个 token：
 
-\[
+$$
 Z_l=\operatorname{softmax}(E_lX_l^T/\sqrt r)X_l,
 \quad Z_l\in\mathbb R^{m\times r}.
-\]
+$$
 
 再用已有空间槽的 decoded feature 为 query，把 token 解码回 S 个槽：
 
-\[
+$$
 H_l=\operatorname{softmax}(P^s_l\operatorname{LN}(D_l)Z_l^T/\sqrt r)Z_l,
-\]
+$$
 
-\[
+$$
 (\Delta K_l,\Delta V_l)=W^{out}_lH_l,\quad
 (K'_l,V'_l)=(\bar K_l,\bar V_l)+\alpha(\Delta K_l,\Delta V_l).
-\]
+$$
 
 默认 `m=4,r=32`。读取观测和路由内容的分工受 [Perceiver 的 latent attention](https://arxiv.org/abs/2103.03206) 启发；“是否适合插入纠正”仍是待检验假设。
 
@@ -153,21 +153,21 @@ T4 的潜在优势是把当前观测与 planner 内容结合成一个显式可�
 
 设 frozen base 参数为 θ₀，新 adapter 为 φ。用本仓库原 action scheduler 构造 noisy action 和 flow target，不手写另一套 t 的方向：
 
-\[
+$$
 \mathcal L_{BC}=\mathbb E\left[w(t)\,\operatorname{MaskedMean}_{valid}
 \|v_{\theta_0,\phi}(x_t,t,c)-u^*\|^2\right].
-\]
+$$
 
 demo 和连续 HUMAN 均使用真实有效 action target；`action_is_pad` 排除跨段复制的尾部动作。来源采样由现有 loader 完成。Video loss 系数设为零且 Video 权重冻结。
 
 再在 demo source=0 的样本加入同噪声 velocity anchor：
 
-\[
+$$
 \mathcal L_{anchor}=
 \operatorname{MaskedMean}_{valid\land demo}
 \|v_{\theta_0,\phi}(x_t,t,c)-\operatorname{sg}(v_{\theta_0}(x_t,t,c))\|^2,
 \quad \mathcal L=\mathcal L_{BC}+\lambda_a\mathcal L_{anchor}.
-\]
+$$
 
 实现先在 `torch.random.fork_rng` 中关闭 adapter、无梯度运行 P0，捕获 flow；退出后恢复 RNG 再执行 student。这样无需在显存复制第二份大模型，同时两次拥有相同 noise、timestep、训练 offset 条件。额外 forward 仍要花时间，并不是免费 teacher。Native BC 用原 scheduler 权重；anchor 使用不额外乘 scheduler 权重的 masked velocity MSE，这个系数定义须在实验中保持一致。
 
