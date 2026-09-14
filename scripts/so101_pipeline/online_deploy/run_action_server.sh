@@ -23,7 +23,7 @@ set -eo pipefail
 #
 # All ovcr_* and padapter_v2_sft serve the power-adapter task string;
 # only cylinder_v1_sft serves the cylinder one.
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft.yaml"
+DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft.yaml"
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_full_pretrained_natural_4ep.yaml"
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_p1_v32_balanced.yaml"
 
@@ -31,8 +31,11 @@ set -eo pipefail
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_p1_v32_balanced_recover.yaml"
 
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_v32_balanced.yaml"
-DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video.yaml"
 
+
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video.yaml"
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_vidext.yaml"
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_actext.yaml"
 
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v2_sft.yaml"
 

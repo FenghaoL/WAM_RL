@@ -11,6 +11,7 @@
 - [训练管线逐层讲解：一个 sample 是什么、边界怎么处理、一个 step 发生了什么](07_TRAINING_PIPELINE_ZH.md)
 - [HIL v2：历史可跨越接管边界的纠正训练，含历史间隔的选择依据](08_HILV2_HISTORY_ZH.md)
 - [抓取对准后不合爪的诊断，以及纠正样本窗口改造（视频/动作延伸到接管之后）](09_GRASP_STALL_DIAGNOSIS_ZH.md)
+- [full balanced video 三个单变量实验：视频延伸 / 动作延伸 / demo:DAgger=2:1](10_FULL_VARIANTS_ZH.md)
 - [ICRA 截止前：历史 KV 审计、局部恢复采集、最小消融与投稿分支](04_ICRA_RECOVERY_AND_MEMORY_PLAN_ZH.md)
 
 数据事实（已冻结在 `runs/ovcr_adapter_cylinder_v1/data_manifest.json`）：demo 训练 19,708 帧 / 验证 661 帧（`20260904_024009_val`）；DAgger 80 条 rollout 中人类接管 3,067 帧、94 段，划分为训练 2,393 帧 / 77 段与验证 674 帧 / 17 段。自然混合下 HUMAN 只占 10.8%，比 padapter 轮的 21.7% 更少，因此 1:1 采样会把 HUMAN 起点重复约 8.2 遍，过拟合风险更高——这是本轮读结果时首先要看的地方。

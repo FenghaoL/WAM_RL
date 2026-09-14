@@ -1,0 +1,20 @@
+{
+  "unit_tests": 5,
+  "unit_tests_passed": true,
+  "cpu_dataset_checks": {
+    "context": {
+      "data_only_passed": true,
+      "gpu_smoke_run": false
+    },
+    "video_off": {
+      "data_only_passed": true,
+      "gpu_smoke_run": false
+    },
+    "raw48": {
+      "data_only_passed": true,
+      "gpu_smoke_run": false
+    }
+  },
+  "new_gpu_training_started": false,
+  "new_power_data_checked": false
+}

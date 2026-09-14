@@ -1,0 +1,51 @@
+{
+  "source": "latest_user_message",
+  "recorded_date": "2026-09-13",
+  "verification": "user_report_only_no_per_trial_log",
+  "task": "cylinder",
+  "sft": {
+    "successes": 1,
+    "trials": 13,
+    "rate": 0.07692307692307693,
+    "tested_checkpoint_confirmed": false
+  },
+  "correction": {
+    "reported_success_range": [
+      7,
+      9
+    ],
+    "reported_trials": 17,
+    "model_specific_counts": null,
+    "range_meaning": "two separate models with unequal repeats; all-rollout counts per model still unassigned",
+    "run_dirs": [
+      "runs/ovcr_adapter_cylinder_hil_v2/p1_full_balanced_video_hilv2",
+      "runs/ovcr_adapter_cylinder_hil_v2_full/p1_full_balanced_video_hilv2_vidext"
+    ]
+  },
+  "initializations": "13 shared scenarios; first rollout each available as common comparison",
+  "observations": [
+    "directional grasp correction",
+    "directional insertion correction",
+    "vidext subjectively smoother with similar success"
+  ],
+  "hardware_cause": "unconfirmed hypothesis",
+  "power_hil": "data/ahawam_hil_raw/so101_ahawam_power_adapter_hil_v3",
+  "power_result": null,
+  "clarification": "13 common initialization scenarios; first rollout of each model in each scenario",
+  "first_rollout_comparison": {
+    "sft": {
+      "successes": 1,
+      "trials": 13
+    },
+    "context_preserving": {
+      "successes": 5,
+      "trials": 13
+    },
+    "visual_continuation": {
+      "successes": 6,
+      "trials": 13
+    }
+  },
+  "per_scenario_outcomes": null,
+  "selection_protocol": "first-rollout summary clarified retrospectively; not claimed preregistered"
+}

@@ -16,7 +16,7 @@ task: robotwin_ahawam_offset
 # edit leaking into another.
 serving:
   gpu_id: 3
-  port: 12004
+  port: 12002
   host: 127.0.0.1
   action_dim: 6
   max_return_actions: 8
