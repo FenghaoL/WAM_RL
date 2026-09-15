@@ -1,5 +1,7 @@
 # 人类纠正如何改进世界—动作模型：当前论文参考稿
 
+> 最终贡献与实验矩阵以[三个贡献简版](04_FINAL_CONTRIBUTIONS_ONE_PAGE_ZH.md)和[最终表格与配图](05_FINAL_TABLES_AND_FIGURES_ZH.md)为准。本稿保留背景与方法展开；早期候选实验不代表截止前必做项。
+
 **参考英文题目：Learning from Human Corrections in Memory-Based World–Action Models**
 
 **2026-09-14 定稿范围修订：正文仅保留任务SFT、完整模型纠正训练、未来视觉延伸，以及13场景首次试验结果。**

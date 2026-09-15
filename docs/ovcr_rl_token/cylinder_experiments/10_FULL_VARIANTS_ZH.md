@@ -62,3 +62,25 @@ PYTHONPATH=src:. python scripts/so101_pipeline/ovcr_adapter/cylinder_experiments
 - 09 文档的 A/B 变体：被本方案取代，其配置目录已删除（未产生训练结果）。
 
 部署这些权重时：`num_history_frames: 6`、cylinder stats、原任务指令。
+
+## 6. 追加：人类段当 demo（2026-09-14 排队）
+
+用户要求：纠正样本只用人类段本身，历史和未来视频都只在段内取，不够就按 demo 规则 padding / 不算视频 loss，不取接管前历史、不做延伸。
+
+核查结论：hil_v2 上**没有训练过**这个设置。已有的 `p1_full_balanced_video_hilv2`、`_vidext`、`_actext`、`_demo2to1`
+训练时都 `correction_history_crosses_segment: true`。但 ICRA 2027 会话已为此生成过配置
+`runs/icra2027_cylinder_controls/configs/full_context_truncated.yaml`（09-13，`plan.json` 标记未训练）：与基线唯一差别
+是 `data.train.correction_history_crosses_segment: false`，未来视频本来就不延伸，正是这个设置。为避免重复配置，直接训练它，
+输出也落在 ICRA 文档预期的位置 `runs/icra2027_cylinder_controls/full_context_truncated/model`（最终 `step_003285.pt`，
+wandb project `ahawam-so101-cylinder-hil-v1`，group `icra2027-context-controls`）。
+
+- 历史不跨界时 skip-hold / stride 不起作用（只在跨界时间线上用），因此不必另改。
+- 验证集规则不变：验证纠正样本仍跨界取历史，与本文其他实验 val loss 可比。
+- data-only 长度 `[19708, 3460, 661, 169]`，与 ICRA 文档记录一致。
+
+队列：tmux `ovcr_segdemo_chain`（GPU 0/1/2），在 power adapter `p1_full_balanced_video_hilv3` 完成之后启动，结束后接着跑
+power adapter 的 `_segdemo` 和 `_demo2to1`（见 [padapter_hil_v3](../padapter_hil_v3/README_ZH.md)）。
+
+```bash
+python scripts/so101_pipeline/ovcr_adapter/v2_experiments/status.py runs/icra2027_cylinder_controls
+```

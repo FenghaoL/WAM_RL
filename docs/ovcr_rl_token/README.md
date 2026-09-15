@@ -22,6 +22,7 @@
 | --- | --- | --- |
 | power-adapter v2（2026-09-05 起） | [v2_experiments](v2_experiments/README_ZH.md) | V32/Q32/T4、1:1 全量纠正、从预训练重训四轮，以及机制复核与部署审计 |
 | cylinder v1（2026-09-08 起） | [cylinder_experiments](cylinder_experiments/README_ZH.md) | 同一套协议搬到 cylinder 任务，新增 wandb 在线记录与更大的固定验证子集 |
+| power adapter HIL v3（2026-09-14 起） | [padapter_hil_v3](padapter_hil_v3/README_ZH.md) | p1_full_balanced_video 与视频延伸，配方同 cylinder hil_v2；追加人类段当 demo（segdemo）与 demo:纠正 2:1 |
 
 ## 已实现方案
 

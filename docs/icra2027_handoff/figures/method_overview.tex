@@ -1,0 +1,37 @@
+% Editable vector schematic; no experimental measurements are represented.
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\small,
+ box/.style={draw,rounded corners=2pt,align=center,minimum height=.75cm},
+ arr/.style={->,thick}]
+\node[anchor=west,font=\bfseries] at (0,4.4) {(a) Human-gated post-training with the existing WAM};
+\node[box,text width=2.4cm] (demo) at (1.4,3.55) {Task demonstrations\\$\mathcal D$};
+\node[box,text width=2.2cm] (sft) at (4.5,3.55) {Task SFT\\AHA-WAM};
+\node[box,text width=2.7cm] (hil) at (8.0,3.55) {Real interaction\\policy + human};
+\node[box,text width=4.6cm] (train) at (13.1,3.55) {Joint post-training: $\mathcal D+\mathcal H$\\Video DiT $\to$ OVCR $\to$ Action DiT};
+\draw[arr] (demo)--(sft); \draw[arr] (sft)--(hil); \draw[arr] (hil)--(train);
+\draw[arr] (demo.south)--(1.4,2.65)--node[above,font=\footnotesize]{demonstration replay}(13.1,2.65)--(train.south);
+\node[anchor=west,font=\bfseries] at (0,2.15) {(b) Different temporal supports for one human correction};
+\fill[gray!20] (3,1.25) rectangle (6,1.72);
+\fill[orange!35] (6,1.25) rectangle (9,1.72);
+\fill[gray!20] (9,1.25) rectangle (10.6,1.72);
+\fill[black!20] (10.6,1.25) rectangle (11.3,1.72);
+\fill[gray!20] (11.3,1.25) rectangle (15.5,1.72);
+\node at (4.5,1.49) {Policy}; \node at (7.5,1.49) {Human};
+\node at (9.8,1.49) {Policy}; \node[font=\tiny,rotate=90] at (10.95,1.49) {HOLD};
+\node at (13.4,1.49) {Policy / later human};
+\draw[dashed] (6,-1.05)--(6,1.85); \draw[dashed] (9,-1.05)--(9,1.85);
+\node[above,font=\footnotesize] at (6,1.75) {takeover $b$};
+\node[above,font=\footnotesize] at (9,1.75) {handback $e$};
+\draw[densely dotted,thick] (7,-1.05)--(7,1.25);
+\node[below,font=\footnotesize] at (7,-1.05) {training anchor $t$};
+\node[anchor=east] at (2.8,.85) {Past context};
+\draw[blue!70!black,line width=3pt] (3,.85)--(6.9,.85);
+\node[anchor=west,font=\footnotesize] at (9.3,.85) {observed history, including before takeover};
+\node[anchor=east] at (2.8,.2) {Action labels};
+\draw[orange!80!black,line width=3pt] (7,.2)--(9,.2);
+\node[anchor=west,font=\footnotesize] at (9.3,.2) {human actions only; padding is masked};
+\node[anchor=east] at (2.8,-.45) {Future video};
+\draw[green!45!black,line width=3pt] (7,-.45)--(9,-.45);
+\draw[green!45!black,line width=3pt,dashed] (9,-.45)--(10.6,-.45);
+\draw[green!45!black,line width=3pt,dashed] (11.3,-.45)--(15.5,-.45);
+\node[below,font=\footnotesize] at (12.2,-.55) {HV: extend recorded targets on eligible successful rollouts};
+\end{tikzpicture}

@@ -1,0 +1,10 @@
+# LaTeX intermediates; keep main.pdf as the reviewable manuscript preview.
+/build/
+/main.aux
+/main.bbl
+/main.blg
+/main.log
+/main.fdb_latexmk
+/main.fls
+/main.out
+/main.synctex.gz

@@ -1,0 +1,14 @@
+{
+  "date": "2026-09-15",
+  "pages_including_references": 7,
+  "page_size": "US Letter",
+  "cited_entries": 8,
+  "numbered_equations": 4,
+  "tables": 4,
+  "figures": 2,
+  "unresolved_references": false,
+  "overfull_boxes": false,
+  "type3_fonts": false,
+  "status": "working manuscript, pending results and real experiment figure",
+  "validation": "compiled with official ieeeconf and Tectonic 0.17.0; method and result table pages visually checked"
+}

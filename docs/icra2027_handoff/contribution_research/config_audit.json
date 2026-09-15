@@ -1,0 +1,53 @@
+{
+  "date": "2026-09-14",
+  "scope": "read_only_config_and_code_audit_not_new_run_results",
+  "configs": [
+    {
+      "path": "runs/ovcr_adapter_cylinder_hil_v2/configs/p1_full_balanced_video_hilv2.yaml",
+      "sha256": "823a8ccbb38cd041a35b24283e80b9d0e5c7b339a0ac5495f677ef9dcd1a4d6e",
+      "init_checkpoint": "runs/so101_ahawam_cylinder_v1/full_zero2_offload_ahawam_base/formal-cylinderv1-sft-ahawambase-bs4-acc1-4ep-3gpu-20260905-022135/model/checkpoints/weights/step_006572.pt",
+      "max_steps": 3285,
+      "batch_size": 4,
+      "learning_rate": 1e-05,
+      "data.train.sampling_strategy": "balanced_2_2",
+      "data.train.correction_future_extension": null,
+      "model.num_history_frames": 6,
+      "model.loss.lambda_video": 1.0,
+      "freeze_video_dit": false
+    },
+    {
+      "path": "runs/ovcr_adapter_cylinder_hil_v2_full/configs/p1_full_balanced_video_hilv2_vidext.yaml",
+      "sha256": "04ad2cb2da943f0028e775c74080b93adaaa17e54ea0a44a6d6c97658b0fe7fd",
+      "init_checkpoint": "runs/so101_ahawam_cylinder_v1/full_zero2_offload_ahawam_base/formal-cylinderv1-sft-ahawambase-bs4-acc1-4ep-3gpu-20260905-022135/model/checkpoints/weights/step_006572.pt",
+      "max_steps": 3285,
+      "batch_size": 4,
+      "learning_rate": 1e-05,
+      "data.train.sampling_strategy": "balanced_2_2",
+      "data.train.correction_future_extension": "video",
+      "model.num_history_frames": 6,
+      "model.loss.lambda_video": 1.0,
+      "freeze_video_dit": false
+    },
+    {
+      "path": "runs/ovcr_adapter_cylinder_hil_v2_full/configs/p1_full_balanced_video_hilv2_demo2to1.yaml",
+      "sha256": "9bfbec991eb33d71420f877f602ab3f526cf9e3711abc25fc156f56f837471cc",
+      "init_checkpoint": "runs/so101_ahawam_cylinder_v1/full_zero2_offload_ahawam_base/formal-cylinderv1-sft-ahawambase-bs4-acc1-4ep-3gpu-20260905-022135/model/checkpoints/weights/step_006572.pt",
+      "max_steps": 3285,
+      "batch_size": 4,
+      "learning_rate": 1e-05,
+      "data.train.sampling_strategy": "balanced_2_1",
+      "data.train.correction_future_extension": null,
+      "model.num_history_frames": 6,
+      "model.loss.lambda_video": 1.0,
+      "freeze_video_dit": false
+    }
+  ],
+  "source_sha256": {
+    "src/ahawam/models/wan22/ahawam.py": "5172e11b1755e7dab73abc85a036a86473835f80124358d51a49c8d66c7f4042",
+    "src/ahawam/models/wan22/ahawam_chunk_base.py": "424e31e926dad38845d1ffc0a54a998fbbd352c625cfa4838c124d626acdcd36",
+    "src/ahawam/models/wan22/mot.py": "edba409c4ef8e6e63b06fbb761eb29834f517bccf65a6d18dda7d1cf03cdd1f8",
+    "src/ahawam/utils/samplers.py": "3c10f2ed7dc6887bf26c8bebc68fa0c20ce361c2f9c7529b0395b1bcf58230fd",
+    "deploy/server/ahawam_policy.py": "192ae75445446fd3361fe9f6aa22dca79dd097695c33da71f1370b41029c6f87",
+    "scripts/so101_pipeline/hil_human_only_dataset.py": "f8464e055ece367598680a8945b067b9a3f65be1cdf8424dba28743edff994b5"
+  }
+}
