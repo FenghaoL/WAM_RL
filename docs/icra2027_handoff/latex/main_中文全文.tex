@@ -1,0 +1,330 @@
+% !TeX program = xelatex
+% Chinese reading edition. Compile with XeLaTeX or Tectonic in this directory.
+% Uses the same ieeeconf class, figures, and references as main.tex.
+\documentclass[letterpaper,10pt,conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+\providecommand{\refname}{参考文献}
+\usepackage[UTF8,scheme=plain,fontset=fandol]{ctex}
+\usepackage{graphicx,booktabs,amsmath,amssymb,tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage{cite,xcolor,etoolbox,url}
+\patchcmd{\thebibliography}{References}{参考文献}{}{}
+\patchcmd{\thebibliography}{References}{参考文献}{}{}
+\patchcmd{\abstract}{Abstract}{摘要}{}{}
+\patchcmd{\abstract}{Abstract}{摘要}{}{}
+\makeatletter
+\renewcommand{\fnum@figure}{图~\thefigure}
+\renewcommand{\fnum@table}{表~\thetable}
+\makeatother
+\renewcommand{\abstractname}{摘要}
+\providecommand{\refname}{参考文献}
+\renewcommand{\figurename}{图}
+\renewcommand{\tablename}{表}
+\newcommand{\figplaceholder}[2]{\fbox{\parbox[c][#1][c]{0.94\linewidth}{\centering\small #2}}}
+\title{超越接管片段：\\面向世界—动作模型的人类校正预测学习}
+\author{Fenghao Liu$^{1,*}$, Yunpeng Zhu$^{2,*}$, Lixi Fan$^{3,*}$,\\
+Zhangyuan Wang$^{2,\dagger}$\thanks{$^{*}$前三位作者共同贡献。$^{\dagger}$通讯作者。$^1$密歇根大学；$^2$西湖大学；$^3$浙江大学。}}
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\begin{abstract}
+世界—动作模型（WAM），如AHA-WAM，通过联合建模视觉场景动力学与动作，推动了通用操作的发展。然而，基于示范训练的WAM仍受限于训练数据的覆盖与质量，尚未充分利用闭环交互经验。HG-DAgger这类交互学习框架通过在模型自主运行的关键时刻引入人类接管，能够补充纠正行为。但对于在时间上下文中进行动作和视频预测的WAM，短接管片段可能缺少理解物理场景演变所需的视觉证据。本文提出一种面向带记忆WAM的交互学习框架，将人类门控的真机部署转化为保留时间上下文的纠正经验。其核心机制是“人类校正的预测式策略自改进”：将人类监督的动作学习与真实视觉后续的预测学习结合。接管前观测保留记忆上下文，人类纠正动作指定应模仿的行为，合格的交还后视频扩展视觉监督，同时不将自主动作当作专家标签。初步真机结果显示，纠正后训练提高了圆柱和电源适配器两个插入任务的完成率，并呈现从多种执行错误中恢复的定性证据。进一步地，我们建立恢复导向的预测—行为关联分析，研究任务相关的视频预测准确度是否与实机恢复表现相关。
+\end{abstract}
+\section{引言}
+世界—动作模型（WAM）联合预测视觉未来与机器人动作，将预测表示用于操作学习\cite{videovla,ahawam}。AHA-WAM通过低频视频规划器和高频动作执行器复用视觉上下文\cite{ahawam}。但示范训练策略仍可能在精密插入出现微小偏差后失效。
+
+预测式机器人策略的潜力不仅在于复现动作，还在于连接当前所见、场景演变与下一步行为。精密操作揭示了这一潜力与实际部署之间的距离：看似接近正确的运动仍可能以插入失败结束，随后完成任务所需的行为不同于正常示范。更丰富的视觉表示并不自动意味着训练数据覆盖了这些行为。交互后训练主要针对三种局限。
+
+\textit{分布偏移与误差累积。} 抓取或接近中的微小偏差使策略离开示范状态，后续动作可能放大这种偏移\cite{dagger}。更好地拟合正常轨迹，并不会直接为这些新状态提供监督。
+
+\textit{纠正行为不足。} 成功示范可能缺少接近走偏后的搜索、回撤和重新对准。人类干预在这些操作瓶颈处提供局部有效的行为\cite{iwr}。
+
+\textit{部署经验尚未利用。} 固定示范集不包含学习器自身执行产生的后果，而人机交互使这些观测可用于进一步学习\cite{sirius}。对预测式策略，关键问题是：人机混合轨迹中的哪些部分应监督行为，哪些部分应支持世界建模？
+
+本文通过低成本机器人上的圆柱与电源适配器插入研究这一问题。两任务均需纠正几何偏差，而不同视觉配置为预测学习与任务完成的关系提供了对照情境。
+
+人类门控DAgger通过接管与交还控制，在学习器访问的状态提供纠正动作\cite{hgdagger}。但对带记忆WAM，专家动作区间只是训练样本的一部分：裁剪短干预会丢失此前的视觉上下文，也可能截断未来预测目标。因此需要同时决定模仿哪些动作、保留哪些周边观测。
+
+本文的核心观察是：\emph{专家动作标签的边界，不应自动限定可用视觉证据的边界。} 我们保留接管前观测，并沿成功记录延伸合格的视频目标，同时将专家动作限制在人类控制区间。后训练混合原始示范与纠正数据，更新已有WAM。图\ref{fig:framework}展示交互流程，图\ref{fig:method}给出时间范围构造。
+
+我们将这一视角称为\emph{Beyond the Takeover（超越接管片段）}：短人类干预锚定学习方向，周边真实上下文提供纠正发生的情境及场景随后演变的证据。这使稀缺专家动作标签与可用视觉经验的边界得以分离，将交互模仿与预测式后训练连接起来，使已有WAM同时承担策略与视觉后续模型的角色。
+
+本文的三个贡献是：
+
+\begin{enumerate}
+\item \emph{一种面向WAM的交互学习框架。} 围绕精密操作中策略遇到的偏差状态，整合真机人类门控交互、保留时间上下文的纠正样本构造与原始示范回放，在已有WAM架构上实现交互后训练。
+\item \emph{人类校正的预测式策略自改进。} 将人类动作监督、真实历史条件和未来视频自监督结合，使短纠正引导模型利用更长的人机混合经验学习纠正行为，同时保持不同监督信号的边界。
+\item \emph{理解视频预测如何支持错误恢复。} 通过时间上下文消融，以及留出视频预测质量与实机成功率的跨checkpoint比较，研究预测与纠正行为的相互关系。圆柱展示预测与行为的同向改善，适配器揭示预测质量提升未必转化为执行收益，刻画预测学习支持恢复的边界。
+\end{enumerate}
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/interactive_learning_framework.jpg}
+\caption{真机交互学习框架。两视角示范初始化WAM；真机部署中的短人类接管与周边观测形成纠正经验，再混合示范进行后训练。图示为可迭代流程，当前实验评估一轮纠正后训练。}
+\label{fig:framework}
+\end{figure*}
+
+\section{相关工作}
+\subsection{从人类干预中学习}
+DAgger在学习器访问的状态聚合专家监督以应对分布偏移\cite{dagger}；HG-DAgger由人类决定接管时机\cite{hgdagger}。IWR强调操作瓶颈附近的纠正数据\cite{iwr}，Sirius通过选择性加权利用人机混合部署记录\cite{sirius}，CR-DAgger结合柔顺干预、残差策略与力反馈\cite{crdagger}。这些工作为本文交互与回放设计提供基础；本文关注短纠正适配带记忆预测策略所需的时间范围。
+
+\subsection{预测式机器人策略}
+自监督视觉规划从交互记录学习预测，并利用时间信息应对遮挡\cite{temporalplanning}。VideoVLA联合预测动作与视觉后果，分析想象未来质量与操作表现的联系\cite{videovla}。AHA-WAM通过异步上下文路由连接视频规划与动作执行\cite{ahawam}。本文保留其架构及流匹配目标\cite{flow}，研究纠正后训练应如何组织历史和视觉目标，而非提出新生成骨干。
+
+\subsection{预测、干预与策略评估}
+Model-Based Runtime Monitoring预测失败以请求人工协助\cite{monitor}，本文的接管时机由人类决定。Hi-WM在动作条件世界模型内部采集人类纠正\cite{hiwm}，本文则在真机采集。WorldGym通过动作条件模拟rollout评估策略\cite{worldgym}；本文比较不同WAM checkpoint的留出视频质量与独立真机成功率。既有预测质量与行为表现的研究\cite{modelspixels,videovla}为此提供依据，本文进一步考察人类纠正后训练中的这一关系。
+
+\section{问题定义与骨干}
+
+\subsection{人类门控交互}
+
+任务具有指令$\ell$、固定和腕部相机观测$o_t$以及机器人状态$s_t$。一次交互记为$\tau=\{(o_t,s_t,a_t,c_t)\}_{t=0}^{T_\tau}$，其中$c_t$表示人类控制、策略控制或系统保持。连续有效的人类控制区间记为$[b,e]$。其中的动作展示了如何从纠正过程中遇到的状态继续操作，但没有为整条自主轨迹的所有状态提供标签。
+
+任务策略先在原始示范$\mathcal D$上训练，各纠正版本再独立混合$\mathcal D$与$\mathcal H$后训练；每个任务仅使用一轮采集的纠正集合。
+
+\subsection{带记忆的世界—动作模型}
+
+AHA-WAM根据视觉观测、机器人状态和任务指令预测动作块$A_t=\{a_t,\ldots,a_{t+h_a-1}\}$。下面介绍与纠正训练直接相关的组成。
+
+\textbf{双DiT与上下文路由。} Video DiT提供逐层key/value上下文，Action DiT复用它预测短动作块；历史观测提供视觉记忆。OVCR使用最新观测调整复用上下文\cite{ahawam}。本文保留这些组件并联合训练视频与动作分支。
+
+本文只需如下抽象，而不重新推导原模型注意力：
+
+\begin{equation}
+h_t=\operatorname{sg}\big(E_\theta(C_t^-)\big),\qquad
+A_t\sim\pi_\theta(\cdot\mid o_t,s_t,h_t,\ell).
+\end{equation}
+
+$C_t^-$为选定过去观测，$\operatorname{sg}$表示停止梯度。实现中重建历史的编码过程不反传，当前视觉与动作计算仍参与训练。该表达省略骨干潜变量和动作块偏移，不代表新增循环网络。保留真实历史也不意味着严格重现无限持续部署缓存的全部内部状态。
+
+\section{人类校正的预测式策略自改进}
+
+\subsection{方法总览}
+
+沿用人类门控的数据聚合思路\cite{hgdagger}，部署任务策略并记录观测、控制来源和纠正接管。纠正样本分别保留过去上下文、专家动作与未来视频的时间范围（图\ref{fig:method}），再混合原始示范更新已有预测式策略。
+
+交互数据承担三种不同角色：过去观测帮助理解当前情境，人类动作规定纠正行为，随后图像描述实际发生的视觉后续。三者具有不同监督要求。一个自主动作不一定值得模仿，但它周围的观测仍可提供场景证据；反之，一段可靠专家动作即使不足以提供完整视频目标，也仍值得学习。分离这些角色，能够保留纠正监督，而不强迫所有模态服从相同的时间裁剪。
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/method_overview.pdf}
+\caption{时间上下文与监督构造。历史可以早于接管，动作标签仅来自人类控制；History+Future将合格未来视频延伸到交还之后。右侧为已有骨干的联合更新，以及独立的checkpoint级预测—行为比较。}
+\label{fig:method}
+\end{figure*}
+
+\subsection{三种时间范围}
+
+对有效人类锚点$t\in[b,e]$，分别构造历史$C_t^-$、具有有效性mask $m^a_{tj}$的动作目标，以及具有监督资格$m_t^v$的未来视频目标$C_t^+$。$j$枚举目标动作块的位置。段内构造将三者都限制在人类区间；本文将其边界分别定义：
+
+\begin{equation}
+\begin{aligned}
+C_t^-&=\operatorname{Past}(\tau,t;M,\Delta),\\
+m^a_{tj}&=\mathbf 1\{\text{目标位置}j\text{在}[b,e]\text{内有效}\},\\
+C_t^+&=\operatorname{Future}(\tau,t;K,\eta).
+\end{aligned}
+\end{equation}
+
+$M$为历史数量预算，$\Delta$为历史采样间隔，$K$为未来查询范围，$\eta$选择段内或延伸目标。三个算子均基于同一条交互及其有效性记录。不能跨episode补观测，也不能将未来观测放入过去条件。
+
+\subsection{保留接管前上下文}
+
+历史算子可以访问$b$之前的观测，包括策略自主运行时的记录。因此它保留到达纠正状态之前的接近信息，而不是在接管时刻重置样本。历史也可能包含更早的人类操作，不能统一称为纯自主历史。
+
+该比较保持当前纠正标签不变，将$(o_t,s_t,h_t^{\mathrm{seg}},a_t^H)$与$(o_t,s_t,h_t^{\mathrm{rollout}},a_t^H)$区分开来。动机是条件一致性：模仿在特定上下文中给出的动作时，应提供已有的过去证据。历史是输入，不是额外的重建目标。此构造既不保证更多历史一定更好，也不能因为采用人类门控就直接继承标准DAgger完整专家标注假设下的理论保证。
+
+\subsection{跨交还边界的真实未来视频}
+
+基本保留上下文版本，仅在纠正段内能够提供合格目标时使用video loss。短片段的动作可以有效，但不足完整视频目标。我们保留这些动作训练样本，仅屏蔽它们的直接视频损失。
+
+延伸版本允许视频查询沿同一条成功人机混合轨迹跨过$e$，跳过执行时间线中的系统保持帧，并保留完整窗口检查。不完整查询不作为合格视频监督。视频目标延伸不改变式(2)中的专家动作mask。
+
+这使模型利用真实视觉后续而不模仿产生这些后续的每一个动作。延伸部分可能含自主操作或再次接管，并经过成功轨迹选择，因此既不是无偏自主分布，也不证明每个延伸动作都值得模仿。视频预测目标来自记录本身，可以称为自监督；整体流程仍使用人类动作及结果筛选。
+
+当前视频分支不显式接收任意候选动作序列。其预测描述训练分布下的视觉后续，而不是指定控制输入的反事实结果。这限制了生成视频在恢复分析中的解释范围。
+
+延伸视觉范围利用了短裁剪排除的真实观测，不增加专家动作或干预锚点。因此，视频消融比较同一批纠正交互的不同使用方式，同时改变了视觉证据的数量与内容。
+
+\subsection{预测学习的行为锚定}
+人类干预为预测式后训练提供行为锚点。动作目标规定在纠正状态应模仿什么，视频目标描述该状态周围实际发生的后续。区分两者很重要：视觉上有效的转变可能来自不理想动作，而值得学习的纠正动作也可能处在包含失败的轨迹中。将整条交互赋予统一专家标签会混淆这两种情况。
+
+本文将选择性动作监督与更广的观测利用结合。成功后续筛选限定合格的人机混合视觉经验，人类动作mask则保留专家行为的来源。这构成一种可执行的人类校正预测式策略改进：学习器通过行为纠正与视觉预测重新学习自身部署经验。这里的自改进指在人类引导下使用学习器交互数据进行后训练，并非自主奖励优化或自行生成专家标签。这一区分使模型能够利用WAM的预测能力，而不将自身执行一概视为可靠行为。
+
+\subsection{联合目标与示范回放}
+
+我们保留骨干的流匹配\cite{flow}目标。对干净动作或视频潜变量$x$及高斯噪声$\epsilon$，构造：
+
+\begin{equation}
+x_\sigma=(1-\sigma)x+\sigma\epsilon,\qquad
+u^*=\epsilon-x.
+\end{equation}
+
+网络在视觉、历史、状态、指令等条件下预测速度。动作损失$\ell_i^a$对纠正样本只平均有效人类动作位置的平方误差；demo保留其有效动作。视频损失$\ell_i^v$在原骨干的视频潜空间计算。两者包含原有噪声调度权重。
+
+对训练batch $B$，掩码归一化目标为：
+
+\begin{equation}
+\widehat{\mathcal L}(B)=
+\frac{1}{|B|}\sum_{i\in B}\ell_i^a+
+\lambda_v\frac{\sum_{i\in B}m_i^v\ell_i^v}
+{\max(1,\sum_{i\in B}m_i^v)}.
+\end{equation}
+
+视频项在有资格监督的样本上归一化，避免短片段仅因没有视频目标就稀释其他样本的损失。来源比例也因此不等于实际视频监督比例。所有纠正配置均为$\lambda_v=1$；视频实验改变的是目标范围与资格，而不是有没有video loss。
+
+示范与纠正按1:1混合，遵循交互学习中利用混合经验保留正常行为的思路\cite{iwr,sirius}。来源比例不等于实际有效动作或视频监督比例。
+
+后训练更新Video DiT、Action DiT及原有路由参数；文本编码器和视频自编码器不作为适配对象。没有新actor、critic或adapter。完整模型更新使当前视觉特征与动作生成都能适配纠正数据，而式(1)的历史编码路径仍截断梯度。
+
+\section{实验设计}
+
+实验围绕三个互补问题组织。首先，纠正交互能否改善示范训练策略？SFT与Segment-only的比较提供干预学习参照。其次，保留接管边界之外的时间证据是否改变表现？History与History+Future逐步利用同一记录中的历史和后续。最后，预测与行为改善是否同向？留出视频评估检查这种联系，而不将逼真预测等同于成功控制。这些对照共同区分纠正数据本身的价值、时间组织的作用，以及更新后预测表示的意义。
+
+\begin{table}[t]
+\centering\small
+\setlength{\tabcolsep}{3pt}
+\caption{两个任务分别实例化的配置。 SFT为原始任务SFT；所有纠正版本均有video loss。}
+\label{tab:configs}
+\begin{tabular}{lll}
+\toprule
+Model & 纠正历史 & 未来视频 \\
+\midrule
+SFT & 不适用 & 不适用 \\
+Segment-only & 段内 & 段内 \\
+History & 跨接管 & 段内 \\
+History+Future & 跨接管 & 延伸 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{机器人、任务与数据}
+
+使用带固定相机和腕部相机的低成本SO101机械臂。策略接收图像与机器人状态并输出机器人动作块。任务是圆柱插入，以及包含最终插接阶段的电源适配器操作。完整任务从规定场景开始。
+
+实验夹具说明：为适应SO101的力输出限制，电源适配器任务使用移除内部组件的插座外壳，评估几何对准与插入，不涉及电连接或原装插座的插入力要求。
+
+每个任务SFT在原始demo上训练4epoch，不含后来纠正数据。之后使用任务策略收集人类门控交互，主要在偏差发生后接管调正。因此恢复是自然的研究目标，但不能断言策略完全不会学到避免错误。每个任务的训练与评估保持一致的相机设置。
+
+纠正训练和验证按完整rollout分开，避免随机拆分重叠窗口导致共享历史或未来泄漏。表II按当前训练manifest统计，有效人类帧不同于自主记录总量，帧数也不代表等时长的独立样本数。
+
+\begin{table}[t]
+\centering\small
+\setlength{\tabcolsep}{3pt}
+\caption{纠正训练数据。}
+\begin{tabularx}{\columnwidth}{@{}Xll@{}}
+\toprule
+项目 & Cylinder & Power adapter \\
+\midrule
+有效人类帧 & 3460 & 4289 \\
+人类片段 & 121 & 110 \\
+含训练人类片段的rollout & 82 & 67 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{训练与受控对照}
+
+各纠正版本从同一4epoch任务SFT出发，使用batch 12、学习率$10^{-5}$及余弦衰减。圆柱和适配器更新预算分别为3285和2664步。
+
+历史预算为6帧。Segment-only将纠正历史限制在段内，而非全局关闭memory。圆柱Segment-only仅改变跨边界设置；适配器Segment-only还改变历史采样间隔与HOLD过滤，因此后者Segment-only/History比较包含多项历史构造差异。
+
+History与History+Future保持动作标签、历史、比例、更新预算一致，改变未来视觉延伸。部署比较固定相机、指令、归一化、动作采样和执行设置。
+
+\subsection{完整任务评估}
+从任务规定的共同初始化条件出发测试自主完成，测试rollout中不进行人工接管；仅向目标移动或部分插入不计为成功。表中主体只报告百分比。评估分母为每模型圆柱13次、电源适配器20次；圆柱采用各共同初始化的首次rollout，不混入数量不等的额外重复。首次rollout口径是在回溯整理时澄清的。当前汇总不支持配对显著性检验或多训练种子比较。
+
+\begin{table}[t]
+\centering\small
+\caption{自主任务成功率（\%）。Segment-only为段内纠正上下文，History保留跨接管历史，History+Future进一步延伸未来视频监督。粗体标记每个任务的最高观测值。}
+\label{tab:success}
+\begin{tabular}{lrr}
+\toprule
+模型 & 圆柱 & 电源适配器 \\
+\midrule
+SFT & 7.7 & 50.0 \\
+Segment-only & 30.8 & \textbf{75.0} \\
+History & 38.5 & 65.0 \\
+History+Future & \textbf{46.2} & 55.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{留出视频预测评估}
+SFT、History与History+Future在相同的纠正起点窗口上预测视频，条件包含记录的视觉历史：圆柱验证集四条rollout中的七个窗口，以及适配器七条rollout中的十二个窗口。各checkpoint使用相同预测时域、采样预算与随机种子。逐窗口计算RGB PSNR与MSE后平均，排除干净条件帧；固定与腕部相机分数来自各自区域。真实未来可以延伸到人类控制之外，窗口到达episode边界时重复末帧。
+
+视频质量与独立测量的任务成功率在checkpoint层面比较，两者来自不同评估集合，不是同一次真机试验中预测与结果的配对。
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=.94\linewidth,height=.78\textheight,keepaspectratio]{figures/rollout_comparison.pdf}
+\caption{定性rollout对照。每行从左向右为时间顺序；每个任务的SFT在上、DAgger在下。RPC是原始帧编号，不代表同步时刻。结果标签来自原始记录。这些案例不替代成功率统计或History/History+Future消融。}
+\label{fig:experiments}
+\end{figure*}
+
+\section{结果与分析}
+\subsection{任务完成与纠正行为}
+两个任务中，三个纠正版本的观测成功率均高于任务SFT。圆柱从SFT的7.7\%提升至段内纠正的30.8\%、保留历史的38.5\%和视频延伸的46.2\%；电源适配器分别为50.0\%、75.0\%、65.0\%和55.0\%。结果支持本设置下纠正后训练的价值，但没有给出跨任务普遍最优的时间构造。
+
+圆柱的排序与保留纠正周边上下文有益的解释一致；电源适配器的三个纠正版本排序相反，Segment-only最好。前述适配器额外历史配置差异限制了Segment-only与History的单因素解释。History与History+Future更直接比较未来视频范围，但两个任务的变化方向不同。延伸同时改变监督覆盖量与目标内容，不能单独归因于其中之一。
+
+图中SFT与DAgger轨迹提供定性案例。观察到的纠正包括接近走偏后的重新定位，以及插偏后向圆柱孔位移动。这些案例不用于测量恢复范围、恢复速度或对标定机械漂移的鲁棒性。
+
+\subsection{纠正起点的视频预测质量}
+两个任务中纠正训练均改善视频预测（表\ref{tab:video}）。相对SFT，History与History+Future在圆柱上分别提高1.30和2.11 dB，七个窗口均胜过SFT；在适配器上分别提高1.44和1.97 dB，均为十二个窗口中胜出十一个。History+Future在两任务的平均质量最高，但并非每个窗口都领先。
+
+\begin{table}[t]
+\centering\small
+\caption{留出视频预测质量。PSNR（dB）越高越好，8位RGB的MSE越低越好。All为拼接相机图像，Fixed/Wrist为各相机区域。}
+\label{tab:video}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrr}
+\toprule
+模型 & All & Fixed & Wrist & MSE \\
+\midrule
+\multicolumn{5}{l}{圆柱} \\
+SFT & 21.45 & 24.07 & 15.71 & 501.3 \\
+History & 22.74 & 25.07 & 17.19 & 362.8 \\
+History+Future & 23.56 & 26.02 & 18.09 & 303.9 \\
+\midrule
+\multicolumn{5}{l}{适配器} \\
+SFT & 19.63 & 23.25 & 13.36 & 759.3 \\
+History & 21.08 & 24.18 & 15.05 & 524.9 \\
+History+Future & 21.61 & 24.87 & 15.52 & 469.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+两相机视角均改善。适配器中，History+Future相对SFT在腕部提高2.16 dB、固定相机提高1.62 dB。这说明视角间收益不同，但没有阶段标注时不能把改善定位为接触或对准阶段。预测改善在留出交互而非训练纠正上测量。两个视角和多数窗口的一致改善表明均值收益不限于单个有利视角或案例，但这并不意味着像素质量已经捕捉决定插入结果的细微几何差别。
+
+\subsection{视频预测如何支持错误恢复}
+两个观察提示预测与行为的耦合适应。首先，短纠正的直接视频监督有限时，History仍改善留出纠正视频质量。当前视频上下文通路联合可训练，行为监督因而可能适配预测表示。其次，History+Future进一步改善两个任务的视频质量，与模型学习到更准确视觉后续的解释一致，但行为收益不同。
+
+圆柱上，SFT、History、History+Future的视频质量与任务成功率排序一致。适配器中，虽然History+Future的PSNR更高（21.61对21.08 dB），History与History+Future的成功率却分别为65.0\%与55.0\%。因此，更准确地重建参考视频不足以保证更好的控制。这是每任务三个checkpoint的描述性比较，不是因果或统计普遍关系。
+
+联合预测能够使视觉表示服务动作生成\cite{videovla}。本文结果支持围绕这一机制研究恢复，同时揭示预测—执行差异：更准确的留出交互后续，不一定改善自主接触行为。本文没有通过搜索生成视频来选动作，讨论的是已有WAM内预测学习的作用；分离其因果贡献仍需要损失或特征通路消融。
+
+参考视频与自主执行衡量的是两种不同对象。前者衡量与一条实际记录后续的一致程度，后者取决于更新后策略诱导的状态及其后续响应。表示可能改善前者，却未提供后者所需的纠正精度。因此，圆柱与预测—行为有效耦合的解释一致，适配器则说明必须将预测质量与实际执行共同评价，不能将前者直接作为后者的替代。
+
+\section{讨论与局限}
+
+\textbf{作为选择性学习的交互后训练。} Beyond the Takeover将部署视为互补监督的来源。人类纠正标识应模仿的行为，真实视觉上下文则支持纠正周围的预测学习，从而利用WAM联合建模结构而不假设自主执行始终正确。其设计原则是区分控制权归属与可用观测的时间范围；这一原则在其他骨干上的效果仍需实证验证。
+
+
+\textbf{可观测性。} 适配器可能遮挡插接界面，圆柱的对齐缝隙则更可见。视觉不确定性下的插入研究支持触觉的补充价值\cite{visiontouch}，时间预测也可能帮助跟踪遮挡物体\cite{temporalplanning}。本文未操控遮挡或量化幻觉，因此仅将可见性作为可能的适用边界。
+
+\textbf{诊断范围。} 预测质量与任务表现的联系已在视觉模型学习和视频—动作联合模型中研究\cite{modelspixels,videovla}。不同于动作条件模拟评估\cite{worldgym}，本文对照参考视频质量与独立部署结果。每任务三个checkpoint不足以建立因果关系，也不能使PSNR成为通用成功率替代指标。
+
+评估仅覆盖有限初始化、每配置一个训练种子和一个视频采样种子。共享来源rollout、重复真值尾帧、人类接管选择和成功后续筛选限制了独立性与普适性，需要更多任务及针对性的损失消融。
+
+\section{结论}
+本文提出Beyond the Takeover交互后训练框架，将短人类纠正放回其真实时间上下文中以适配带记忆WAM。分离历史、专家动作与未来视频目标，使短干预能够支持预测式策略适应。两个插入任务中，纠正训练均提高了观测完成率，而时间上下文消融展示了任务依赖的收益。两任务视频预测均改善，但只有圆柱表现出一致的行为排序；适配器揭示了预测—执行差异，说明需要同时研究预测学习对恢复的作用和边界。
+
+\section*{致谢声明}
+
+本工作受国家重点研发计划（批准号 2026YFE0104400）、国家自然科学基金（NSFC，批准号 52401393 与 12502288）、浙江省杭州市自然科学基金（批准号 2025SZRJJ1217）以及广东省哲学社会科学规划项目（批准号 GD26YJY18）资助。同时感谢百度智能云 LoongForge 团队提供算力支持。
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

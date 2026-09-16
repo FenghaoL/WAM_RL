@@ -1,0 +1,51 @@
+% Original editable vector artwork. Palette encodes evidence roles, not outcomes.
+\definecolor{wmInk}{HTML}{25364B}
+\definecolor{wmBlue}{HTML}{4875B5}
+\definecolor{wmOrange}{HTML}{C78145}
+\definecolor{wmTeal}{HTML}{26877E}
+\definecolor{wmPurple}{HTML}{8271A8}
+\definecolor{wmPale}{HTML}{F3F5F8}
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,>=Latex,font=\sffamily\fontsize{8}{9}\selectfont,text=wmInk,
+ panel/.style={draw=wmInk!15,fill=wmPale,rounded corners=7pt},
+ box/.style={rounded corners=5pt,draw=wmInk!25,fill=white,align=center,minimum height=.72cm,inner sep=5pt},
+ arr/.style={->,line width=.8pt,draw=wmInk!75},
+ lab/.style={font=\sffamily\fontsize{7}{8}\selectfont,align=center}]
+\path[use as bounding box] (0,0) rectangle (17,5.96);
+\fill[panel] (0,0) rectangle (10.5,5.96);
+\node[anchor=west,font=\sffamily\bfseries] at (.25,5.6) {A\quad One correction, three temporal supports};
+\node[anchor=west,lab] at (.25,5.16) {Retain the interaction context beyond the expert-action boundary};
+\fill[wmBlue!15,rounded corners=3pt] (2.15,3.99) rectangle (4.9,4.58);
+\fill[wmOrange!23,rounded corners=3pt] (4.95,3.99) rectangle (7.0,4.58);
+\fill[wmBlue!15,rounded corners=3pt] (7.05,3.99) rectangle (10.15,4.58);
+\node[lab] at (3.52,4.29) {Policy history};\node[lab] at (5.98,4.29) {Human};\node[lab] at (8.6,4.29) {Recorded continuation};
+\draw[dashed,wmInk!40] (4.93,1.25)--(4.93,4.82);
+\draw[dashed,wmInk!40] (7.03,1.25)--(7.03,4.82);
+\node[above,lab] at (4.93,4.64) {takeover};\node[above,lab] at (7.03,4.64) {handback};
+\draw[densely dotted,wmInk!70] (5.5,1.25)--(5.5,3.98);
+\node[lab,anchor=north] at (5.5,1.33) {anchor $t$};
+\node[anchor=west,lab,text=wmBlue] at (.25,3.39) {Past context};
+\draw[wmBlue,line width=3pt] (2.15,3.39)--(5.43,3.39);
+\node[anchor=west,lab] at (5.75,3.39) {observed memory $C_t^-$};
+\node[anchor=west,lab,text=wmOrange] at (.25,2.64) {Action labels};
+\draw[wmOrange,line width=3pt] (5.5,2.64)--(6.99,2.64);
+\node[anchor=west,lab] at (7.25,2.64) {human only};
+\node[anchor=west,lab,text=wmTeal] at (.25,1.89) {Future video};
+\draw[wmTeal,line width=3pt] (5.5,1.89)--(7.0,1.89);
+\draw[wmTeal,line width=3pt,dashed] (7.04,1.89)--(10.12,1.89);
+\node[box,draw=wmTeal!25,fill=wmTeal!6,text width=9.5cm,minimum height=.55cm,lab] at (5.25,.43) {History+Future: extend recorded video on eligible successful rollouts.};
+\fill[panel] (10.75,0) rectangle (17,5.96);
+\node[anchor=west,font=\sffamily\bfseries] at (11,5.6) {B\quad Learn and evaluate};
+\node[box,draw=wmBlue!55,fill=wmBlue!9,text width=2.0cm] (video) at (12.24,4.54) {Video DiT};
+\node[box,draw=wmOrange!55,fill=wmOrange!9,text width=2.0cm] (action) at (15.55,4.54) {Action DiT};
+\draw[arr] (video)--node[above,lab]{OVCR}(action);
+\node[lab,text=wmBlue] at (12.24,3.83) {history + observation};
+\node[lab,text=wmOrange] at (15.55,3.83) {state + instruction};
+\node[box,fill=wmTeal!8,draw=wmTeal!45,text width=5.25cm] at (13.86,2.95) {Joint update of the existing WAM\\$\mathcal L_{\mathrm{action}}+\lambda_v\mathcal L_{\mathrm{video}}$};
+\draw[arr] (12.24,3.62)--(12.24,3.37);\draw[arr] (15.55,3.62)--(15.55,3.37);
+\draw[wmInk!20] (11.05,2.27)--(16.7,2.27);
+\node[anchor=west,lab,font=\sffamily\bfseries\fontsize{7}{8}\selectfont,text=wmPurple] at (11.08,1.94) {Understanding prediction and recovery};
+\node[box,draw=wmPurple!45,fill=wmPurple!7,text width=5.15cm,lab] at (13.87,1.22) {Validation video fidelity $\longleftrightarrow$ task success\\Checkpoint-level comparison on both tasks};
+\node[lab] at (13.87,.38) {Evaluation only; no reward or critic};
+\end{tikzpicture}%
+}

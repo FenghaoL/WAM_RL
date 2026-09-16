@@ -11,34 +11,24 @@ set -eo pipefail
 # ============================================================================
 
 # ---- which model to serve --------------------------------------------------
-# Available (scripts/so101_pipeline/online_deploy/deployments/):
-#
-#   cylinder_v1_sft              cylinder insertion, 4ep SFT       GPU0 :12000
-#                                task: "Pick up the cylinder ..."
-#   padapter_v2_sft              power adapter v2, 4ep SFT         GPU1 :12001
-#   ovcr_p1_full_balanced_video  OVCR p1, full finetune, no adapter GPU2 :12002
-#   ovcr_p1_v32_balanced         OVCR p1, adapter mode=value        GPU3 :12003
-#   ovcr_p1_t4_balanced          OVCR p1, adapter mode=token_kv     GPU0 :12004
-#   ovcr_p1_q32_balanced         OVCR p1, adapter mode=query        GPU1 :12005
-#
-# All ovcr_* and padapter_v2_sft serve the power-adapter task string;
-# only cylinder_v1_sft serves the cylinder one.
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft.yaml"
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_full_pretrained_natural_4ep.yaml"
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_p1_v32_balanced.yaml"
+# Available (scripts/so101_pipeline/online_deploy/deployments/), all on GPU 3.
+# Every model has its own port; the last digit is the variant:
+#   0 SFT   1 full (1:1)   2 vidext   3 segdemo (human spans as demos)   4 demo2to1
+# Older configs live in deployments/archive/.
 
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft_nohist.yaml"
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_p1_v32_balanced_recover.yaml"
+# cylinder: "Pick up the cylinder and insert it into the matching hole."
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft.yaml"                              # :12100
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video.yaml"           # :12101
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_vidext.yaml"    # :12102
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_segdemo.yaml"   # :12103
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_demo2to1.yaml"  # :12104
 
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_v32_balanced.yaml"
-
-
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video.yaml"
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_vidext.yaml"
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_actext.yaml"
-
-#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v2_sft.yaml"
-DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_vidext.yaml"
+# power adapter: "Remove the power adapter from the holder and plug it into the power strip."
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v2_sft.yaml"                              # :12110
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video.yaml"           # :12111
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_vidext.yaml"    # :12112
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_segdemo.yaml"   # :12113
+DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_demo2to1.yaml"  # :12114
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$REPO_ROOT"

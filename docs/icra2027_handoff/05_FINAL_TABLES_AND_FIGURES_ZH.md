@@ -1,6 +1,9 @@
 # 最终实验表格、配图与八个纠正模型的评估协议
 
-> 2026-09-15投稿格式核对：ICRA 2027的补充文字也计入全文8页。本文下述“附录表”是完整研究/交接材料储备，不能默认作为额外不计页的supplement提交。当前正文取舍与排版以[main.tex](main.tex)和[改稿说明](06_MANUSCRIPT_REVISION_AND_FIGURES_ZH.md)为准。
+> 历史规划记录：本次投稿已取消受控恢复范围及2:1配比实验。当前实际表格、模型结果与第三项分析以[实测更新说明](10_RESULTS_AND_PREDICTIVE_RECOVERY_ZH.md)和LaTeX正文为准。
+
+
+> 2026-09-15投稿格式核对：ICRA 2027的补充文字也计入全文8页。本文下述“附录表”是完整研究/交接材料储备，不能默认作为额外不计页的supplement提交。当前正文取舍与排版以[main.tex](latex/main.tex)和[改稿说明](06_MANUSCRIPT_REVISION_AND_FIGURES_ZH.md)为准。
 
 ## 1. 范围与术语：先统一作者和实验人员的理解
 

@@ -1,14 +1,35 @@
 {
   "date": "2026-09-15",
-  "pages_including_references": 7,
-  "page_size": "US Letter",
-  "cited_entries": 8,
-  "numbered_equations": 4,
+  "manuscripts": {
+    "main": {
+      "pages": 8,
+      "typesetting_errors": [],
+      "sha256": "307be07c70fbeebe7fe997aa298ae2daf0cd75d500c8a9bb370acc798e3953a3"
+    },
+    "main_中文全文": {
+      "pages": 7,
+      "typesetting_errors": [],
+      "sha256": "276032ac3579442e6a92bf16ea2d54b938cab9d4bdd284f7b2a916e0868d8320"
+    }
+  },
   "tables": 4,
-  "figures": 2,
-  "unresolved_references": false,
-  "overfull_boxes": false,
-  "type3_fonts": false,
-  "status": "working manuscript, pending results and real experiment figure",
-  "validation": "compiled with official ieeeconf and Tectonic 0.17.0; method and result table pages visually checked"
+  "figures": 3,
+  "english_submission_page_limit_met": true,
+  "video_audit": "analysis/video_results_audit.json",
+  "success_source": "analysis/task_success_results.json",
+  "association_unit": "three checkpoints, separate video validation and real deployments",
+  "power_video_results": "included; analysis/padapter_video_results_audit.json",
+  "removed_experiments": [
+    "controlled-offset recovery",
+    "demo:correction 2:1"
+  ],
+  "third_contribution": "Understanding how video prediction supports error recovery",
+  "references": 14,
+  "model_display_names": {
+    "S": "SFT",
+    "C": "Segment-only",
+    "H": "History",
+    "HV": "History+Future"
+  },
+  "title": "Beyond the Takeover: Human-Corrected Predictive Learning for World–Action Models"
 }

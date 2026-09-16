@@ -1,4 +1,6 @@
-# Power adapter v2, 4-epoch SFT from AHA-WAM-Pretrained (step 5328).
+# Power adapter HIL v3, p1_full_balanced_video_vidext: as padapter_v3_p1_full_balanced_video,
+# but correction future video continues past handback (executing frames of successful
+# rollouts); action labels stay inside the HUMAN span. Final checkpoint step_002664.
 
 checkpoint_path: runs/ovcr_adapter_padapter_hil_v3/p1_full_balanced_video_hilv3_vidext/model/checkpoints/weights/step_002664.pt
 dataset_stats_path: runs/so101_ahawam_padapter_v2/assets/dataset_stats.json
@@ -16,7 +18,7 @@ task: robotwin_ahawam_offset
 # edit leaking into another.
 serving:
   gpu_id: 3
-  port: 12001
+  port: 12112
   host: 127.0.0.1
   action_dim: 6
   max_return_actions: 8
@@ -90,4 +92,4 @@ action_video_freq_ratio: 4
 preview_num_frames: 13
 preview_num_inference_steps: 20
 preview_fps: 3.75
-preview_output_dir: runs/so101_ahawam_padapter_v2/online_previews
+preview_output_dir: runs/ovcr_adapter_padapter_hil_v3/p1_full_balanced_video_hilv3_vidext/online_previews

@@ -1,0 +1,10 @@
+/build/
+*.aux
+*.log
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+figures/*.aux
+figures/*.log

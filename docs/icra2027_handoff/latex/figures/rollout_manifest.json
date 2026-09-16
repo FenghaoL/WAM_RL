@@ -1,0 +1,173 @@
+{
+  "layout": "Each rollout is one row, increasing RPC left to right; SFT above DAgger for each task.",
+  "compact_view": "Original pixel rectangle (0,0,320,256), global camera only; raw files unchanged.",
+  "selection": "Three manually selected frames per rollout. Power SFT uses RPC 634 instead of 636 as requested. These are qualitative examples, not synchronized or paired trial samples.",
+  "outcomes": "User-provided directory labels; exact checkpoint mapping not supplied.",
+  "files": [
+    {
+      "path": "cylinder_dagger_success/rpc_000149_front.png",
+      "sha256": "f31e474aa22747df0f0894d738b65e3bcb875aae390a97ea11fcd2a278c6adb1",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000157_front.png",
+      "sha256": "390f2b45568c105c6f61e47165da74338f554564b5e210fcaadbdee3829a372a",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000165_front.png",
+      "sha256": "f8187f453ecacd67fbd5de6168be8e754dd830b6e05dac2d7292ddae852c815d",
+      "in_paper": true
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000168_front.png",
+      "sha256": "a3c60cfa0c379b82539dd548600ed8b6d447580354eaf2685af82cc97cd2c843",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000171_front.png",
+      "sha256": "32c70c0e3d6164f75328b01c19d8ad3abc896734914b269d6b3da925febf2c1f",
+      "in_paper": true
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000176_front.png",
+      "sha256": "6bcdfa5cedbb0728b6ec878cb6fcd70c33ac5c7c7ea539ab696ad0ad45afb2d0",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000181_front.png",
+      "sha256": "53a2117794e9a6dbfa97001ab6c560b8b70f029fda8b71e043983310797d5248",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_dagger_success/rpc_000184_front.png",
+      "sha256": "90031519db3d3dd82532dd63c90b963ff5bdf0c3c9d371d36c1d0d7d689d8c0b",
+      "in_paper": true
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000065_front.png",
+      "sha256": "442f7acfddca0e54bc70841625246390996803bbc4039f7e5a3581ac576b5a2c",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000072_front.png",
+      "sha256": "d8df9c8cb1ee2bfe420bb41e2ca1f652795fbaa185b6aea1f4b3364b771e736d",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000076_front.png",
+      "sha256": "d350d6644dc79c59c6a0f66e27866bc64cd655cf6b5e08b115123197edf0b07c",
+      "in_paper": true
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000079_front.png",
+      "sha256": "69a77a02e6ebf3a750f8af39faa6c089e939cd9679cd286d9551ee3acda40803",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000085_front.png",
+      "sha256": "a197138ff36e73eb3449a7453dae3dc1b22b420a51251fd59863a2b6764b0daf",
+      "in_paper": true
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000087_front.png",
+      "sha256": "de46856cbcbed4efc69b6c7a5ab3de914e36b543f95af0b63dc0c760e2836c8f",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000088_front.png",
+      "sha256": "08d7a518a2609721bced9e46f6d287cc26c458863ec602913c2a4d252d42b956",
+      "in_paper": false
+    },
+    {
+      "path": "cylinder_sft_fail/rpc_000089_front.png",
+      "sha256": "31238ea26e47b89e441cc8bda2ec7859c964409a21a997620f9fc98c30acf4ad",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000644_front.png",
+      "sha256": "1e9c17e1f880bbe608a09eaccf1f5c9269ebec7c2d2a75f3396299d4a35006b0",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000649_front.png",
+      "sha256": "0029a472137c4cb44cf8dbcb476fa701ceeda2c5fde9f293baf9b7de16c3a351",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000655_front.png",
+      "sha256": "9dbaafe322d43adbfb202350dbaea196d7d955f09e79418f66d65341050a8c2a",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000656_front.png",
+      "sha256": "b8b8f44f8425474a84e9c0f4d8cc3b62350066ac2d3eb0cfceff42f0b5f7ef75",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000662_front.png",
+      "sha256": "2275ed909b5091eb2190192174d9f947ac35fad6293449d57ed9000c3d3b6c67",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000665_front.png",
+      "sha256": "a652d811d9d7f91c26c175a5dd32f5257abfd2976abe9b52f7156717d2f24110",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000679_front.png",
+      "sha256": "f1d275e1ea880acc4382426fc23bd3692bc377dd927818e3b69d591675696206",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_dagger_success/rpc_000681_front.png",
+      "sha256": "e8316402c593be32de24899f2021cc4cf77820e4e15c989e6f149a4e87d61acb",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000608_front.png",
+      "sha256": "3774a3b43efda7b89174c16b3814b775b06c8d9302c4c405c11028eea98a0a8a",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000613_front.png",
+      "sha256": "ccfecac175c1dcee76505e4bd985f6fb6612eab52b32dadc958a869c900ca5a3",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000617_front.png",
+      "sha256": "38df48de4f8900f58a12bbd8c1b705a9dddb20265d4c9cde33d761cf8507ad94",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000619_front.png",
+      "sha256": "7c61d9dbb24f50b3f50ccd0ba5bc7569385e02d6d7bdb6f92c070037158c05ce",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000624_front.png",
+      "sha256": "d55a81c24128c10d2eefa09fbd24b464cfc08711ac9dbbc7b07ce1dbc4cc3da2",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000629_front.png",
+      "sha256": "eb21ead142fbdad366ff6ce15d9248fc5332f8a5d818cdea5b7d2850e5a96772",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000632_front.png",
+      "sha256": "485bc227520e936865ff0f2ef19f314f6a961a90a91c418940a5cd0fe508cb34",
+      "in_paper": false
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000634_front.png",
+      "sha256": "a81530cfc7b0c77f141fce61770ccb869fba87aa5a057161f38d627564251f3c",
+      "in_paper": true
+    },
+    {
+      "path": "power_adapter_sft_fail/rpc_000636_front.png",
+      "sha256": "2aec8b7cc9a534e2d4cbe999cf7f8b0698a3c267068c5b78c95e6be639d588ef",
+      "in_paper": false
+    }
+  ]
+}

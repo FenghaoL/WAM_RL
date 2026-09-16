@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[paperwidth=172mm,paperheight=216.60000000000002mm,margin=0mm]{geometry}
+\usepackage{graphicx,tikz}
+\definecolor{ink}{HTML}{26364A}
+\definecolor{panel}{HTML}{EEF2F6}
+\definecolor{sft}{HTML}{98634E}
+\definecolor{dag}{HTML}{187B75}
+\pagestyle{empty}\setlength{\parindent}{0pt}\setlength{\topskip}{0pt}
+\begin{document}\noindent
+\begin{tikzpicture}[x=1mm,y=1mm]
+\path[use as bounding box] (0,0) rectangle (172,-216.60000000000002);
+\fill[panel,rounded corners=3pt] (1,-5) rectangle (171,-13);
+\node[anchor=west,font=\sffamily\bfseries\small,text=ink] at (4,-9) {a\quad Cylinder insertion};
+\node[anchor=east,font=\sffamily\scriptsize,text=ink] at (168,-9) {Time $\longrightarrow$};
+\node[align=center,text width=16mm,text=sft,font=\sffamily\small] at (10,-35.2) {\textbf{SFT}\\{\scriptsize Failure}};
+\node[anchor=north west,inner sep=0] at (21,-16) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/cylinder_sft_fail/rpc_000076_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (21,-55.400000000000006) {RPC 000076};
+\node[anchor=north west,inner sep=0] at (71,-16) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/cylinder_sft_fail/rpc_000085_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (71,-55.400000000000006) {RPC 000085};
+\node[anchor=north west,inner sep=0] at (121,-16) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/cylinder_sft_fail/rpc_000089_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (121,-55.400000000000006) {RPC 000089};
+\node[align=center,text width=16mm,text=dag,font=\sffamily\small] at (10,-79.60000000000001) {\textbf{DAgger}\\{\scriptsize Success}};
+\node[anchor=north west,inner sep=0] at (21,-60.400000000000006) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/cylinder_dagger_success/rpc_000165_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (21,-99.80000000000001) {RPC 000165};
+\node[anchor=north west,inner sep=0] at (71,-60.400000000000006) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/cylinder_dagger_success/rpc_000171_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (71,-99.80000000000001) {RPC 000171};
+\node[anchor=north west,inner sep=0] at (121,-60.400000000000006) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/cylinder_dagger_success/rpc_000184_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (121,-99.80000000000001) {RPC 000184};
+\fill[panel,rounded corners=3pt] (1,-107.80000000000001) rectangle (171,-115.80000000000001);
+\node[anchor=west,font=\sffamily\bfseries\small,text=ink] at (4,-111.80000000000001) {b\quad Power-adapter insertion};
+\node[anchor=east,font=\sffamily\scriptsize,text=ink] at (168,-111.80000000000001) {Time $\longrightarrow$};
+\node[align=center,text width=16mm,text=sft,font=\sffamily\small] at (10,-138.0) {\textbf{SFT}\\{\scriptsize Failure}};
+\node[anchor=north west,inner sep=0] at (21,-118.80000000000001) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/power_adapter_sft_fail/rpc_000619_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (21,-158.20000000000002) {RPC 000619};
+\node[anchor=north west,inner sep=0] at (71,-118.80000000000001) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/power_adapter_sft_fail/rpc_000629_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (71,-158.20000000000002) {RPC 000629};
+\node[anchor=north west,inner sep=0] at (121,-118.80000000000001) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/power_adapter_sft_fail/rpc_000634_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (121,-158.20000000000002) {RPC 000634};
+\node[align=center,text width=16mm,text=dag,font=\sffamily\small] at (10,-182.40000000000003) {\textbf{DAgger}\\{\scriptsize Success}};
+\node[anchor=north west,inner sep=0] at (21,-163.20000000000002) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/power_adapter_dagger_success/rpc_000656_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (21,-202.60000000000002) {RPC 000656};
+\node[anchor=north west,inner sep=0] at (71,-163.20000000000002) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/power_adapter_dagger_success/rpc_000665_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (71,-202.60000000000002) {RPC 000665};
+\node[anchor=north west,inner sep=0] at (121,-163.20000000000002) {\includegraphics[width=48mm,trim=0 128bp 0 0,clip]{../../figures/rollouts/power_adapter_dagger_success/rpc_000681_front.png}};
+\node[anchor=north west,inner sep=0,font=\sffamily\fontsize{6}{7}\selectfont,text=ink] at (121,-202.60000000000002) {RPC 000681};
+\end{tikzpicture}
+\end{document}

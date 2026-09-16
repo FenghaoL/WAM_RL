@@ -1,0 +1,41 @@
+按你说的，改用 rollout 目录名和数量作为准绳重算了。结论变化不小 —— 之前那版被 attempts.jsonl 里的错误标注污染了。
+
+先说数据结构（rollout 目录是干净的）
+全库共 133 个 rollout 目录，命名格式 {时间戳}__{模型}__{结果}，结构完全规整：
+
+cylinder：13 个初始条件 × 4 个模型 = 52，每个条件正好 4 个 rollout，一模型一次，无遗漏无重复
+power_adapter：20 个初始条件 × 4 个模型 = 80，外加 init_0016 的 segdemo 重跑了一次 = 81
+我把 133 个目录名逐个和目录里的 events.jsonl（evaluation_result 事件）对了一遍，131 个完全一致，只有 3 处不一致，全部集中在 cylinder，正是你说的标注错误（详见下面第 2 节）。
+
+cylinder：把圆柱插入对应孔位（13 个条件）
+模型	成功/总数	成功率
+cylinder_v2_full_balanced_video_vidext	6/13	46.2%
+cylinder_v2_full_balanced_video	5/13	38.5%
+cylinder_v2_full_balanced_video_segdemo	4/13	30.8%
+cylinder_v1_sft	1/13	7.7%
+合计	16/52	30.8%
+power_adapter：电源适配器（20 个条件）
+模型	成功/总数	成功率
+padapter_v3_full_balanced_video_segdemo	15/21	71.4%
+padapter_v3_full_balanced_video	13/20	65.0%
+padapter_v2_full_balanced_video_vidext	11/20	55.0%
+padapter_v2_sft	10/20	50.0%
+合计	49/81	60.5%
+总计：65/133 = 48.9%
+
+三处需要说明的判定
+1. cylinder init_0006 的 segdemo 我按 failure 计入，所以分母是 13 不是 12。那个目录后缀是 __invalid，但里面 events.jsonl 明确记着 evaluation_result: outcome=failure，result.json 的 reason 显示是重命名 _pending → rollouts 时报了 WinError 5 拒绝访问，纯粹是 Windows 文件锁问题，操作员已经打过分了。按 invalid 剔除的话 segdemo 是 4/12 = 33.3%。
+
+2. 那 3 处标注错误，rollout 目录名是对的，attempts.jsonl 是错的：
+
+位置	attempts.jsonl / result.json 写的	rollout 目录名写的
+cylinder/init_0001/20260914T004659	cylinder_v1_sft	cylinder_v2_full_balanced_video
+cylinder/init_0007/20260914T011711	cylinder_v2_full_balanced_video	cylinder_v2_full_balanced_video_vidext
+判定依据不只是"你说以目录为准"：按 ledger 的标注，init_0001 会变成 v1_sft 跑了两次、v2_full 一次没跑；按目录名则每个条件恰好 4 个模型各一次，和整个 cylinder 的 13×4 设计完全吻合。所以是 ledger 被改错了。第 3 处就是上面那个 invalid。
+
+3. padapter_v3_full_balanced_video_segdemo 的 21 是真重复，不是数据错误。init_0016 跑了两次（232438 success、232540 failure），两次的 events.jsonl 都是完整试验（739 / 652 条事件，44.8s / 40.8s），不是中断重来。如果按"每条件只取首次"算，它是 15/20 = 75.0%；按全部试验算就是 71.4%。这个选择只影响它一个模型，其余三个都是干净的 20/20。
+
+另外补一句：padapter_v3_full_balanced_video_vidext 在 133 个 rollout 目录里一个都没有。它在 ledger 里有 4 条记录（3 条 discarded + 1 条 success），但没有任何落盘的 rollout，等于这个模型这轮没有可用数据。我上面的表里就没列它。
+
+一个对不上的地方
+你说分母应该是 13 和 17 —— cylinder 这边 13 对上了，但 power_adapter 我从目录数出来是 20 个条件（init_0001 ~ init_0020，每个都有完整的 4 个模型 rollout），不是 17。有几种可能：是要排除某 3 个条件（比如场景重复或摆放不合规），还是 17 指的是别的东西？你告诉我排除哪几个 init_xxxx，我重算一版。

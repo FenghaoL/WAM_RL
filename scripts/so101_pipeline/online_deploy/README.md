@@ -8,7 +8,7 @@
 | 文件 | 作用 |
 | --- | --- |
 | `settings.yaml` | checkpoint、stats、模型形状和视频参数，主要配置文件 |
-| `run_action_server.sh` | GPU 3、端口 12000，只返回动作，当前同步 DAgger 采集使用 |
+| `run_action_server.sh` | 只返回动作，当前同步 DAgger 采集使用；在脚本里取消注释一行 `DEPLOY_CONFIG` 选模型，GPU/端口/指令读自 `deployments/*.yaml` 的 `serving:`（现均为 GPU 3，端口见脚本注释：cylinder 12100–12104，power adapter 12110–12114） |
 | `run_video_server.sh` | GPU 0、端口 12001，可同时返回动作和未来视频 |
 | `ahawam_tcp_client.py` | 机械臂端客户端、关节坐标转换和双相机拼接 |
 | `deployment_preflight.py` | 服务启动前检查 checkpoint、stats 和配置 |
@@ -45,10 +45,10 @@ bash scripts/so101_pipeline/online_deploy/run_video_server.sh
 
 动作脚本当前使用 GPU 3，视频脚本的 GPU 设置以其文件为准，不要同时启动。服务只监听
 `127.0.0.1`，Windows 端通过
-SSH 隧道访问，例如动作端口：
+SSH 隧道访问，端口换成所选 yaml 的 `serving.port`，例如 cylinder SFT：
 
 ```powershell
-ssh -N -L 12000:127.0.0.1:12000 fenghao@chickadee.engin.umich.edu
+ssh -N -L 12100:127.0.0.1:12100 fenghao@chickadee.engin.umich.edu
 ```
 
 ## 3. 请求和返回

@@ -1,0 +1,41 @@
+{
+  "source": "User-confirmed aggregate results, not reconstructed trial logs",
+  "cylinder": {
+    "S": [
+      1,
+      13
+    ],
+    "C": [
+      4,
+      13
+    ],
+    "H": [
+      5,
+      13
+    ],
+    "HV": [
+      6,
+      13
+    ]
+  },
+  "power_adapter": {
+    "S": [
+      10,
+      20
+    ],
+    "C": [
+      15,
+      20
+    ],
+    "H": [
+      13,
+      20
+    ],
+    "HV": [
+      11,
+      20
+    ]
+  },
+  "power_HV_identity": "User confirmed v2 in message is a typo: padapter_v3_p1_full_balanced_video_vidext.yaml / step_002664.pt",
+  "excluded": "No pooled result; supplied totals 49/81 and 65/133 conflict with individual rows."
+}

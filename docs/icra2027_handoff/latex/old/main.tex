@@ -1,0 +1,336 @@
+% ============================================================================
+% TODO (before submission) — read this first:
+%   1. FIGURES: all figures are PLACEHOLDERS (\figplaceholder). Replace with
+%      real \includegraphics when figures are ready. Image files live in the
+%      repo ROOT (not IROS/), e.g. \includegraphics{Framework_NEW.png}.
+%   2. BIBLIOGRAPHY: \bibliography{new-refs}. All keys cited here are defined
+%      in new-refs.bib. Add AHA-WAM's full citation (title/authors/venue)
+%      there before submission.
+%   3. NUMBERS: every [TBD] in tables/text awaits your real-robot results.
+%   4. Title/authors/affiliations are working values — adjust as needed.
+% ============================================================================
+\documentclass[letterpaper, 10pt, conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+
+%---------- packages ----------
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm, algorithmicx}
+\usepackage{fancyvrb}
+\usepackage{tikz}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{hyperref}
+\usepackage{algpseudocode}
+\usepackage{cite}
+\usepackage{subcaption}
+\usepackage{tabularx}
+
+%---------- placeholder figure helper (delete once real figures are in) ----------
+\newcommand{\figplaceholder}[2][5cm]{%
+  \fbox{\parbox[c][#1][c]{0.92\linewidth}{\centering\textit{[Figure placeholder]}\\[2pt]\textit{#2}}}%
+}
+
+%---------- title & authors ----------
+\title{Beyond Imitation: Real-Robot Offline Reinforcement Learning on World-Action Models}
+
+\author{Fenghao Liu$^{1,2,\dagger}$, Yunpeng Zhu$^{2,3,\dagger}$, A$^{2,\dagger}$, B~$^{4,*}$, Zhangyuan Wang$^{2,*}$%
+\thanks{$^{\dagger}$These authors contributed equally to this work.}%
+\thanks{$^{1}$College of Environmental and Resource Sciences, Zhejiang University, Hangzhou, 310027, China.}%
+\thanks{$^{2}$School of Engineering, Westlake University, Hangzhou, 310030, China.}%
+\thanks{$^{3}$College of Information Science \& Electronic Engineering, Zhejiang University, Hangzhou, 310027, China.}%
+\thanks{$^{*}$Corresponding authors.}%
+}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+%---------- abstract ----------
+\begin{abstract}
+World-action models (WAMs) such as AHA-WAM~\cite{ahawam} have advanced general-purpose manipulation by jointly modeling visual scene dynamics and actions, but they remain purely imitative: they inherit the coverage and quality of their demonstrations and cannot improve from closed-loop interaction. We present, to our knowledge, the first framework to combine a WAM with reinforcement learning (RL), lifting a WAM-based imitation policy beyond its imitation ceiling without retraining the large backbone and without any online RL exploration. The framework is an \emph{improved DAgger loop} that keeps DAgger's interactive skeleton---roll out the policy on the physical robot, aggregate what it visits, retrain---but changes both the supervision and the update rule. A vision-language model (VLM) labels each visited segment as success or failure from the wrist-camera view, replacing human corrective relabeling; preference pairs then contrast the robot's own successful and failed behavior, and a lightweight Gaussian action head on the frozen world-action backbone---warm-started by distillation from the imitation policy and outputting full 6-DOF actions---is updated with a direct preference optimization (DPO) objective. Failed rollouts, which behavior cloning discards, thus become explicit negative supervision. Two further ingredients make the framework practical. An \emph{egocentric-video data pyramid} grounds the visual world model on large-scale first-person video before any target-task action data is used, and \emph{infrastructure-level inference acceleration} (TensorRT FP16 execution, few-step flow matching, and reuse of the video latent and attention KV cache across the action chunk) brings the WAM policy to [TBD]~ms per action chunk, a [TBD]$\times$ speedup that keeps closed-loop control and on-robot data collection inside the real-time budget. We validate the framework on plug insertion, a contact-rich task that stresses precisely the compounding-error and missing-recovery failure modes of imitation, where the improved loop raises grasp-and-insert success from [TBD]\% (imitation) to \textbf{[TBD]\%} ($+$[TBD]~pp), with the largest gains on the contact-heavy insertion phase.
+\end{abstract}
+
+\textbf{Keywords}: World-Action Models, Offline Reinforcement Learning, Preference Optimization, DAgger, Vision-Language Model Feedback, Egocentric Video Pretraining, Inference Acceleration, Contact-Rich Manipulation
+
+%==========================================================================
+\section{Introduction}
+\label{sec:introduction}
+%==========================================================================
+
+World-action models (WAMs) have emerged as a powerful paradigm for general-purpose manipulation: by jointly modeling visual scene dynamics and actions, they inject physical priors into policy learning and outperform action-only vision-language-action (VLA) models~\cite{zitkovich2023rt,mees2024octo,cadene2026lerobot,black2025pi_}. AHA-WAM~\cite{ahawam} exemplifies this trend, coupling action prediction with video-based world modeling through an asynchronous dual-DiT architecture---a low-frequency video planner and a high-frequency action executor---achieving strong performance across simulation and real-robot tasks. Yet despite their richer dynamics modeling, WAMs remain \emph{purely imitative}, and imitation imposes three structural limits that are especially acute for contact-rich tasks:
+
+\textit{(i) Compounding error.} Behavioral cloning assumes the learner visits the same state distribution as the demonstrator. Small deviations---slip during grasp, a mis-aimed approach---push the policy off the demonstration manifold, and errors cascade over the long approach-and-insert trajectory~\cite{ross2011dagger}.
+
+\textit{(ii) Missing corrective behaviors.} Demonstrators produce smooth, successful insertions and rarely exhibit the reactive search-and-recover motions needed after a contact-induced misalignment. An imitation policy therefore never learns what to do when the plug is off-center by a few millimeters.
+
+\textit{(iii) No improvement from interaction.} An imitation policy is frozen at the quality of its data; it cannot refine itself through trial and error, even though every real-robot rollout reveals which contact responses actually succeed.
+
+Plug insertion makes these limits concrete and measurable---it is a contact-rich task whose success is binary, requires tight alignment, and hinges on tactile correction underrepresented in demonstrations---so we adopt it as our validation task. More broadly, reinforcement learning (RL) can in principle address all three limits by optimizing task success rather than demonstrated behavior. But \emph{online} RL on a billion-parameter world-action model on a physical robot is impractical: exploration is unsafe, rewards must be engineered, and data-collection throughput is low. \emph{Offline} preference-based RL offers a practical alternative---provided preferences over the robot's own behavior can be obtained cheaply, without human labeling.
+
+We propose a task-agnostic real-robot learning framework that upgrades DAgger~\cite{ross2011dagger} from behavior cloning to preference optimization on a WAM backbone. The loop keeps DAgger's interactive skeleton: the policy is rolled out on the real robot and the data it visits is aggregated across iterations. It changes both the supervision and the update rule. For supervision, a vision-language model (VLM) judges each visited segment as success or failure from the wrist-camera view under a task rubric, replacing human corrective relabeling entirely; preference pairs then contrast the robot's \emph{own} successful and failed behavior. For the update, a lightweight Gaussian action head on the frozen world-action backbone---warm-started by distillation from the imitation policy---is optimized with a direct preference optimization (DPO)~\cite{rafailov2023dpo} objective rather than cloned toward expert actions. Failed rollouts, which behavior cloning discards, become explicit negative supervision, and the entire update is offline: no value bootstrapping, no reward engineering, no online exploration. Two ingredients make this loop practical on a physical robot: an egocentric-video data pyramid that grounds the world model before action data is spent (Sec.~\ref{subsec:egovideo}), and infrastructure-level acceleration that keeps the WAM within the real-time budget required for closed-loop data collection (Sec.~\ref{subsec:accel}).
+
+Our contributions are threefold.
+\begin{itemize}
+\item \emph{The first WAM+RL framework.} We introduce a task-agnostic improved-DAgger loop that brings reinforcement learning to world-action models: on-robot rollouts are labeled success/failure by a VLM, aggregated into preference pairs over the robot's own behavior, and optimized with a DPO objective on a frozen-backbone action head---no human relabeling, no reward engineering, no online exploration, and no backbone retraining. To our knowledge this is the first work to bring reinforcement learning to world-action models.
+\item \emph{Egocentric-video data pyramid.} Before any target-task action data is used, the visual world model is grounded on large-scale egocentric video, after which progressively narrower tiers of robot demonstrations and VLM-labeled preference rollouts align the policy with the target task. The pyramid decouples abundant action-free video from scarce on-robot interaction and is what makes the downstream preference-learning loop sample-feasible.
+\item \emph{Infrastructure-level inference acceleration.} TensorRT FP16 execution, few-step flow matching, and reuse of the video latent and attention KV cache across the action chunk bring the WAM policy to [TBD]~ms per chunk, a [TBD]$\times$ speedup over the unoptimized baseline, keeping both closed-loop control and on-robot data collection inside the real-time budget. Validated on plug insertion, the full loop improves grasp-and-insert success from [TBD]\% to \textbf{[TBD]\%} ($+$[TBD]~pp).
+\end{itemize}
+
+%==========================================================================
+\section{Related Work}
+\label{sec:related_work}
+%==========================================================================
+
+\subsection{World-Action Models and Imitation}
+VLA models~\cite{zitkovich2023rt,mees2024octo,black2025pi_} unify perception and control but model physical dynamics only implicitly. AHA-WAM~\cite{ahawam} advances this by coupling action prediction with video-based world modeling in an asynchronous dual-DiT design. All of these are imitation-based: they learn from demonstrations and cannot improve from interaction. We keep AHA-WAM's strong perceptual and world-modeling backbone and add the missing interactive-learning loop on top.
+
+\subsection{Video Pretraining and Efficient WAM Inference}
+Video pretraining carries much of the benefit of WAMs~\cite{cheang2024gr2,hu2024vpp,li2025uva}, and egocentric human video in particular has proven a scalable source of visual representations for manipulation, from Ego4D~\cite{grauman2022ego4d} to representation objectives such as R3M~\cite{nair2022r3m}. We bring this recipe to a WAM backbone through an egocentric-video data pyramid that grounds the visual world model before action data is used. On the systems side, Fast-WAM~\cite{yuan2026fastwam} established that video co-training, not test-time imagination, accounts for most of the benefit, enabling a single-pass latent world representation at inference. We adopt this single-pass view and push efficiency further with few-step flow matching~\cite{lipman2023flow}, TensorRT FP16 execution, and KV-cache reuse across the action chunk, which together keep a WAM inside the real-time budget of closed-loop RL on a physical robot.
+
+\subsection{Imitation Learning and DAgger}
+Behavioral cloning suffers from covariate shift and compounding error. DAgger~\cite{ross2011dagger} iteratively aggregates expert-labeled actions on learner-visited states, reducing imitation regret to that of online learning. Classic DAgger, however, still requires a human expert to supply corrective actions, and its behavior-cloning update discards the learner's failed attempts once they are relabeled. We keep DAgger's interactive aggregation skeleton on a world-action-model backbone but replace both ingredients: a VLM supplies outcome labels instead of human corrections, and a preference-optimization update turns the failed attempts into explicit negative supervision.
+
+\subsection{Offline and Preference-Based Reinforcement Learning}
+Online off-policy RL---SAC~\cite{haarnoja2018soft}, scaled to real-robot grasping by QT-Opt~\cite{kalashnikov2018qtopt}---is sample-efficient enough for physical robots but demands sustained online exploration, engineered rewards, and safety supervision. Offline RL~\cite{kostrikov2022iql} removes online interaction by learning from a fixed dataset. Preference-based RL~\cite{christiano2017preferences} additionally removes hand-designed rewards by learning from pairwise comparisons, and recent work automates the labeler with vision-language models, from zero-shot VLM reward models~\cite{rocamonde2024vlmrm} to VLM pairwise preferences~\cite{wang2024rlvmlf}. DPO~\cite{rafailov2023dpo} shows that preferences can be optimized directly, without an explicit reward model or value bootstrapping. We combine these threads: VLM success/failure labels on DAgger-aggregated rollouts drive a DPO update on a frozen WAM backbone---to our knowledge the first reinforcement learning on a world-action model.
+
+%==========================================================================
+\section{Preliminaries: The AHA-WAM Backbone}
+\label{sec:preliminaries}
+%==========================================================================
+
+We build on the AHA-WAM world-action model~\cite{ahawam} as our base imitation system, whose architecture we recap. Given a visual observation history $O^{v}_{\le t}$, a proprioceptive state $s_t$, and a language instruction $l$, AHA-WAM predicts an executable action chunk $A_t=\{a_t,\dots,a_{t+h_a-1}\}$ of horizon $h_a$.
+
+\textbf{Dual-DiT planner--executor.} AHA-WAM decouples world prediction from action execution across two DiT branches. A \emph{low-frequency video DiT} (world planner) maintains a rolling key-value memory over past observations and exposes a reusable layerwise planner context
+\begin{equation}
+\mathcal{C}^{p}_{\tau} = \big\{\big(K^{p,\ell}_{\tau}, V^{p,\ell}_{\tau}\big)\big\}_{\ell=1}^{L},
+\label{eq:planner_ctx}
+\end{equation}
+encoding long-horizon scene evolution; a \emph{high-frequency action DiT} (executor) consumes this context to denoise short action chunks through layerwise joint attention:
+\begin{equation}
+\tilde{H}^{a,\ell}_{t} = \operatorname{Attn}\Big(Q^{a,\ell}_{t},\big[K^{a,\ell}_{t};\tilde{K}^{p,\ell}_{t}\big],\big[V^{a,\ell}_{t};\tilde{V}^{p,\ell}_{t}\big]\Big).
+\label{eq:joint_attn}
+\end{equation}
+This amortizes expensive video-DiT computation across many high-frequency action updates.
+
+\textbf{Observation-Guided Video-Context Routing (OVCR).} Because the planner context is reused across action updates, OVCR adapts it to the latest observation: learnable routing queries pool over current visual tokens, then predict gated residual key--value updates to produce a chunk-specific context $\tilde{\mathcal{C}}^{p}_{t}$ aligned with the real-time execution state.
+
+\textbf{Training objective.} AHA-WAM is trained with a joint flow-matching objective over action chunks and future video latents, $\mathcal{L}=\mathcal{L}_a+\lambda\mathcal{L}_v$, with horizon-adaptive offset training making the executor robust to planner--executor phase misalignment. We freeze this entire backbone and add our interactive-learning loop on top of its features and action executor.
+
+\textbf{Why imitation is not enough.} The flow-matching objective is behavioral cloning: it matches demonstrated actions but never optimizes task success. States displaced off the demonstration manifold by grasp slip or contact misalignment carry no corrective labels, and the policy has no mechanism to learn from its own rollouts. Our framework turns these gaps into a preference-based RL problem seeded by AHA-WAM.
+
+%==========================================================================
+\section{Method}
+\label{sec:methodology}
+%==========================================================================
+
+\subsection{Overview}
+\label{subsec:overview}
+
+Figure~\ref{fig:pipeline} shows the framework. The backbone is first grounded by \textbf{egocentric video pretraining} (Sec.~\ref{subsec:egovideo}), which produces the imitation policy $\pi_0$ (an AHA-WAM-style WAM trained on the data pyramid). On top of $\pi_0$, a single iterative learning loop runs on the physical robot---our improved DAgger (Sec.~\ref{subsec:dagger}): rollouts are labeled success/failure by a VLM, aggregated into preference pairs, and optimized with a DPO update, yielding $\pi^{*}$. The WAM backbone (video planner, OVCR, action executor features) is kept frozen throughout; only a lightweight Gaussian action head is trained. Infrastructure-level acceleration (Sec.~\ref{subsec:accel}) makes the whole loop fast enough to run on the real robot, and no simulator is used in the learning loop.
+
+\begin{figure*}[!htbp]
+\centering
+\figplaceholder[4.5cm]{Pipeline: ego-video pretrain $\to$ $\pi_0$ (AHA-WAM-style WAM) $\to$ improved-DAgger loop (rollout $\to$ VLM success/failure labels $\to$ preference pairs $\to$ DPO update) $\to$ $\pi^{*}$; frozen WAM backbone shared across iterations; acceleration stack at deployment.}
+\caption{Framework overview. Egocentric video pretraining grounds the world-action backbone; the improved-DAgger loop then iterates on the physical robot: the policy is rolled out, a VLM labels visited segments as success or failure, and a DPO update on a frozen-backbone action head turns both successful and failed rollouts into supervision. Infrastructure-level acceleration keeps the policy inside the real-time budget of the physical robot.}
+\label{fig:pipeline}
+\end{figure*}
+
+\subsection{Egocentric Video Pretraining}
+\label{subsec:egovideo}
+
+World-model quality, not the RL algorithm, is the usual bottleneck when a WAM is moved to a new domain: a backbone that has never seen the target scene cannot supply useful planner context to either the imitation policy or the RL head. We therefore ground the visual world model before any target-task action data is used, following the video-pretraining recipe validated by GR-2, VPP, and UVA~\cite{cheang2024gr2,hu2024vpp,li2025uva}.
+
+Our data pyramid has three tiers, narrowing from abundant action-free video toward scarce on-robot interaction:
+\begin{itemize}
+\item \emph{Tier 1: egocentric video} ([TBD]~h). Large-scale first-person video of human manipulation, in the spirit of Ego4D~\cite{grauman2022ego4d} and the egocentric representation learning of R3M~\cite{nair2022r3m}, trains the video branch with the flow-matching video objective only ($\mathcal{L}_v$, no actions). This grounds the planner in manipulation-relevant visual dynamics: hand-object contact, object permanence under occlusion, and insertion-like alignments.
+\item \emph{Tier 2: target-task demonstrations} ([TBD] episodes). Teleoperated plug grasp-and-insert episodes with wrist-camera video, joint states, language, and action labels train the full joint WAM objective $\mathcal{L}=\mathcal{L}_a+\lambda\mathcal{L}_v$, producing the imitation policy $\pi_0$.
+\item \emph{Tier 3: VLM-labeled preference rollouts} (Sec.~\ref{subsec:dagger}). On-robot rollouts of the current policy, labeled success/failure by the VLM, provide the preference pairs for offline RL---including the recovery and failure states that demonstrations lack.
+\end{itemize}
+
+Each tier is an order of magnitude smaller than the one above it, so expensive on-robot data is spent only where cheaper data cannot substitute: the pyramid allocates action-free video to visual grounding, demonstrations to task structure, and robot interaction to preference-based correction.
+
+\subsection{Preference-Aggregated DAgger}
+\label{subsec:dagger}
+
+\textbf{Policy architecture.} We freeze the AHA-WAM backbone and learn a lightweight stochastic action head $\pi_\phi(a\mid s)$ that maps the backbone's latent features (planner context and action-executor hidden state) plus the proprioceptive state to a single-step 6-DOF action $a$. The head is a Gaussian policy whose mean network is \emph{warm-started by distillation} from $\pi_0$ (collapsing its action chunk to a single-step target), so learning starts from an already-competent policy. The state is $s=(I^{\text{wrist}}, \theta, \dot\theta, l, \mathcal{C}^{p})$, comprising the wrist-camera image, joint state, language instruction, and the backbone's planner context; the action $a\in\mathbb{R}^6$ is a bounded joint-velocity command.
+
+\textbf{The loop.} Classic DAgger rolls out the learner, asks a human expert to relabel corrective actions on the states it visits, and behavior-clones the aggregate. We keep this interactive skeleton and replace both the supervision and the update rule. At iteration $k{=}1,\dots,K$ we (i)~roll out $\pi_{k-1}$ on the real robot and record segments $\xi=\{(s_t,a_t)\}_{t=1}^{T}$; (ii)~a VLM judges each segment as success or failure from the wrist-camera view under a task rubric (stable grasp, progressive alignment, increasing insertion depth, no jamming or drop); (iii)~preference pairs $(\xi^{+}\succ\xi^{-})$ are formed over segments sharing initial conditions (plug/socket type and initial pose) and aggregated, $\mathcal{D}_k=\mathcal{D}_{k-1}\cup\{(\xi^{+},\xi^{-})\}$; and (iv)~the head is updated by DPO~\cite{rafailov2023dpo} against the reference policy $\pi_{\text{ref}}=\pi_{k-1}$:
+\begin{equation}
+\mathcal{L}_{\text{DPO}}(\phi) = -\mathbb{E}_{(\xi^{+},\xi^{-})\sim\mathcal{D}_k}\Big[\log\sigma\Big(\beta\big[\log\tfrac{\pi_\phi(\xi^{+})}{\pi_{\text{ref}}(\xi^{+})}-\log\tfrac{\pi_\phi(\xi^{-})}{\pi_{\text{ref}}(\xi^{-})}\big]\Big)\Big],
+\label{eq:dpo}
+\end{equation}
+where $\log\pi_\phi(\xi)=\sum_{t}\log\pi_\phi(a_t\mid s_t)$ is the Gaussian segment log-likelihood. A behavior-cloning anchor on successful segments prevents drift away from demonstrated competence:
+\begin{equation}
+\mathcal{L}(\phi) = \mathcal{L}_{\text{DPO}}(\phi) + \lambda_{\text{bc}}\,\mathbb{E}_{(s_t,a_t)\sim\xi^{+}}\big[-\log\pi_\phi(a_t\mid s_t)\big].
+\label{eq:total}
+\end{equation}
+The output of the loop is $\pi^{*}=\pi_K$.
+
+\textbf{Why this improves DAgger.} Classic DAgger needs corrective action labels---a human must show \emph{what to do}---and its behavior-cloning update then discards the failed rollout actions that triggered the correction. Our variant asks the VLM only \emph{how it went}---success or failure, a far cheaper judgment---and the DPO update uses the robot's own failed attempts as explicit negative supervision: precisely the recovery information that demonstrations lack, obtained with no corrective relabeling at all. Because labels are collected on the \emph{learner's} distribution, the loop directly counteracts compounding error. Two points matter in practice. First, no human is in the labeling loop, so supervision scales with data; we validate VLM labels against human judgments on a held-out subset (Sec.~\ref{subsec:analysis}). Second, we reuse the WAM data schema (visual tokens, proprioception, language), so aggregated data is plug-compatible with the backbone's training stack.
+
+\textbf{Safety.} Rollouts are the loop's only contact with the physical robot: actions are clipped to joint-velocity limits, episodes terminate early on excessive force (sensed via joint torque), plug drop, or workspace breach, and a human kill-switch halts unsafe rollouts. The policy update itself is fully offline---no exploration, no value bootstrapping, no reward engineering.
+
+\subsection{Inference Acceleration and Real-Time Deployment}
+\label{subsec:accel}
+
+Real-robot learning places a hard latency requirement on the policy: closed-loop control must run at the control frequency, and every second of policy latency directly throttles the data-collection throughput of each DAgger iteration. A naive WAM deployment does not meet this requirement, because each action chunk normally pays for a full multi-step denoising pass. Following Fast-WAM's single-pass formulation~\cite{yuan2026fastwam}, our deployment removes test-time future-frame roll-out entirely and stacks three infrastructure-level accelerators:
+\begin{itemize}
+\item \emph{TensorRT FP16 execution.} The action executor, the action head, and the perception encoders are compiled to a static FP16 graph, removing framework overhead from the denoising hot path.
+\item \emph{Few-step flow matching.} Action chunks are denoised with $2$ steps instead of the default $10$, following the distilled few-step samplers used by recent WAM deployments~\cite{yuan2026fastwam}.
+\item \emph{Latent and KV-cache reuse.} The video latent and the planner attention K/V of Sec.~\ref{sec:preliminaries} are computed once per chunk and reused across all denoising steps and all $T_c$ chunk updates, rather than recomputed per step.
+\end{itemize}
+Together these bring the policy to [TBD]~ms per action chunk on [TBD hardware], a [TBD]$\times$ speedup over the unoptimized eager baseline (Sec.~\ref{subsec:efficiency}), which is what makes on-robot learning with a WAM backbone feasible at all.
+
+\begin{algorithm}[t]
+\caption{Preference-Aggregated DAgger on a WAM Backbone}
+\label{alg:pipeline}
+\begin{algorithmic}[1]
+\State \textbf{Input:} imitation policy $\pi_0$ (WAM grounded by ego-video pretraining, Sec.~\ref{subsec:egovideo}), dataset $\mathcal{D}_0$, VLM judge, iterations $K$.
+\State Warm-start Gaussian head $\pi_\phi$ from $\pi_0$ (distillation); $\pi_{\text{ref}}\leftarrow\pi_\phi$.
+\For{$k=1,\dots,K$}
+  \State Roll out $\pi_{k-1}$ on the real robot with safety checks; record segments $\{\xi\}$.
+  \State VLM labels each segment success/failure under the task rubric.
+  \State Form pairs $(\xi^{+}\!\succ\!\xi^{-})$ over shared initial conditions; $\mathcal{D}_k \leftarrow \mathcal{D}_{k-1}\cup\{(\xi^{+},\xi^{-})\}$.
+  \State Update $\phi$ via Eq.~\ref{eq:dpo}--\ref{eq:total} against $\pi_{\text{ref}}$; $\pi_{\text{ref}}\leftarrow\pi_k$.
+\EndFor
+\State \textbf{Return} $\pi^{*}\equiv\pi_K$.
+\end{algorithmic}
+\end{algorithm}
+
+%==========================================================================
+\section{Experiments}
+\label{sec:experiments}
+%==========================================================================
+
+\subsection{Experimental Setup}
+\label{subsec:setup}
+
+\textbf{Hardware.} A 6-DOF robotic arm with a parallel gripper and a wrist-mounted RGB camera; joint position/velocity proprioception. No force/torque sensor is used---contact is inferred from the wrist camera and joint state.
+
+\textbf{Data.} Following the data pyramid of Sec.~\ref{subsec:egovideo}: (i)~[TBD]~h of egocentric human-manipulation video for visual world-model grounding; (ii)~[TBD] teleoperated plug grasp-and-insert episodes for behavior cloning; (iii)~[TBD] on-robot rollout segments labeled by the VLM, forming [TBD] preference pairs over $K{=}$[TBD] DAgger iterations.
+
+\textbf{Task.} Plug grasp-and-insert: the robot grasps a plug and inserts it into a socket until fully seated. We vary plug/socket type and initial pose to test alignment robustness. A trial succeeds if the plug is grasped and inserted to full depth without jamming or dropping.
+
+\textbf{Protocol.} Each method is evaluated over [TBD] independent trials per condition. Training and inference run on a single NVIDIA RTX 4090.
+
+\textbf{Baselines.} All methods share the same backbone, data, and VLM labels; they differ only in how the aggregated rollouts are used. (i)~\emph{Imitation} ($\pi_0$: AHA-WAM backbone, behavioral cloning); (ii)~\emph{DAgger-BC} (the same loop, but successful segments are aggregated and behavior-cloned---classic DAgger with VLM filtering, isolating the preference update); (iii)~\emph{Preference-DAgger} (ours, full loop with the DPO update); (iv)~\emph{Ours w/ human labels} (oracle variant where humans replace the VLM judge) to measure the cost of VLM labeling.
+
+\subsection{Main Results}
+\label{subsec:main_results}
+
+\begin{table}[!htbp]
+\centering
+\caption{Plug grasp-and-insert success across conditions. Entries are successful/total trials (\%). \textbf{[All numbers TBD pending real-robot runs.]}}
+\label{tab:main}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Condition} & \textbf{Imitation} & \textbf{DAgger-BC} & \textbf{Pref-DAgger (ours)} & \textbf{Ours + human labels} \\
+\midrule
+Plug type A & [TBD] & [TBD] & [TBD] & [TBD] \\
+Plug type B & [TBD] & [TBD] & [TBD] & [TBD] \\
+Varied initial pose & [TBD] & [TBD] & [TBD] & [TBD] \\
+\midrule
+\textbf{Average} & \textbf{[TBD]} & \textbf{[TBD]} & \textbf{[TBD]} & \textbf{[TBD]} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+We expect three qualitative patterns, to be confirmed by the runs: (i)~DAgger-BC should improve over imitation by aggregating on-distribution successful behavior, especially in the insertion phase; (ii)~Preference-DAgger should deliver the largest gains, since it additionally exploits failed rollouts as negative supervision; and (iii)~the human-label oracle should sit only marginally above VLM labels, indicating that VLM judging is not the bottleneck.
+
+\subsection{Ablations}
+\label{subsec:ablations}
+
+\begin{table}[!htbp]
+\centering
+\caption{Ablation summary (average over conditions). \textbf{[TBD.]}}
+\label{tab:ablation}
+\begin{tabular}{lc}
+\toprule
+\textbf{Configuration} & \textbf{Success (\%)} \\
+\midrule
+Imitation ($\pi_0$, AHA-WAM BC) & [TBD] \\
+\;\;DAgger-BC (VLM-filtered, BC update) & [TBD] \\
+\;\;Preference-DAgger (full, ours) & [TBD] \\
+\midrule
+Full w/ human preference labels (oracle) & [TBD] \\
+Full w/o BC anchor ($\lambda_{\text{bc}}{=}0$) & [TBD] \\
+Full w/o warm start (no distillation from $\pi_0$) & [TBD] \\
+Full w/o ego-video pretraining (Tier 1 removed) & [TBD] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+We ablate: (a)~\emph{update rule}---DPO vs.\ BC on identical VLM-labeled data, isolating the value of negative supervision; (b)~\emph{label source}---VLM vs.\ human preference labels; (c)~\emph{BC anchor}---Eq.~\ref{eq:total} with vs.\ without $\lambda_{\text{bc}}$; (d)~\emph{warm start}---head initialized by distillation from $\pi_0$ vs.\ from scratch; (e)~\emph{ego-video pretraining}---the full loop with Tier~1 of the data pyramid removed, isolating the contribution of visual world-model grounding; (f)~\emph{DAgger iterations} $K$ and the DPO coefficient $\beta$.
+
+\subsection{Efficiency and Real-Time Deployment}
+\label{subsec:efficiency}
+
+The deployed policy must close the control loop on the robot while also sustaining the data-collection throughput that the DAgger loop requires. We profile the accelerated pipeline of Sec.~\ref{subsec:accel} on [TBD hardware], measuring on-device compute time per action chunk and reporting the median over a steady stream of chunks.
+
+Table~\ref{tab:efficiency} peels the three accelerators off the full stack one at a time, following the protocol of~\cite{yuan2026fastwam}: removing TensorRT FP16 raises per-chunk latency from [TBD]~ms to [TBD]~ms ([TBD]$\times$), additionally disabling latent/KV-cache reuse takes it to [TBD]~ms ([TBD]$\times$), and removing few-step flow matching as well, the fully unaccelerated policy (eager execution, $10$ denoising steps, no reuse), takes it to [TBD]~ms ([TBD]$\times$). The full stack thus delivers a [TBD]$\times$ end-to-end speedup while preserving the deployed behavior, and the resulting latency leaves a [TBD]$\times$ real-time margin inside the control window, which is what makes on-robot data collection practical.
+
+\begin{table}[!htbp]
+\centering
+\caption{Acceleration ablation: on-device latency per action chunk, peeling accelerators off the full stack. \textbf{[All numbers TBD.]}}
+\label{tab:efficiency}
+\begin{tabular}{lc}
+\toprule
+\textbf{Configuration} & \textbf{Latency (ms/chunk)} \\
+\midrule
+Full stack (TensorRT + few-step + reuse) & [TBD] \\
+\;\;$-$ TensorRT FP16 & [TBD] \\
+\;\;$-$ latent/KV-cache reuse & [TBD] \\
+\;\;$-$ few-step flow matching (unaccelerated) & [TBD] \\
+\midrule
+\textbf{End-to-end speedup} & \textbf{[TBD]$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Analysis}
+\label{subsec:analysis}
+
+\textbf{Sample efficiency.} We report success vs.\ number of real-robot rollout episodes across DAgger iterations, the key cost metric for on-robot learning. We expect the preference update to dominate the BC update per episode, since each collected segment contributes supervision whether it succeeds or fails.
+
+\textbf{Where gains come from.} We hypothesize the largest improvements on the insertion phase (tight alignment, contact recovery), precisely where imitation is weakest and where failed attempts are most informative as negatives, rather than the grasp phase where imitation already succeeds.
+
+\textbf{VLM labeling quality.} We report the agreement rate between VLM success/failure labels and human judgments on a held-out subset of rollout segments, and analyze how label noise on millimeter-scale alignment affects the learned policy.
+
+\textbf{Training stability.} We report success across the $K$ DAgger iterations, including the effect of the BC anchor and of $\beta$ on drift from the reference policy.
+
+%==========================================================================
+\section{Discussion}
+\label{sec:discussion}
+%==========================================================================
+
+\textbf{Preference supervision instead of corrective labels.} Classic DAgger asks a human to demonstrate \emph{what to do} on the states the learner visits, then clones those corrections---discarding the failed attempts that triggered them. Our loop asks a much cheaper question---\emph{did it work?}---answered by a VLM, and the DPO update converts both sides of the answer into supervision: successful rollouts reinforce the policy, failed rollouts suppress it. The robot's own mistakes, not just expert knowledge, become training signal, and no human enters the labeling loop. Because the update is offline and anchored to a reference policy, it avoids the value-bootstrapping instability and exploration risk that make online real-robot RL impractical~\cite{ibarz2021how,kalashnikov2018qtopt}.
+
+\textbf{Imitation vs.\ RL on a WAM backbone.} A world-action model brings strong perception and long-horizon planning, but its flow-matching objective is still cloning. Our results indicate that a small preference-optimized head on top of frozen WAM features can capture contact-rich correction without retraining the billion-parameter backbone---suggesting a general recipe: keep the WAM for world understanding, add preference-based RL for interactive refinement.
+
+\textbf{Limitations.} (i)~Contact is inferred from vision and joint state; adding a force/torque sensor would sharpen both the policy and the VLM's judgment. (ii)~VLM labels are noisy at millimeter-scale alignment; the human-agreement study bounds this, but finer-grained VLM feedback (progress scores, pairwise clip comparisons) could help. (iii)~Improvement is bounded by the behaviors the current policy actually produces---preference pairs cannot contrast recovery strategies the policy never attempts. (iv)~The update is fully offline; an online RL stage on top of $\pi^{*}$ is a natural next step.
+
+%==========================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%==========================================================================
+
+We presented, to our knowledge, the first framework combining world-action models with reinforcement learning: a task-agnostic improved-DAgger loop that lifts a WAM-based imitation policy beyond its imitation ceiling on the real robot, without retraining the backbone and without online RL exploration. The loop keeps DAgger's interactive skeleton but replaces its supervision and its update rule: a VLM labels on-robot rollouts as success or failure, and a DPO objective on a frozen-backbone action head turns both successful and failed attempts into supervision---no human corrective relabeling, no reward engineering, no value bootstrapping. An egocentric-video data pyramid grounds the visual world model before any target-task action data is used, and infrastructure-level acceleration (TensorRT FP16, few-step flow matching, latent/KV-cache reuse) brings the policy to [TBD]~ms per action chunk, a [TBD]$\times$ speedup that keeps closed-loop control and data collection inside the real-time budget. Validated on plug insertion, the full loop improves success from [TBD]\% to \textbf{[TBD]\%} ($+$[TBD]~pp), with the largest gains on the contact-heavy insertion phase. More broadly, the results suggest that imitation and preference-based RL are complementary for WAMs: the former gives a safe, sample-efficient starting point, and the latter lifts the policy beyond the imitation ceiling using the robot's own failures. Future work will add an online RL stage on top of the learned policy, and apply the framework to a wider range of contact-rich tasks and to other WAM and VLA backbones.
+
+%---------- acknowledgements ----------
+\section*{ACKNOWLEDGEMENTS}
+This work was supported by the National Key R\&D Program of China (Grant No. 2026YFE0104400), the National Natural Science Foundation of China (NSFC, Grant No. 52401393 and No. 12502288), the Natural Science Foundation of Hangzhou, Zhejiang Province, China (Grant No. 2025SZRJJ1217), and the Guangdong Philosophy and Social Science Foundation (Grant No. GD26YJY18). We also gratefully acknowledge the LoongForge team from Baidu AI Cloud for computational resource support.
+
+%---------- references ----------
+\bibliographystyle{IEEEtran}
+\bibliography{new-refs}
+
+\end{document}

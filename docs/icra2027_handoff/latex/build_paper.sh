@@ -24,12 +24,12 @@ fi
 if command -v pdfinfo >/dev/null 2>&1; then
   manuscript_pages=$(pdfinfo build/main.pdf | awk '/^Pages:/{print $2}')
   echo "Compiled pages: $manuscript_pages (limit: 8, including references)."
-  if (( manuscript_pages > 8 )); then
-    echo 'Page limit exceeded; the top-level preview has not been replaced.' >&2
+  if (( manuscript_pages > 8 )) && [[ "${ALLOW_OVERLENGTH:-0}" != "1" ]]; then
+    echo 'Page limit exceeded; use ALLOW_OVERLENGTH=1 for an explicitly overlength working draft.' >&2
     exit 1
   fi
 else
   echo 'pdfinfo is unavailable; check the page count manually.' >&2
 fi
 cp build/main.pdf main.pdf
-echo 'Updated main.pdf. Pending table cells and figure placeholders still require author review.'
+echo 'Updated main.pdf. Pending measurements and draft hypotheses require author review.'

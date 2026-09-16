@@ -1,0 +1,269 @@
+% Working manuscript, revised 2026-09-15. Pending cells are NOT measured results.
+% Read 06_MANUSCRIPT_REVISION_AND_FIGURES_ZH.md before final submission.
+% Compile from this directory. Official ieeeconf class; 8 pages INCLUDING refs.
+\documentclass[letterpaper,10pt,conference]{ieeeconf}
+\IEEEoverridecommandlockouts
+\overrideIEEEmargins
+\usepackage{graphicx,booktabs,amsmath,amssymb,tabularx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+\usepackage{cite}
+\usepackage{xcolor}
+\newcommand{\pending}{\textit{pending}}
+\newcommand{\figplaceholder}[2]{\fbox{\parbox[c][#1][c]{0.94\linewidth}{\centering\small #2}}}
+\title{Learning Recovery from Human Corrections in Memory-Based World--Action Models}
+% Anonymous review version; the original author block is not submission-ready.
+\author{Anonymous Authors}
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\begin{abstract}
+Human interventions provide corrective actions at states encountered by an imperfect robot policy, but these interventions are often much shorter than the temporal context used by a world--action model (WAM). Treating each intervention as an independent demonstration can remove observations preceding the correction and truncate the future video targets used during joint visual and action learning. We study this mismatch in AHA-WAM and develop a human-gated post-training protocol that separates three temporal supports: past observations for memory, human-controlled actions for imitation, and observed future video for auxiliary prediction. The protocol reconstructs history across intervention boundaries and, in a visual-continuation variant, extends video targets along successful mixed-control trajectories without treating subsequent autonomous actions as expert labels. Full-model updates combine these corrections with original task demonstrations. On a preliminary set of 13 shared cylinder-insertion initializations, task SFT succeeds in 1 trial, context-preserving correction training in 5, and the visual-continuation variant in 6. These results motivate a recovery-focused study rather than establishing superiority of the extension. We specify matched ablations on two precision-manipulation tasks and a controlled-offset evaluation that separates task completion from recovery after a common error. The study frames short-intervention learning as a temporal data-construction problem for predictive policies.
+\end{abstract}
+
+\section{Introduction}
+Precision manipulation exposes a limitation of policies learned from successful demonstrations: small deviations can place a robot in states for which the training set contains few corrective actions. A slightly misaligned grasp may still lift an object, but an insertion policy must subsequently adjust its approach, retreat, or retry. The ability to execute a nominal trajectory and the ability to recover from a displaced state are therefore distinct aspects of performance. Human-gated imitation learning addresses this coverage problem by collecting corrections during policy execution~\cite{dagger,hgdagger,iwr}.
+
+World--action models add a temporal dimension to this problem. AHA-WAM~\cite{ahawam}, the backbone used here, combines a video prediction branch, an action branch, and visual history. A training example consequently contains more than a current observation and an expert action: it also specifies which past observations condition the prediction and which future observations provide visual supervision. These time ranges need not coincide with the interval during which a human holds control.
+
+In our setting, a human typically intervenes after the robot has deviated, moves it toward a feasible alignment, and returns control. The correction may occupy only a small part of the recorded interaction. If that interval is exported as a standalone episode, the memory available at its start becomes empty even though the robot had observed the approach. The same crop can also leave too few future frames for the backbone's video objective. Simply disabling memory during correction training changes the conditioning convention used by the demonstration-trained policy; retaining the architecture while repeatedly presenting truncated contexts also changes its training inputs.
+
+Our central observation is that \emph{the boundary of an expert action label is not necessarily the boundary of usable visual evidence}. Observations preceding a takeover remain relevant to the state in which the correction was demonstrated. Likewise, a subsequently observed video can provide a prediction target even when its accompanying autonomous actions are not suitable expert labels. We operationalize this distinction through three separate temporal supports, illustrated in Fig.~\ref{fig:method}.
+
+The resulting method is a form of human-gated corrective imitation learning with an auxiliary self-supervised visual objective. It uses recorded interaction, human action labels, and the existing WAM losses. It does not require a reward model, a critic, preference pairs, or a new action head. The point of departure from prior intervention learning is the construction of training examples for a policy whose inputs and objectives span both sides of a short correction.
+
+We make three contributions. First, we formulate context-preserving correction training for a memory-based WAM, separating human action supervision from the preceding observed history. Second, we introduce and study an observed-video continuation variant that extends visual supervision across handbacks while keeping action labels restricted to human control. Third, we develop a two-task evaluation protocol that connects full-task success to recovery from shared offset states and examines demonstration replay as a sensitivity factor. Current measured evidence supports improved cylinder performance after corrective post-training; the remaining comparisons are explicitly identified as pending in this working manuscript.
+
+\begin{figure*}[t]
+\centering
+\input{figures/method_overview.tex}
+\caption{Context and supervision across a short intervention. (a) Original demonstrations initialize a task-specific AHA-WAM; human-gated interaction supplies correction examples for full-model post-training with demonstration replay. Video DiT, action DiT, and OVCR are inherited components. (b) For a correction starting at $t$, past observations may precede takeover, action labels stop at the end of the human segment, and eligible future video may continue beyond handback. Visual targets are recorded observations, not generated pseudo-labels. HOLD denotes system waiting and is excluded from the execution timeline used by the extended target.}
+\label{fig:method}
+\end{figure*}
+
+\section{Related Work}
+\subsection{Learning from Human Interventions}
+DAgger aggregates expert supervision at learner-visited states to mitigate distribution shift~\cite{dagger}. HG-DAgger makes this interaction practical by allowing a human to determine when to take control~\cite{hgdagger}. Intervention Weighted Regression emphasizes intervention data during policy learning~\cite{iwr}, while Sirius uses intervention information to weight deployment data and improve policies over successive deployments~\cite{sirius}. These works establish the value of corrective data and selective supervision; neither intervention collection nor balanced replay is new to our method.
+
+Contact-rich manipulation has also motivated changes to how corrections are collected and incorporated. Compliant Residual DAgger combines a compliant intervention interface with residual policy learning and force feedback~\cite{crdagger}. Our setup instead uses takeover teleoperation and the original WAM action representation. We address the temporal support of an intervention example, rather than a new compliance controller or residual action interface.
+
+\subsection{Predictive Models and Temporal Context}
+AHA-WAM couples video and action generation through an asynchronous architecture with observation-guided context routing~\cite{ahawam}. We reuse this architecture and its flow-based training objectives. The architectural details matter here because cropping an intervention affects both memory conditioning and the availability of future video targets. Our method concerns a memory-based instance of a WAM; it does not assume that every WAM requires the same history mechanism.
+
+World models have already been combined with interactive imitation learning. Model-Based Runtime Monitoring uses predictive modeling to help identify failures and request intervention~\cite{monitor}. This is an important distinction from our setting: a human supplies the intervention decision, and the visual objective is used during policy post-training rather than to implement an automatic intervention gate. Our experiments ask how observed temporal context should be retained once a short correction has been collected.
+
+\section{Problem and Backbone}
+\subsection{Human-Gated Interaction}
+We consider a task with instruction $\ell$, visual observation $o_t$ from fixed and wrist cameras, and robot state $s_t$. A recorded interaction is $\tau=\{(o_t,s_t,a_t,c_t)\}_{t=0}^{T_\tau}$, where $c_t$ denotes human control, policy control, or system hold. A maximal valid human-controlled segment is $[b,e]$. Its actions demonstrate how to proceed from the states encountered during a correction, but do not label all states in the robot's rollout.
+
+We distinguish a demonstration set $\mathcal D$ from a correction set $\mathcal H$ extracted from these interactions. The task policy is first trained on $\mathcal D$, then post-trained on a mixture of $\mathcal D$ and $\mathcal H$. The present comparisons use one collected correction dataset per task and independent updates from the same task SFT. They are not experiments over multiple successive DAgger rounds.
+
+\subsection{Memory-Based World--Action Model}
+AHA-WAM contains a video diffusion transformer (DiT), an action DiT, and Observation-Guided Video-Context Routing (OVCR)~\cite{ahawam}. The video branch provides context used by action generation; OVCR updates that context using the current observation. Historical visual tokens are represented through attention key/value memory. During deployment, an action chunk is predicted and a prefix is executed before the next update.
+
+For this paper, it is sufficient to express the conditioning as
+\begin{equation}
+ h_t=\operatorname{sg}\big(E_\theta(C_t^-)\big),\qquad
+ A_t\sim\pi_\theta(\cdot\mid o_t,s_t,h_t,\ell),
+ \label{eq:memory}
+\end{equation}
+where $C_t^-$ contains selected past observations and $\operatorname{sg}$ denotes a stopped gradient. In the implementation, history is reconstructed without backpropagation through its encoding pass, while the current visual and action computation remains trainable. This notation abstracts the backbone's latent variables and chunk offsets; it is not a new recurrent architecture. In particular, our history reconstruction preserves observed context but is not claimed to reproduce every internal state of an indefinitely running deployment cache.
+
+\section{Context-Preserving Corrective Post-Training}
+\subsection{Three Temporal Supports}
+For each valid human-controlled training anchor $t\in[b,e]$, we construct history $C_t^-$, an action target with validity mask $m^a_{tj}$, and a future video target $C_t^+$ with eligibility indicator $m_t^v$. The action index $j$ enumerates the target chunk. A segment-only construction restricts all three to the human interval. Our protocol instead treats their boundaries separately:
+\begin{equation}
+\begin{aligned}
+ C_t^-&=\operatorname{Past}(\tau,t;M,\Delta),\\
+ m^a_{tj}&=\mathbf 1\{\text{target }j\text{ is valid in }[b,e]\},\\
+ C_t^+&=\operatorname{Future}(\tau,t;K,\eta).
+\end{aligned}
+\label{eq:supports}
+\end{equation}
+Here $M$ is the history budget, $\Delta$ the history sampling interval, $K$ the future query horizon, and $\eta$ selects segment-only or extended visual targets. The operators act on the same recorded interaction and respect its validity metadata. Missing observations are not supplied from another episode, and future observations never enter the past-conditioning set.
+
+\subsection{Preserving Context Before Takeover}
+The history operator can access observations before $b$, including those recorded under policy control. This retains evidence of the approach to the corrected state rather than resetting the example at the takeover. Earlier human-controlled observations can also be present; the retained prefix is mixed-control history, not necessarily a purely autonomous sequence.
+
+The comparison is between $(o_t,s_t,h_t^{\mathrm{seg}},a_t^H)$ and $(o_t,s_t,h_t^{\mathrm{rollout}},a_t^H)$, holding the current correction label fixed. The motivation is conditional consistency: the learner should receive available past evidence when imitating an action demonstrated in that context. History itself is an input, not an additional reconstruction objective. This construction does not imply a theoretical guarantee that more history improves every policy, nor does sparse human gating satisfy the full-label assumptions of standard DAgger analyses.
+
+\subsection{Observed Future Video Across Handback}
+The basic context-preserving variant retains video supervision only when an eligible target fits within the correction segment. For short segments, the action target can remain valid even when no complete video target is available. We keep these samples for action learning and mask their direct video loss.
+
+The visual-continuation variant allows the video query to continue after $e$ along the same successful mixed-control rollout. It skips system-hold frames in the execution timeline and retains the existing full-window validity checks. In our configuration, a complete query covers 49 execution-frame positions and supplies 13 sampled video frames. Padding does not convert an incomplete query into a fully supervised one. Extending the visual query does not extend the expert action mask in Eq.~\ref{eq:supports}.
+
+This distinction lets the model use real visual consequences without copying every action that produced them. The extension may contain autonomous execution and later human interventions. It is conditioned on successful recorded interactions and is therefore neither an unbiased sample of autonomous behavior nor evidence that every extended action is desirable. We describe the video objective as self-supervised because its targets come from recorded images; the overall procedure still uses human action supervision and outcome-based selection.
+
+The current video branch is not explicitly conditioned on arbitrary candidate action sequences. Its predictions characterize possible visual continuations under the training distribution, not counterfactual outcomes of a specified control input. This limits how generated videos can be interpreted in the recovery analysis.
+
+\subsection{Joint Objective and Demonstration Replay}
+We preserve the backbone's flow-matching objective~\cite{flow}. For a clean action or video latent $x$ and Gaussian noise $\epsilon$, the linear interpolation and velocity target are
+\begin{equation}
+ x_\sigma=(1-\sigma)x+\sigma\epsilon,\qquad
+ u^*=\epsilon-x.
+ \label{eq:flow}
+\end{equation}
+The corresponding networks predict the velocity under their visual, history, state, and language conditions. The action loss $\ell_i^a$ averages squared velocity error only over valid human action positions for correction samples; demonstration samples retain their ordinary valid actions. The video loss $\ell_i^v$ operates in the backbone's video latent space. Both retain the original noise-schedule weights, which we include in the per-sample losses.
+
+For a local training minibatch $B$, the implemented masked objective is
+\begin{equation}
+ \widehat{\mathcal L}(B)=
+ \frac{1}{|B|}\sum_{i\in B}\ell_i^a+
+ \lambda_v\frac{\sum_{i\in B}m_i^v\ell_i^v}
+ {\max(1,\sum_{i\in B}m_i^v)}.
+ \label{eq:loss}
+\end{equation}
+Distributed training averages the local objectives across devices. Normalizing the video term over eligible samples avoids reducing its scale merely because a minibatch contains short action-only corrections. It also means that a nominal source ratio is not the same as the ratio of effective video supervision. All correction configurations here use $\lambda_v=1$; the video experiment changes target eligibility and extent, not whether a video objective exists.
+
+We sample anchors with nominal distribution $q_r=r\mathcal D+(1-r)\mathcal H$. The main setting uses demo:correction $1{:}1$ ($r=1/2$); a sensitivity setting uses $2{:}1$ ($r=2/3$). Replay exposes the model to nominal task behavior alongside local recovery actions. We do not introduce a new replay algorithm or claim that either ratio is universally optimal. Because examples contribute different numbers of valid action and video targets, the source mixture and supervision coverage are reported separately.
+
+Post-training updates the video DiT, action DiT, and existing routing parameters. The text encoder and video autoencoder are not the target of adaptation. The method adds no actor, critic, or adapter; the contribution is how recorded interaction is used by the existing predictive policy. Full-model updates permit both current visual features and action generation to adapt to corrections, while the historical encoding path in Eq.~\ref{eq:memory} remains detached.
+
+\section{Experimental Design}
+Our experiments address three questions: (Q1) does corrective post-training improve autonomous task completion? (Q2) how do history construction and future visual support affect recovery from a shared error state? (Q3) how sensitive is the resulting policy to demonstration replay? Table~\ref{tab:configs} defines the comparisons. Pending measurements are marked explicitly rather than presented as completed experiments.
+
+\begin{table}[t]
+\centering\small
+\caption{Correction configurations, instantiated separately for both tasks. All have a video loss. ``Segment'' refers to its target boundary, not disabling the video branch. S is the original task SFT.}
+\label{tab:configs}
+\begin{tabular}{llll}
+\toprule
+ID & Correction history & Future video & Demo:H \\
+\midrule
+S & --- & --- & Demo only \\
+C & Within segment & Segment & 1:1 \\
+H & Across takeover & Segment & 1:1 \\
+HV & Across takeover & Extended & 1:1 \\
+H2 & Across takeover & Segment & 2:1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Robot, Tasks, and Data}
+We use a low-cost SO101 arm with a fixed camera and a wrist camera. The policy receives images and robot state and predicts six-dimensional robot action vectors in the existing task representation; these are not described as Cartesian six-degree-of-freedom poses. The tasks are cylinder insertion and power-adapter manipulation with a final insertion stage.\footnote{To accommodate the SO101's force limits, we use a socket housing with its internal components removed, evaluating geometric alignment and insertion rather than electrical mating or the insertion-force requirements of an intact socket.} Full-task evaluation starts from the task's prescribed initial scene; local recovery evaluation starts with the object already grasped near the insertion target. These settings measure different capabilities and are reported separately.
+
+
+Each task SFT is trained for four epochs on its original demonstrations, without the later correction data. Human-gated interactions are then collected using the task policy. The human primarily intervenes after a deviation and teleoperates a correction. This makes recovery a natural evaluation target, without establishing that the learned policy cannot also avoid some errors. We use the cylinder correction set and the newly collected power-adapter set with the corrected camera setup; earlier power-adapter corrections from a mismatched camera setup are excluded.
+
+Training and validation corrections are separated by complete recorded rollouts rather than randomly splitting overlapping windows. This matters because different windows may reuse the same pre-takeover observations or post-handback future. Table~\ref{tab:data} reports the current training manifests. Counts describe valid human frames and segments, not the total amount of autonomous recording, and should not be interpreted as independent training examples of equal duration.
+
+\begin{table}[t]
+\centering\small
+\caption{Correction training manifests. A rollout may contain multiple human segments. Coverage columns require a common loader audit; missing measurements are not zero.}
+\label{tab:data}
+\begin{tabularx}{\columnwidth}{@{}Xrr@{}}
+\toprule
+ & Cylinder & Power adapter \\
+\midrule
+Human-controlled frames & 3460 & 4289 \\
+Human segments & 121 & 110 \\
+Training rollouts & 82 & 67 \\
+Median segment duration & \pending & \pending \\
+Zero-history anchors, C / H & \pending & \pending \\
+Eligible video targets, H / HV & \pending & \pending \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Training and Controlled Comparisons}
+All correction variants for a task start independently from the same four-epoch task SFT. We use three GPUs, four samples per device, one gradient-accumulation step, and a global batch size of 12. The correction learning rate is $10^{-5}$ with a cosine schedule, weight decay 0.01, and gradient clipping at 1.0. The configured budgets are 3285 optimizer steps for cylinder and 2664 for power adapter. The chosen checkpoint and actual completed step must be attached to each evaluation batch. These are matched update budgets within a task, not four additional epochs over every correction mixture.
+
+The backbone uses a budget of six history frames. C truncates correction history at the intervention boundary, rather than disabling memory during all training or deployment. For cylinder, C retains the history stride and hold filtering of H while changing the cross-boundary setting. For power adapter, the current C configuration also changes the history stride and hold filtering; its comparison with H therefore tests the history construction as a whole, not a single boundary switch. We do not pool these contrasts as identical one-factor ablations.
+
+H and HV share human action labels, history construction, source ratio, and update budget, and differ in visual continuation. H and H2 isolate the source ratio within the non-extended setting. HV and H2 differ in both ratio and video support and cannot isolate either factor. Across deployment comparisons we hold camera setup, task instruction, normalization, action sampling settings, and chunk execution settings fixed.
+
+\subsection{Full-Task Evaluation}
+Full-task success requires autonomous completion of the prescribed task, without intervention during the evaluated rollout. An incomplete insertion or a movement toward the target is not counted as success. For expanded testing, we specify shared initialization definitions and interleaved trial order to reduce session effects. The initial cylinder batch contains 13 shared scenes; the available common summary uses the first rollout for each model in each scene. This reporting rule was clarified retrospectively. Extra repeats with unequal counts are not mixed into this summary.
+
+The expanded protocol targets 20--30 trials per model and task, recording the actual denominator when budgets differ. We retain initialization IDs, repeated-trial IDs, checkpoint identifiers, and failure stages. Repeated attempts from one layout are distinguished from new layouts. Paired comparisons require the scene-level outcome matrix; aggregate counts alone are insufficient for a paired significance test. Marginal intervals are descriptive, and small absolute differences are interpreted with their uncertainty.
+
+\begin{table}[t]
+\centering\small
+\caption{Autonomous full-task completion. Current cylinder values are preliminary first-rollout counts on 13 shared scenes, reported by the experimenter. Final checkpoint-to-trial records and expanded testing remain to be reconciled. Brackets show descriptive 95\% Wilson intervals.}
+\label{tab:success}
+\begin{tabular}{lll}
+\toprule
+Method & Cylinder success/n (\%) & Power adapter \\
+\midrule
+S & 1/13 (7.7) [1.4, 33.3] & \pending \\
+C & \pending & \pending \\
+H & 5/13 (38.5) [17.7, 64.5] & \pending \\
+HV & 6/13 (46.2) [23.2, 70.9] & \pending \\
+H2 & \pending & \pending \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Controlled Recovery Evaluation}
+A natural rollout does not provide a common recovery test: two policies may reach different error states, or one may never attempt the same insertion. We therefore define a separate, controlled local initialization. The object is placed in a fixed grasp at a fixed height and orientation near its target. In addition to the centered condition, we use four planar directions at two offset magnitudes, giving nine conditions. The two magnitudes are selected on development trials and then fixed; their measured task-specific values remain to be entered before data collection. This is a sampled cross-shaped set, not a continuous recovery basin or an ordinary $3\times3$ grid.
+
+The primary comparison is H versus HV, with three repeats per condition and model: 54 short trials per task. Centered starts are reported separately, leaving 24 displaced starts per model for the recovery denominator. Both policies receive the same prescribed observation-prefix protocol and cache reset. If only a single initial frame is provided, both use the same cold start; this is labeled as such rather than equated with full-task history. Trials are interleaved under the same reset procedure.
+
+The primary metric is insertion completion within a fixed stage timeout $T$, without assistance. We additionally report the capped recovery time, using actual completion time on success and $T$ for an unsuccessful or assisted trial. This penalizes failures rather than reporting only the speed of successful attempts. A retry is a pre-defined approach/contact followed by withdrawal and another attempt; retry counts must be interpreted alongside completion, since a stalled robot may make few retries. The timeout, insertion criterion, and retry rubric are fixed before comparing models.
+
+\begin{table}[t]
+\centering\small
+\caption{Controlled recovery: planned H/HV comparison. Recovery excludes centered starts. All entries are pending; denominators are the proposed budget, not completed trials. Time includes failures capped at the fixed timeout.}
+\label{tab:recovery}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llcccc}
+\toprule
+Task & Model & Recover & Center & Time & Retries \\
+ & & /24 & /3 & (s) & \\
+\midrule
+Cylinder & H & \pending & \pending & \pending & \pending \\
+ & HV & \pending & \pending & \pending & \pending \\
+Power & H & \pending & \pending & \pending & \pending \\
+ & HV & \pending & \pending & \pending & \pending \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\IfFileExists{figures/experiment_panel.pdf}{\includegraphics[width=\linewidth]{figures/experiment_panel.pdf}}{%
+\figplaceholder{5.0cm}{Experiment figure to replace with real material.\\[5pt]
+(a) SO101 setup and both insertion targets, with fixed/wrist camera views.\\
+(b) Measured center + four directions $\times$ two offsets; H/HV counts per condition.\\
+(c) Matched recovery frames with actual timestamps; include an unsuccessful case.\\[5pt]
+No success map or robot image has been synthesized for this placeholder.}}
+\caption{Task setup and controlled recovery evaluation (figure pending). The final panels should show actual apparatus, the tested offset coordinates, and measured recovery outcomes. Each displaced condition receives the same repeat budget for H and HV. Representative trajectories illustrate observable corrections; they do not replace the completion counts in Table~\ref{tab:recovery}.}
+\label{fig:experiments}
+\end{figure*}
+
+\section{Results and Analysis}
+\subsection{Current Full-Task Evidence}
+In the shared 13-scene cylinder summary, S succeeds in 1 trial, H in 5, and HV in 6 (Table~\ref{tab:success}). The observed differences from S are 30.8 and 38.5 percentage points, respectively. These descriptive results are consistent with a benefit from the overall corrective post-training recipe in this batch. They do not by themselves separate the effects of additional human data, history construction, replay, and visual supervision.
+
+The H--HV difference is only one successful initialization. We therefore do not infer a reliable advantage for visual continuation from the current full-task counts. The experimenter observed directional adjustments after a misplaced approach and movement toward the hole following an offset insertion attempt. Such behavior motivates the controlled recovery experiment, but qualitative smoothness is not substituted for a measured recovery-time improvement. Power-adapter results and the C/H2 comparisons have not yet been supplied in the available evidence.
+
+\subsection{Interpreting the Ablations}
+The C--H contrast tests whether retaining preceding interaction context helps correction learning. A positive effect would support the importance of the training example's temporal conditioning in this backbone. A null effect would not establish that memory is unnecessary: neither variant removes memory from the original task SFT, and segment-only examples can still contain some past frames. The additional power-adapter history changes further limit a one-switch interpretation.
+
+The H--HV contrast tests the scope of observed future supervision. If HV improves local completion or capped recovery time while full-task success remains close, the result would identify a stage-specific benefit that the aggregate endpoint can obscure. If only visual prediction improves, the conclusion is limited to the auxiliary objective. These are interpretation criteria for pending measurements, not predicted outcomes. Because continuation changes both which anchors obtain video supervision and what those targets contain, this contrast does not separately identify supervision quantity and target content.
+
+The H--H2 contrast examines replay sensitivity at a fixed update budget. We inspect full-task completion and, where trial videos permit, the fraction reaching the grasp and insertion stages. Better early-stage completion with unchanged local recovery would be consistent with greater retention of nominal behavior. However, changing the ratio also changes correction exposure, so this comparison is not a pure forgetting measurement. Two ratios support a local sensitivity analysis, not an optimum or a general data-scaling law.
+
+\subsection{Visual Prediction as a Diagnostic}
+An optional diagnostic uses held-out recovery starts with identical observed histories, instructions, prediction horizons, sampling steps, and random seeds for H and HV. One input from each of the nine conditions per task and two seeds per model would produce 72 generated clips from 18 distinct inputs. Generation is performed in an isolated state so generated frames cannot become supposedly observed history or alter the live control cache.
+
+The diagnostic records object/grasp continuity, visible movement toward alignment, and obvious visual violations such as teleportation. Ambiguous insertion depth is labeled unjudgeable. When a held-out real future is available, every model is compared with the same recorded continuation, with execution-time alignment matching the training timeline. A plausible generated insertion is not evidence that the action policy completes it: the video head is not an action-conditioned simulator, and a fixed initial state need not have a unique valid future. For this reason, video prediction remains a secondary analysis rather than a proxy for task success.
+
+\section{Discussion and Limitations}
+The method distinguishes the authority of an action label from the usefulness of an observation. Human actions specify a local behavioral target; preceding observations describe the state in which that action was supplied; subsequent observations provide a visual learning target. Keeping these roles separate is particularly relevant when a predictive policy is trained from interventions shorter than its temporal window. It also clarifies the scope of self-supervision: no additional labels are needed for the recorded-image prediction target, but human corrections and successful-trajectory selection remain essential supervision.
+
+There are important empirical limits. Current measured results cover one task and a small shared initialization set, with single trained checkpoints rather than multiple training seeds. Hardware variation, calibration, and trial ordering can affect low-cost robot performance; they have not been isolated as causes of the baseline's failures. We consequently make no claim of robustness to quantified actuator drift, no WAM--VLA superiority claim, and no causal attribution of recovery specifically to Video DiT. The controlled experiment samples a few offsets and cannot establish a continuous safe recovery region.
+
+The method also retains selection bias from human intervention and successful future continuations. It learns from states humans choose to correct, not from exhaustive exploration, and does not optimize a return or learn a value function. Broader recovery coverage, multiple collection rounds, and comparisons across predictive backbones are natural next steps. They require additional evidence rather than a relabeling of this supervised post-training procedure as reinforcement learning.
+
+\section{Conclusion}
+We study how short human interventions should be used to adapt a memory-based world--action model. The proposed protocol preserves pre-takeover visual context, restricts corrective action labels to human control, and optionally extends observed future-video supervision along successful mixed-control interactions. Preliminary cylinder results show higher completion counts after corrective post-training, while the relative benefit of visual continuation remains unresolved. Matched configuration comparisons and controlled-offset recovery tests provide a concrete way to evaluate this distinction. The resulting perspective is a temporal data-construction approach to learning recovery with predictive robot policies.
+
+\section*{ACKNOWLEDGEMENTS}
+This work was supported by the National Key R\&D Program of China (Grant No. 2026YFE0104400), the National Natural Science Foundation of China (NSFC, Grant No. 52401393 and No. 12502288), the Natural Science Foundation of Hangzhou, Zhejiang Province, China (Grant No. 2025SZRJJ1217), and the Guangdong Philosophy and Social Science Foundation (Grant No. GD26YJY18). We also gratefully acknowledge the LoongForge team from Baidu AI Cloud for computational resource support.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

@@ -1,7 +1,7 @@
-# cylinder HIL v2, p1 full balanced-video: full finetune from the cylinder task SFT,
-# no adapter block. History was trained crossing the takeover start with SYSTEM_HOLD
-# skipped (48 executing frames). step_002190 is an intermediate checkpoint of a run
-# that was still training when this file was written (final step: 3285).
+# Cylinder HIL v2, p1_full_balanced_video: full finetune (no adapter block) from the
+# cylinder SFT step_006572 on demos + hil_v2 HUMAN spans, demo:correction = 1:1.
+# Correction history crosses the takeover start with SYSTEM_HOLD skipped (48 executing frames);
+# future video stops at the span end. Final checkpoint step_003285.
 
 checkpoint_path: runs/ovcr_adapter_cylinder_hil_v2/p1_full_balanced_video_hilv2/model/checkpoints/weights/step_003285.pt
 dataset_stats_path: runs/so101_ahawam_cylinder_v1/assets/dataset_stats.json
@@ -19,7 +19,7 @@ task: robotwin_ahawam_offset
 # edit leaking into another.
 serving:
   gpu_id: 3
-  port: 12000
+  port: 12101
   host: 127.0.0.1
   action_dim: 6
   max_return_actions: 8

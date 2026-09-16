@@ -1,11 +1,23 @@
 # 2026-09-15：论文改稿、八页预算与最终图件
 
+> 后续融合修订：`main.tex`已恢复，初稿引言/骨干/总览已融合，PDF当前为8页，英文插座脚注已同步。下文关于7页和main.tex暂缺的描述保留为当时记录，最新取舍见[融合说明](07_OLD_DRAFT_INTEGRATION_ZH.md)。
+
+### 插座夹具补充说明
+
+用户补充：SO101无法提供原装插座所需的插入力，实际使用移除内部组件的插座外壳。已在中文稿V-A任务描述后加一句，限定为几何对准与插入评估。该事实影响任务定义，放在实验设置或首次描述任务的脚注即可，不必在摘要或贡献中反复强调。
+
+参考放置方式：[CR-DAgger §4.1](https://arxiv.org/html/2506.16685#S4.SS1)将齿轮材质、轴和底板抬高设置放在任务描述；[RSS 2021插入研究](https://www.roboticsproceedings.org/rss17/p088.pdf)在任务/实验叙述中交代连接器、夹具和测试条件。这是对信息位置的参考，未查到可核实的“同样拆空插座并仅用脚注说明”的直接先例，不据此声称别人也采用相同简化。
+
+随后`main.tex`已恢复，英文脚注现已直接插入第V-A节（Robot, Tasks, and Data）首次介绍power-adapter任务的句末，源文件第145行；PDF已重新编译，仍为7页。可复用文本保存在[socket_fixture_note.tex](socket_fixture_note.tex)：
+
+> To accommodate the SO101's force limits, we use a socket housing with its internal components removed, evaluating geometric alignment and insertion rather than electrical mating or the insertion-force requirements of an intact socket.
+
 ## 1. 现在读哪份
 
-- [main.tex](main.tex)：英文论文源稿，按现有实现整体重写。
+- [main.tex](latex/main.tex)：英文论文源稿，按现有实现整体重写。
 - [main_中文全文.md](main_中文全文.md)：对应的完整中文阅读稿，公式统一使用`$`和`$$`。
-- [main.pdf](main.pdf)：实际编译的双栏工作稿，当前**7页，包含参考文献**。为新结果、真实组合图与最终复现参数保留约1页；不应为凑满8页加入未做方法。
-- [references.bib](references.bib)：本次核验并实际引用的8个条目，替代不存在的`new-refs.bib`依赖。
+- [main.pdf](latex/main.pdf)：实际编译的双栏工作稿，当前**7页，包含参考文献**。为新结果、真实组合图与最终复现参数保留约1页；不应为凑满8页加入未做方法。
+- [references.bib](latex/references.bib)：本次核验并实际引用的8个条目，替代不存在的`new-refs.bib`依赖。
 - [figures/method_overview.tex](figures/method_overview.tex)：可编辑TikZ方法矢量图，已经进入PDF。
 
 当前PDF用于协作写作：有`pending`和实验图占位，不是可以直接投稿的完整结果论文。填结果时应同步摘要、结果分析、结论和中文版；没有完成的实验需要删去相应承诺，不能仅把将来时改为过去时。
@@ -96,7 +108,7 @@ demo比例用行内$q_r=r\mathcal D+(1-r)\mathcal H$足够；超时计分用文�
 
 ## 9. 编译与验证
 
-使用同目录[build_paper.sh](build_paper.sh)。优先latexmk，其次本机tectonic，再次pdflatex＋bibtex。例：
+使用同目录[build_paper.sh](latex/build_paper.sh)。优先latexmk，其次本机tectonic，再次pdflatex＋bibtex。例：
 
 ```bash
 cd docs/icra2027_handoff
