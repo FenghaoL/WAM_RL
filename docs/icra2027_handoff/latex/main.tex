@@ -12,17 +12,17 @@
 \usepackage{xcolor}
 \newcommand{\pending}{\textit{pending}}
 \newcommand{\figplaceholder}[2]{\fbox{\parbox[c][#1][c]{0.94\linewidth}{\centering\small #2}}}
-\title{Beyond the Takeover: Human-Corrected Predictive Learning for World--Action Models}
-% Named author version requested by the authors.
-\author{Fenghao Liu$^{1,*}$, Yunpeng Zhu$^{2,*}$, Lixi Fan$^{3,*}$,\\
-Zhangyuan Wang$^{2,\dagger}$\thanks{$^{*}$Equal contribution. $^{\dagger}$Corresponding author. $^1$University of Michigan; $^2$Westlake University; $^3$Zhejiang University.}}
+\title{HSI-WAM: Human-Corrected Predictive Self-Improvement for World--Action Models}
+% Anonymous review version.
+% Explicit bold font for scores avoids ieeeconf TU/ptm bold substitution.
+\newcommand{\bestscore}[1]{{\fontencoding{OT1}\fontfamily{cmr}\fontseries{bx}\selectfont #1}}
 \begin{document}
 \maketitle
 \thispagestyle{empty}
 \pagestyle{empty}
 
 \begin{abstract}
-World--action models (WAMs), such as AHA-WAM, advance general-purpose manipulation by jointly modeling visual scene dynamics and actions. However, demonstration-trained WAMs remain limited by the coverage and quality of their training data, leaving closed-loop interaction experience untapped. Interactive learning frameworks such as HG-DAgger can supply corrective behaviors through human takeovers at critical moments of autonomous execution. Yet for WAMs that predict actions and video in temporal context, these short interventions can omit the visual evidence needed to interpret the evolving physical scene. We present an interactive learning framework for memory-based WAMs that transforms human-gated real-robot deployments into temporally contextualized corrective experience. Its core mechanism, human-corrected predictive policy self-improvement, couples human-supervised action learning with prediction of observed visual continuations. Pre-takeover observations preserve memory context, human corrections specify the behavior to imitate, and eligible post-handback video extends visual supervision without treating autonomous actions as expert labels. Preliminary real-robot results show improved completion on cylinder and power-adapter insertion, with qualitative evidence of recovery from multiple execution errors. We further introduce a recovery-oriented prediction--behavior analysis to investigate whether task-relevant video prediction fidelity is associated with real-robot recovery performance.
+World--action models (WAMs), such as AHA-WAM, advance general-purpose manipulation by jointly modeling visual scene dynamics and actions. However, demonstration-trained WAMs remain limited by the coverage and quality of their training data, leaving closed-loop interaction experience untapped. Interactive learning frameworks such as HG-DAgger can supply corrective behaviors through human takeovers at critical moments of autonomous execution. Yet for WAMs that predict actions and video in temporal context, these short interventions can omit the visual evidence needed to interpret the evolving physical scene. We present HSI-WAM, an interactive learning framework for memory-based WAMs that transforms human-gated real-robot deployments into temporally contextualized corrective experience. Its core mechanism, human-corrected predictive self-improvement, couples human-supervised action learning with prediction of observed visual continuations. Pre-takeover observations preserve memory context, human corrections specify the behavior to imitate, and eligible post-handback video extends visual supervision without treating autonomous actions as expert labels. Preliminary real-robot results show improved completion on cylinder and power-adapter insertion, with qualitative evidence of recovery from multiple execution errors. We further introduce a recovery-oriented prediction--behavior analysis to investigate whether task-relevant video prediction fidelity is associated with real-robot recovery performance.
 \end{abstract}
 
 \section{Introduction}
@@ -42,19 +42,19 @@ Human-gated DAgger supplies corrective actions at learner-visited states by allo
 
 Our central observation is that \emph{the boundary of an expert action label need not delimit useful visual evidence}. We preserve pre-takeover observations as context and extend eligible video targets along recorded successful continuations, while restricting expert actions to human control. Original demonstrations are replayed alongside corrections to update the existing WAM. Figure~\ref{fig:framework} presents the interaction workflow; Figure~\ref{fig:method} specifies its temporal supports.
 
-We call this perspective \emph{Beyond the Takeover}: a short human intervention anchors learning, while its surrounding real-world context supplies evidence about how the correction is situated and how the scene subsequently evolves. This separates the scarcity of expert action labels from the availability of visual experience. The resulting framework connects interactive imitation with predictive post-training, using the existing WAM as both a policy and a model of visual continuation.
+We introduce \emph{HSI-WAM}, a framework for human-corrected predictive self-improvement: a short human intervention anchors learning, while its surrounding real-world context supplies evidence about how the correction is situated and how the scene subsequently evolves. This separates the scarcity of expert action labels from the availability of visual experience. The resulting framework connects interactive imitation with predictive post-training, using the existing WAM as both a policy and a model of visual continuation.
 
 Our contributions are threefold:
 \begin{itemize}
-\item \emph{An interactive learning framework for WAMs.} We integrate human-gated real-robot interaction, temporally contextualized correction construction, and demonstration replay to adapt an existing WAM at the deviations encountered during precision manipulation.
-\item \emph{Human-corrected predictive policy self-improvement.} We combine human action supervision, observed history, and future-video self-supervision, enabling short corrections to guide learning from longer mixed-control experience while preserving distinct supervision boundaries.
+\item \emph{HSI-WAM: an interactive learning framework for WAMs.} We integrate human-gated real-robot interaction, temporally contextualized correction construction, and demonstration replay to adapt an existing WAM at the deviations encountered during precision manipulation.
+\item \emph{Human-corrected predictive self-improvement.} We combine human action supervision, observed history, and future-video self-supervision, enabling short corrections to guide learning from longer mixed-control experience while preserving distinct supervision boundaries.
 \item \emph{Understanding how video prediction supports error recovery.} We investigate the interplay between predictive fidelity and corrective behavior through temporal-support ablations and checkpoint-level comparison of held-out video prediction with real-robot success. Cylinder exhibits aligned predictive and behavioral improvement, while power adapter reveals a prediction--execution gap that delineates the limits of this relationship.
 \end{itemize}
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/interactive_learning_framework.jpg}
-\caption{Real-robot interactive learning framework. Two-view demonstrations initialize the WAM. Human takeovers and surrounding observations provide corrective experience for post-training with demonstration replay. The diagram depicts an iterative workflow; the present experiments evaluate one correction round.}
+\caption{HSI-WAM interactive post-training framework. Two-view demonstrations initialize the WAM. Human takeovers and surrounding observations provide corrective experience for post-training with demonstration replay. The diagram depicts an iterative workflow; the present experiments evaluate one correction round.}
 \label{fig:framework}
 \end{figure*}
 
@@ -65,8 +65,12 @@ DAgger addresses distribution shift by aggregating expert supervision at learner
 \subsection{Predictive Robot Policies}
 Self-supervised visual planning learns from recorded interaction and uses temporal information to address occlusion~\cite{temporalplanning}. VideoVLA jointly forecasts actions and visual outcomes and relates imagined-future quality to manipulation performance~\cite{videovla}. AHA-WAM separates visual planning and action execution through asynchronous context routing~\cite{ahawam}. We retain the latter architecture and its flow-matching objectives~\cite{flow}, studying how corrective post-training should preserve history and visual targets rather than introducing a new generative backbone.
 
+Recent WAM adaptation also uses predictive objectives beyond conventional demonstration training. WAM-TTT adapts a lightweight memory through self-supervised prediction of human videos while keeping its pretrained WAM frozen~\cite{wamttt}. HSI-WAM instead jointly updates the existing video--action policy using real-robot corrections and their observed temporal context. The distinction concerns both the source of guidance and the parameters being adapted: human actions anchor the behavioral update, while recorded history and future video provide complementary evidence. Thus, predictive adaptation need not be restricted to action-free video or inference-time memory updates.
+
 \subsection{Prediction, Intervention, and Policy Evaluation}
 Model-Based Runtime Monitoring predicts failures to request human assistance~\cite{monitor}, whereas our operator supplies the intervention gate. Hi-WM collects human corrections inside an action-conditioned world model~\cite{hiwm}; ours are collected on a real robot. WorldGym evaluates policies through action-conditioned simulated rollouts~\cite{worldgym}. In contrast, our analysis compares held-out video fidelity with independently measured task success across WAM checkpoints. Prior findings connecting prediction quality to behavior~\cite{modelspixels,videovla} motivate this diagnostic; our question is how that relationship changes under human corrective post-training.
+
+These comparisons locate HSI-WAM within interactive robot post-training: the world model is part of the policy being corrected, rather than a separate environment in which to collect corrections. Its visual predictions are learned from observed physical continuations and analyzed alongside real execution. This positioning motivates the temporal-support design without requiring a new simulator or a new policy backbone.
 
 \section{Problem and Backbone}
 \subsection{Human-Gated Interaction}
@@ -87,16 +91,16 @@ For this paper, it is sufficient to express the conditioning as
 \end{equation}
 where $C_t^-$ is selected observed history and $\operatorname{sg}$ stops gradients through its encoding pass. Current visual and action computation remains trainable. Reconstructed history need not reproduce every internal state of a live deployment cache.
 
-\section{Human-Corrected Predictive Policy Self-Improvement}
+\section{HSI-WAM: Human-Corrected Predictive Self-Improvement}
 \subsection{Overview}
-Following human-gated data aggregation~\cite{hgdagger}, we deploy the task policy, record observations and control-source metadata, and collect corrective takeovers. Correction examples preserve separate past-context, action-label, and future-video supports (Fig.~\ref{fig:method}); mixed demonstration replay then updates the existing predictive policy.
+HSI-WAM follows human-gated data aggregation~\cite{hgdagger}: we deploy the task policy, record observations and control-source metadata, and collect corrective takeovers. Correction examples preserve separate past-context, action-label, and future-video supports (Fig.~\ref{fig:method}); mixed demonstration replay then updates the existing predictive policy.
 
 The design distinguishes three roles of interaction data. Past observations help interpret the current situation; human actions prescribe a correction; subsequent images describe the continuation that was actually observed. These roles have different supervision requirements. An autonomous action need not be a desirable imitation target for the surrounding observation to remain useful evidence about the scene. Conversely, a short interval of reliable expert actions remains useful even when it cannot support a complete video target. Separating these roles preserves corrective supervision without forcing all modalities into the same temporal crop.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/method_overview.pdf}
-\caption{Temporal support and supervision. History may precede takeover, expert actions remain within human control, and History+Future extends eligible recorded-video targets beyond handback. The existing backbone is jointly updated; predictive fidelity and task success are compared separately across checkpoints.}
+\caption{Temporal support and supervision in HSI-WAM. History may precede takeover, expert actions remain within human control, and History+Future extends eligible recorded-video targets beyond handback. The existing backbone is jointly updated; predictive fidelity and task success are compared separately across checkpoints.}
 \label{fig:method}
 \end{figure*}
 
@@ -131,7 +135,7 @@ Extending visual support exposes observations excluded by a short crop without a
 \subsection{Behavioral Grounding of Predictive Learning}
 The human intervention gives predictive post-training a behavioral anchor. The action objective specifies what the robot should imitate at a corrected state, while the video objective describes the observed continuation around that state. Keeping these signals distinct is important: a visually valid transition can follow an undesirable action, and a desirable corrective action can occur inside a trajectory that also contains failures. Assigning the entire interaction a single expert label would conflate these two cases.
 
-Our construction instead couples selective action supervision with broader observation use. Successful-continuation selection narrows the visual targets to eligible mixed-control experience, while the human-only action mask preserves the source of expert behavior. This is an operational form of human-corrected predictive policy improvement: the learner revisits its deployment experience through behavioral correction and visual prediction. Here, self-improvement refers to post-training from the learner's interaction data with human guidance, rather than autonomous reward optimization or self-generated expert labels. The distinction is central to using a WAM's predictive capacity without treating its own executions as uniformly trustworthy.
+Our construction instead couples selective action supervision with broader observation use. Successful-continuation selection narrows the visual targets to eligible mixed-control experience, while the human-only action mask preserves the source of expert behavior. In HSI-WAM, human-corrected predictive self-improvement means that the learner revisits its deployment experience through behavioral correction and visual prediction. Here, self-improvement refers to post-training from the learner's interaction data with human guidance, rather than autonomous reward optimization or self-generated expert labels. The distinction is central to using a WAM's predictive capacity without treating its own executions as uniformly trustworthy.
 
 \subsection{Joint Objective and Demonstration Replay}
 We preserve the backbone's flow-matching objective~\cite{flow}. For a clean action or video latent $x$ and Gaussian noise $\epsilon$, the linear interpolation and velocity target are
@@ -157,7 +161,7 @@ Anchors are sampled from $q=\tfrac12\mathcal D+\tfrac12\mathcal H$. Demonstratio
 Post-training updates the video DiT, action DiT, and routing parameters; text encoder and video autoencoder remain frozen. We add no actor, critic, or adapter.
 
 \section{Experimental Design}
-Our experiments ask whether corrective post-training improves task completion, how temporal support changes this improvement, and how held-out video fidelity relates to checkpoint-level task success. Table~\ref{tab:configs} defines the comparisons.
+Our experiments ask whether corrective post-training improves task completion, how temporal support changes this improvement, and how held-out video fidelity relates to checkpoint-level task success. Table~\ref{tab:configs} defines the comparisons; History+Future uses the full temporal support of HSI-WAM.
 
 We organize the evidence around three complementary questions. First, does adding corrective interaction improve an otherwise demonstration-trained policy? The SFT--Segment-only comparison provides an intervention-learning reference. Second, does retaining temporal evidence beyond the takeover change performance? History and History+Future progressively expose the context and continuation available in the same recordings. Third, do predictive and behavioral improvements track one another? Held-out video evaluation examines this relationship without equating a realistic prediction with successful control. Together, these comparisons distinguish the value of correction data, the role of its temporal organization, and the interpretation of the resulting predictive representation.
 
@@ -202,7 +206,7 @@ Training rollouts & 82 & 67 \\
 \subsection{Training and Controlled Comparisons}
 Each correction variant starts from the same four-epoch task SFT. We use batch size 12 and learning rate $10^{-5}$ with cosine decay. Update budgets are 3285 steps for cylinder and 2664 for power adapter.
 
-The history budget is six frames. Segment-only restricts correction history to the human segment rather than globally disabling memory. Cylinder Segment-only retains History's history stride and hold filtering; power-adapter Segment-only also changes these settings, so the latter Segment-only--History comparison tests a history-construction bundle.
+The history budget is six frames. Segment-only restricts correction history to the human segment rather than globally disabling memory. Both tasks use the same segment-restricted history construction, so each Segment-only--History comparison isolates whether history may cross the takeover boundary.
 
 History and History+Future share human action labels, history construction, source ratio, and update budget, and differ in visual continuation. Across deployment comparisons we hold camera setup, task instruction, normalization, action sampling settings, and chunk execution settings fixed.
 
@@ -218,9 +222,9 @@ We evaluate unassisted task completion from shared task-specific initializations
 Model & Cylinder & Power adapter \\
 \midrule
 SFT & 7.7 & 50.0 \\
-Segment-only & 30.8 & \textbf{75.0} \\
+Segment-only & 30.8 & \bestscore{75.0} \\
 History & 38.5 & 65.0 \\
-History+Future & \textbf{46.2} & 55.0 \\
+History+Future & \bestscore{46.2} & 55.0 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -241,7 +245,7 @@ Video fidelity is compared with independently measured task success at the check
 \subsection{Task Completion and Corrective Behavior}
 All corrective variants exceed SFT on both tasks (Table~\ref{tab:success}). Cylinder improves from 7.7\% to 30.8\%, 38.5\%, and 46.2\% for Segment-only, History, and History+Future; power adapter improves from 50.0\% to 75.0\%, 65.0\%, and 55.0\%.
 
-Cylinder favors retained context and video extension, whereas power adapter favors Segment-only. The power-adapter Segment-only--History contrast includes the history-setting differences described above. History--History+Future more directly tests video support, but its direction is task dependent; it also changes both supervision coverage and target content.
+Cylinder favors retained context and video extension, whereas power adapter favors Segment-only. History--History+Future more directly tests video support, but its direction is task dependent; it also changes both supervision coverage and target content.
 
 Figure~\ref{fig:experiments} illustrates corrections after offset approaches and misaligned insertion attempts. The qualitative distinction is the response after deviation: the corrected policy can adjust its approach or move toward the opening rather than simply continue the unsuccessful motion. These observations complement full-task completion by illustrating the type of behavior supplied by intervention data. They do not by themselves separate error prevention from recovery or measure a continuous recovery region.
 
@@ -260,12 +264,12 @@ Model & All & Fixed & Wrist & MSE \\
 \multicolumn{5}{l}{Cylinder} \\
 SFT & 21.45 & 24.07 & 15.71 & 501.3 \\
 History & 22.74 & 25.07 & 17.19 & 362.8 \\
-History+Future & 23.56 & 26.02 & 18.09 & 303.9 \\
+History+Future & \bestscore{23.56} & \bestscore{26.02} & \bestscore{18.09} & \bestscore{303.9} \\
 \midrule
 \multicolumn{5}{l}{Power adapter} \\
 SFT & 19.63 & 23.25 & 13.36 & 759.3 \\
 History & 21.08 & 24.18 & 15.05 & 524.9 \\
-History+Future & 21.61 & 24.87 & 15.52 & 469.4 \\
+History+Future & \bestscore{21.61} & \bestscore{24.87} & \bestscore{15.52} & \bestscore{469.4} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -283,7 +287,7 @@ This distinction matters for interpreting a WAM's imagined future. Reference-vid
 
 \section{Discussion and Limitations}
 
-\textbf{Interactive post-training as selective learning.} Beyond the Takeover treats deployment as a source of complementary supervision rather than a homogeneous set of expert trajectories. Human corrections identify behavior worth imitating, while recorded visual context supports predictive learning around those corrections. This offers a way to use the WAM's joint modeling structure without assuming that autonomous execution is consistently correct. The general design principle is to separate control ownership from the temporal extent of usable observations; its effectiveness beyond this backbone remains an open empirical question.
+\textbf{Interactive post-training as selective learning.} HSI-WAM treats deployment as a source of complementary supervision rather than a homogeneous set of expert trajectories. Human corrections identify behavior worth imitating, while recorded visual context supports predictive learning around those corrections. This offers a way to use the WAM's joint modeling structure without assuming that autonomous execution is consistently correct. The general design principle is to separate control ownership from the temporal extent of usable observations; its effectiveness beyond this backbone remains an open empirical question.
 
 \textbf{Visibility.} The adapter can obscure its mating interface, whereas the cylinder offers a more visible alignment gap. Insertion studies motivate complementary tactile sensing under visual uncertainty~\cite{visiontouch}; temporal prediction can also help track occluded objects~\cite{temporalplanning}. Visibility is therefore a plausible boundary condition, but we have neither controlled occlusion nor measured hallucinations, and cannot attribute the task difference to either.
 
@@ -292,12 +296,8 @@ This distinction matters for interpreting a WAM's imagined future. Reference-vid
 Our evaluation uses limited initializations, one training seed per configuration, and one video sampling seed. Shared source rollouts, repeated reference tails, human intervention choices, and successful-continuation filtering limit independence and generality. Additional tasks and targeted action/video-loss ablations are needed to test the proposed mechanisms.
 
 \section{Conclusion}
-We present Beyond the Takeover, an interactive post-training framework that adapts a memory-based WAM through human corrections embedded in their observed temporal context. Separating history, expert action labels, and future-video targets allows short interventions to support predictive policy adaptation. Corrective training improves observed completion on both insertion tasks, while temporal-support ablations reveal task-dependent benefits. Video prediction improves on both tasks, but the adapter reveals that higher predictive fidelity need not yield higher task success. These findings motivate studying both the contribution and the limits of predictive representations for recovery.
+We present HSI-WAM, an interactive post-training framework that adapts a memory-based WAM through human corrections embedded in their observed temporal context. Separating history, expert action labels, and future-video targets allows short interventions to support predictive policy adaptation. Corrective training improves observed completion on both insertion tasks, while temporal-support ablations reveal task-dependent benefits. Video prediction improves on both tasks, but the adapter reveals that higher predictive fidelity need not yield higher task success. These findings motivate studying both the contribution and the limits of predictive representations for recovery.
 
-%---------- acknowledgements ----------
-\section*{ACKNOWLEDGEMENTS}
-This work was supported by the National Key R\&D Program of China (Grant No. 2026YFE0104400), the National Natural Science Foundation of China (NSFC, Grant No. 52401393 and No. 12502288), the Natural Science Foundation of Hangzhou, Zhejiang Province, China (Grant No. 2025SZRJJ1217), and the Guangdong Philosophy and Social Science Foundation (Grant No. GD26YJY18). We also gratefully acknowledge the LoongForge team from Baidu AI Cloud for computational resource support.
-% Review the scope of this factual disclosure against the final retained material.
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 \end{document}

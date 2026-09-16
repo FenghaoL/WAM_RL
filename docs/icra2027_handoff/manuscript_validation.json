@@ -1,15 +1,15 @@
 {
-  "date": "2026-09-15",
+  "date": "2026-09-16",
   "manuscripts": {
     "main": {
       "pages": 8,
       "typesetting_errors": [],
-      "sha256": "307be07c70fbeebe7fe997aa298ae2daf0cd75d500c8a9bb370acc798e3953a3"
+      "sha256": "ee6c8c7c92774c356aef587f5b2ff06c0a78211fc22d083944e41e6e4df1bfd4"
     },
     "main_中文全文": {
       "pages": 7,
       "typesetting_errors": [],
-      "sha256": "276032ac3579442e6a92bf16ea2d54b938cab9d4bdd284f7b2a916e0868d8320"
+      "sha256": "727e78ae67a17db594508ab6a29d383255f688adeb32f030d582ea2936c82115"
     }
   },
   "tables": 4,
@@ -24,12 +24,32 @@
     "demo:correction 2:1"
   ],
   "third_contribution": "Understanding how video prediction supports error recovery",
-  "references": 14,
+  "references": 15,
   "model_display_names": {
     "S": "SFT",
     "C": "Segment-only",
     "H": "History",
     "HV": "History+Future"
   },
-  "title": "Beyond the Takeover: Human-Corrected Predictive Learning for World–Action Models"
+  "title": "HSI-WAM: Human-Corrected Predictive Self-Improvement for World–Action Models",
+  "current_pdf_identity_checks": {
+    "Fenghao": false,
+    "Yunpeng": false,
+    "Lixi Fan": false,
+    "Zhangyuan": false,
+    "University of Michigan": false,
+    "LoongForge": false,
+    "2026YFE0104400": false,
+    "52401393": false,
+    "12502288": false,
+    "ACKNOWLEDGEMENTS": false,
+    "致谢声明": false
+  },
+  "best_results_bold": {
+    "success": [
+      "Cylinder: History+Future 46.2",
+      "Power adapter: Segment-only 75.0"
+    ],
+    "video": "History+Future: all four metrics within each task; higher PSNR, lower MSE"
+  }
 }

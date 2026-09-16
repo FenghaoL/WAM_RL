@@ -2,7 +2,9 @@
 
 当前稿：[英文PDF（8页，含参考文献）](latex/main.pdf)、[英文TeX](latex/main.tex)、[中文PDF（7页）](latex/main_中文全文.pdf)、[中文TeX](latex/main_中文全文.tex)、[中文Markdown](main_中文全文.md)。编译方法见[LaTeX工程说明](latex/README_ZH.md)。
 
-当前标题：**Beyond the Takeover: Human-Corrected Predictive Learning for World–Action Models**。
+当前标题：**HSI-WAM: Human-Corrected Predictive Self-Improvement for World–Action Models**。
+
+当前中英文稿均为匿名版本；本次命名调整见[HSI-WAM修订说明](12_HSI_WAM_NAMING_ZH.md)。
 
 ## 当前论文主线
 
