@@ -2,6 +2,8 @@
 
 **HSI-WAM: Human-Corrected Predictive Self-Improvement for World–Action Models**
 
+项目页：https://anonymous.4open.science/w/beyond-takeover-page-BE4F/
+
 > 匿名阅读版，与[中文TeX](latex/main_中文全文.tex)同步，2026-09-16。
 
 ## 摘要
@@ -184,6 +186,9 @@ $$
 History与History+Future保持动作标签、历史、比例、更新预算一致，改变未来视觉延伸。部署比较固定相机、指令、归一化、动作采样和执行设置。
 
 ### 完整任务评估
+
+两个任务的训练与评估采用相同的近似摆放范围：待插入物体与承接底座分别相对各自标称位置沿桌面两个水平轴改变约$\pm2$ cm和$\pm1$ cm。
+
 从任务规定的共同初始化条件出发测试自主完成，测试rollout中不进行人工接管；仅向目标移动或部分插入不计为成功。表中主体只报告百分比。评估分母为每模型圆柱13次、电源适配器20次；圆柱采用各共同初始化的首次rollout，不混入数量不等的额外重复。首次rollout口径是在回溯整理时澄清的。当前汇总不支持配对显著性检验或多训练种子比较。
 
 **自主任务成功率（%）。Segment-only为段内纠正上下文，History保留跨接管历史，History+Future进一步延伸未来视频监督。粗体标记每个任务的最高观测值。**

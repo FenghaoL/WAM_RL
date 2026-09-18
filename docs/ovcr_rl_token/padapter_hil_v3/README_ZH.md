@@ -63,3 +63,37 @@ python scripts/so101_pipeline/ovcr_adapter/v2_experiments/status.py runs/ovcr_ad
 tmux attach -t ovcr_segdemo_chain
 tmux kill-session -t ovcr_segdemo_chain      # 还在等待阶段时取消整条链；已开始训练则对对应 run root 的 suite.pid 发 TERM
 ```
+
+## 续训到与 cylinder 相同的 DAgger 遍数（2026-09-16）
+
+run root `runs/ovcr_adapter_padapter_hil_v3_cont`，生成器
+`scripts/so101_pipeline/ovcr_adapter/padapter_experiments/prepare_hil_v3_continue.py`。
+
+**多跑多少步**：以"每条 DAgger 训练样本被抽到的平均次数"对齐 cylinder hil_v2 的三个 full 权重
+（普通版、vidext、full_context_truncated，均 3285 步）。cylinder：3285 步 × 每步 6 个纠正样本 ÷ 3460 = 5.70 遍；
+power adapter 要达到同样遍数需 ⌈3285 × 4289 / 3460⌉ = **4073 步**，即在已完成的 2664 步之后再跑 **1409 步**
+（续训后 5.698 遍）。步数由脚本从两边 manifest 和配置实时算出，不是手填。
+
+**怎么接上**：用训练器自带的只含权重的续训（`resume: .../step_002664.pt`，`init_checkpoint: null`，`max_steps: 4073`），
+效果等同于"原训练本来计划跑 4073 步，现在停在第 2664 步继续"：
+
+| 状态 | 处理 |
+|---|---|
+| step 计数 | 从文件名解析为 2664，wandb/validation 的 step 轴接着往后 |
+| LR 调度 | 按 4073 步重建（5% warmup + cosine，最低 1% 峰值），连续 step 到 2664：续训起点 LR = **3.0e-6**，1409 步后衰减到 1e-7。已用 torch 模拟核对，原 2664 步调度在 step 2600 = 1.156e-7，与原训练日志一致 |
+| sampler | demo 一个 epoch 正好 2664 步，续训从 epoch 1 开头开始，随机种子 seed+1——即原训练若继续跑时第二个 epoch 本来会用的排列，不会重放第一个 epoch 的顺序 |
+| AdamW 动量 | **无法恢复**：原权重文件只存了权重（`state/` 为空，`optimizer_state_saved: false`）。betas=(0.9, 0.95)，一阶/二阶动量的记忆长度约 10/20 步，续训开始后几十步内即回到稳态；代价约等于起始 LR 下十几步的额外噪声更新 |
+| 其余 | batch 组成（每步 6 demo + 6 纠正）、数据、seed、eval 每 178 步、save 每 888 步（3552 和最终 4073）、验证集均与原训练相同 |
+
+与原配置逐键比对，只改了 `output_dir`、`max_steps`、`init_checkpoint`/`resume`、`resume_global_batch_size`、wandb 名称/分组
+（`padapter-hil-v3-cont`）和 `experiment.*` 元信息。续训开始前的第一次验证（step 2664）应与原训练最终验证一致，可据此确认权重正确加载。
+
+副作用：demo 在 4073 步内约被看 1.53 遍（cylinder 为 1.0 遍）。
+
+队列：tmux `ovcr_padapter_cont`，GPU 0/1/2，顺序为 普通版 → segdemo → vidext，每个约 4 小时。
+部署 yaml：`padapter_v3_p1_full_balanced_video{,_segdemo,_vidext}_cont4073.yaml`，端口 12121（full）、12123（segdemo）、12122（vidext）。
+
+```bash
+python scripts/so101_pipeline/ovcr_adapter/v2_experiments/status.py runs/ovcr_adapter_padapter_hil_v3_cont
+kill -TERM "$(cat runs/ovcr_adapter_padapter_hil_v3_cont/suite.pid)"      # 停止
+```

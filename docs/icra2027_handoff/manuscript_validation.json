@@ -4,12 +4,12 @@
     "main": {
       "pages": 8,
       "typesetting_errors": [],
-      "sha256": "ee6c8c7c92774c356aef587f5b2ff06c0a78211fc22d083944e41e6e4df1bfd4"
+      "sha256": "c3ae7e425c658940b95bdc820fc3a11d196ee4e5e31fa913fead970b802eede3"
     },
     "main_中文全文": {
       "pages": 7,
       "typesetting_errors": [],
-      "sha256": "727e78ae67a17db594508ab6a29d383255f688adeb32f030d582ea2936c82115"
+      "sha256": "33b5d5a830530fb977d24b2954174759384c8b354bd53828ef230fe4c023547b"
     }
   },
   "tables": 4,
@@ -51,5 +51,17 @@
       "Power adapter: Segment-only 75.0"
     ],
     "video": "History+Future: all four metrics within each task; higher PSNR, lower MSE"
+  },
+  "project_page": {
+    "url": "https://anonymous.4open.science/w/beyond-takeover-page-BE4F/",
+    "placement": "Anonymous author footnote; plain URL",
+    "site_content_verified": false
+  },
+  "initialization_description": {
+    "inserted_object_cm_per_axis": 2,
+    "fixture_cm_per_axis": 1,
+    "axes": "two tabletop axes",
+    "measurement": "approximate user report",
+    "train_test_overlap": "User confirmed same approximate training and evaluation placement ranges for both tasks; cylinder may be slightly narrower"
   }
 }
