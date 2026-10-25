@@ -9,6 +9,10 @@
 
 ## 1. 当前最应该先读
 
+### [已有 DAgger 数据上的离线 RL：RLT/HALO-WA 接口、时序选择与可运行候选](./offline_rl/README_ZH.md)
+
+针对 cylinder HIL v2 的成功帧标注，比较连续 tick 与原 chunk＋hold 宏动作，提供双 Q 的 IQL、TD3+BC、特征读出与训练入口；记录真实指定批次审计、CPU 验证以及尚待决定的部署时序和基座。
+
 ### [OVCR 小适配器与 RL Token：研究、实现和实验方案](./ovcr_rl_token/README.md)
 
 核查 RLT 原文及 AHA 代码，提供 Query、Value-only 和多 token K/V writer 三种可训练方案，说明任务 checkpoint、HUMAN 数据、P0 保持损失与实验命令；单独讨论 critic、异步 replay 和真正 RL 的扩展边界，并记录已完成的 CPU 验证。

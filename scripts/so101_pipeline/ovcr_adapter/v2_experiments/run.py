@@ -75,6 +75,19 @@ class FullTrainer(AdapterTrainer):
         Wan22Trainer._apply_dit_only_train_mode(model, freeze_video_dit=False)
 
 
+class ActionOnlyTrainer(FullTrainer):
+    """Full fine-tune restricted to the action pathway; the video DiT expert stays frozen.
+
+    Trainable: the action expert, the native OVCR chunk-KV editor and the observation
+    encoders. The video expert still runs in eval mode to supply visual context.
+    """
+    @staticmethod
+    def _apply_dit_only_train_mode(model, *, freeze_video_dit=False):
+        if not freeze_video_dit or model.mot.chunk_kv_cache_editor.adapter is not None:
+            raise ValueError("Action-only training requires a frozen video DiT and no adapter")
+        Wan22Trainer._apply_dit_only_train_mode(model, freeze_video_dit=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True)
@@ -129,7 +142,8 @@ def main():
         Path(cfg.output_dir).mkdir(parents=True, exist_ok=True)
         OmegaConf.save(cfg, Path(cfg.output_dir) / "experiment_config.yaml", resolve=True)
     model = instantiate(cfg.model, device=f"cuda:{local_rank}", model_dtype=_mixed_precision_to_model_dtype(_normalize_mixed_precision(cfg.mixed_precision)))
-    trainer_cls = FullTrainer if cfg.experiment.get("training_scope", "adapter") == "full" else AdapterTrainer
+    trainer_cls = {"full": FullTrainer, "action_only": ActionOnlyTrainer}.get(
+        cfg.experiment.get("training_scope", "adapter"), AdapterTrainer)
     trainer_cls._apply_dit_only_train_mode(model, freeze_video_dit=bool(cfg.freeze_video_dit))
     print("TRAINABLE_PARAMETERS", sum(p.numel() for p in model.parameters() if p.requires_grad), flush=True)
     trainer = trainer_cls(cfg=cfg, model=model, train_dataset=train, val_dataset=val)

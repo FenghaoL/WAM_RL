@@ -245,3 +245,5 @@ manifest.json
 wandb/
 onelogger.err
 onelogger.log
+
+tools/

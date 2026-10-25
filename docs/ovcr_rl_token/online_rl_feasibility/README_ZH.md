@@ -1,5 +1,7 @@
 # AHA-WAM 在线 RL 可行性与实施方案
 
+2026-09-18 更新：[VINE与生成策略RL重新评估](05_VINE_AND_GENERATIVE_RL_REASSESSMENT_ZH.md)。补充直接更新diffusion/flow生成器的路线：VINE、QAM、DPPO、ReinFlow、FPO及SAC Flow；区分“快速实机闭环”与“WAM内部奖励适配”的研究优先级。
+
 2026-09-11 补充：在用户明确的 9 月 15 日投稿约束下，先完成局部恢复数据与无记忆监督对照，在线 RL 降为有条件扩展；见 [截止前实验与投稿决策](../cylinder_experiments/04_ICRA_RECOVERY_AND_MEMORY_PLAN_ZH.md)。下文排序针对长期技术路线。
 
 **结论：可以做在线 RL，优先冻结已经适配 SO101 的 AHA-WAM，在动作输出端训练小 actor/critic；第二条路线做 DSRL-SAC 式噪声控制，反演验证通过后再加入人工噪声监督。暂不优先对 V32/Q32/T4 权重直接做在线 RL。**

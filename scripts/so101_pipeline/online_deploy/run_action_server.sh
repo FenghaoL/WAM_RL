@@ -14,14 +14,16 @@ set -eo pipefail
 # Available (scripts/so101_pipeline/online_deploy/deployments/), all on GPU 3.
 # Every model has its own port; the last digit is the variant:
 #   0 SFT   1 full (1:1)   2 vidext   3 segdemo (human spans as demos)   4 demo2to1
+#   5 action-DiT-only (video DiT frozen)      121x = power adapter continued to 4073 steps
 # Older configs live in deployments/archive/.
 
 # cylinder: "Pick up the cylinder and insert it into the matching hole."
-DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft.yaml"                              # :12100
-DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video.yaml"           # :12101
-DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_vidext.yaml"    # :12102
-DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_segdemo.yaml"   # :12103
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v1_sft.yaml"                              # :12100
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video.yaml"           # :12101
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_vidext.yaml"    # :12102
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_segdemo.yaml"   # :12103
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_full_balanced_video_demo2to1.yaml"  # :12104
+DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_action_dit_only.yaml"        # :12105 action DiT only
 
 # power adapter: "Remove the power adapter from the holder and plug it into the power strip."
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v2_sft.yaml"                              # :12110
@@ -29,6 +31,7 @@ DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_f
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_vidext.yaml"    # :12112
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_segdemo.yaml"   # :12113
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_demo2to1.yaml"  # :12114
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_action_dit_only.yaml"        # :12115 action DiT only
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_cont4073.yaml"         # :12121
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_vidext_cont4073.yaml"  # :12122
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_segdemo_cont4073.yaml" # :12123

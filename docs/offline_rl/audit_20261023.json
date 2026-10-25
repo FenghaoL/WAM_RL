@@ -1,0 +1,664 @@
+{
+  "date": "2026-10-23",
+  "data_roots": [
+    "data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057"
+  ],
+  "cuda_available": false,
+  "raw_frames": 2941,
+  "sources": {
+    "POLICY": 1228,
+    "HUMAN": 234,
+    "SYSTEM_HOLD": 1479
+  },
+  "independent_success_events": 6,
+  "independent_failed_episodes": 1,
+  "success_observations_during_hold": 3,
+  "temporal_choice": "not_decided_by_user",
+  "audits": {
+    "tick": {
+      "config": {
+        "chunk_size": 8,
+        "stride": 2,
+        "gamma_tick": 0.997,
+        "intervention_mode": "mixed",
+        "temporal_mode": "tick"
+      },
+      "transitions": 1358,
+      "end_reasons": {
+        "continuing": 1330,
+        "failure_end": 4,
+        "success": 24
+      },
+      "episodes": [
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0002",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 0,
+          "frames": 389,
+          "status": "ready",
+          "outcome": "failure",
+          "outcome_class": "FAILURE",
+          "first_success": null,
+          "success_source": null,
+          "sources": {
+            "2": 202,
+            "0": 166,
+            "1": 21
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 1,
+          "annotation_sha256": null,
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 0,
+            "logical_episode_id": "20260911_183057_rollout_0002",
+            "num_frames": 389,
+            "parquet_path": "data/chunk-000/episode_000000.parquet",
+            "parquet_sha256": "e129a88fe3e0ba0f88e604f75fdfcd0afac5e9099973833215a16b786d06c2bf"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0003",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 1,
+          "frames": 404,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 399,
+          "success_source": 0,
+          "sources": {
+            "2": 211,
+            "0": 175,
+            "1": 18
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "74b9fb877913f9796c3c0ec9d910840020af37c1484bfd160375890f9074f1fa",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 1,
+            "logical_episode_id": "20260911_183057_rollout_0003",
+            "num_frames": 404,
+            "parquet_path": "data/chunk-000/episode_000001.parquet",
+            "parquet_sha256": "2439c8b5459cae0089e6232f71c126f4d5860cd128b891dd459580a847f47eea"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0005",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 2,
+          "frames": 436,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 419,
+          "success_source": 2,
+          "sources": {
+            "2": 229,
+            "0": 191,
+            "1": 16
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "bdf4a2d42f832a9bf6c1d012f580c34c54a46ef15d7f05298e5abcca6168dfde",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 2,
+            "logical_episode_id": "20260911_183057_rollout_0005",
+            "num_frames": 436,
+            "parquet_path": "data/chunk-000/episode_000002.parquet",
+            "parquet_sha256": "9c4a4960e638241eb25e24c5ab93c1bfaba09dbc6bac14bffe23b9ff8b259780"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 3,
+          "frames": 507,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 494,
+          "success_source": 0,
+          "sources": {
+            "2": 227,
+            "0": 191,
+            "1": 89
+          },
+          "tick_gaps": 4,
+          "dropped_frames": 0,
+          "annotation_sha256": "ba83e0c9d8a71b5559043846d6d39b7a58dacedbae1d5cef9a6897834303b0a8",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 3,
+            "logical_episode_id": "20260911_183057_rollout_0006",
+            "num_frames": 507,
+            "parquet_path": "data/chunk-000/episode_000003.parquet",
+            "parquet_sha256": "e6e9d8f2b029368197563fd4f9277686693b1517f576a157e2f4a041d6548944"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0007",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 4,
+          "frames": 342,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "AUTONOMOUS_SUCCESS",
+          "first_success": 317,
+          "success_source": 2,
+          "sources": {
+            "2": 190,
+            "0": 152
+          },
+          "tick_gaps": 0,
+          "dropped_frames": 0,
+          "annotation_sha256": "3f2c171b6080a66a10f8b64a54f5b214cf2c5c74dbc2c863c541bf14200979d4",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 4,
+            "logical_episode_id": "20260911_183057_rollout_0007",
+            "num_frames": 342,
+            "parquet_path": "data/chunk-000/episode_000004.parquet",
+            "parquet_sha256": "2a2df0af8f77127c5b9092de18c778a9451b1aa7bf81d4cd7787b08ccb70f726"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0008",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 5,
+          "frames": 417,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 393,
+          "success_source": 2,
+          "sources": {
+            "2": 213,
+            "0": 176,
+            "1": 28
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "eef32abeb068f6ff746b7a9402fc8c27ab85eea38d04e18ff14daab1b23f0daa",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 5,
+            "logical_episode_id": "20260911_183057_rollout_0008",
+            "num_frames": 417,
+            "parquet_path": "data/chunk-000/episode_000005.parquet",
+            "parquet_sha256": "a20ef28d8099b6873182d275cd53fcfb88266b57153993c10bf620f6033b941e"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 6,
+          "frames": 446,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 437,
+          "success_source": 0,
+          "sources": {
+            "2": 207,
+            "0": 177,
+            "1": 62
+          },
+          "tick_gaps": 4,
+          "dropped_frames": 0,
+          "annotation_sha256": "1826ade8d388adf39611ef3c31760dfd16505af3a4c4001b10247c11343b54a9",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 6,
+            "logical_episode_id": "20260911_183057_rollout_0009",
+            "num_frames": 446,
+            "parquet_path": "data/chunk-000/episode_000006.parquet",
+            "parquet_sha256": "cd758ad25df2f6ed9078b4ae3be9a9e5931e58eed37745a59e691d652aa23d68"
+          }
+        }
+      ],
+      "duration_ticks_min": 1,
+      "duration_ticks_max": 8,
+      "transitions_sha256": "83c17fae557665904392418d1e850e0310af03905de332a0bedc65b754deb500"
+    },
+    "macro": {
+      "config": {
+        "chunk_size": 8,
+        "stride": 2,
+        "gamma_tick": 0.997,
+        "intervention_mode": "mixed",
+        "temporal_mode": "macro"
+      },
+      "transitions": 168,
+      "end_reasons": {
+        "continuing": 161,
+        "failure_end": 1,
+        "success": 6
+      },
+      "episodes": [
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0002",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 0,
+          "frames": 389,
+          "status": "ready",
+          "outcome": "failure",
+          "outcome_class": "FAILURE",
+          "first_success": null,
+          "success_source": null,
+          "sources": {
+            "2": 202,
+            "0": 166,
+            "1": 21
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 1,
+          "annotation_sha256": null,
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 0,
+            "logical_episode_id": "20260911_183057_rollout_0002",
+            "num_frames": 389,
+            "parquet_path": "data/chunk-000/episode_000000.parquet",
+            "parquet_sha256": "e129a88fe3e0ba0f88e604f75fdfcd0afac5e9099973833215a16b786d06c2bf"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0003",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 1,
+          "frames": 404,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 399,
+          "success_source": 0,
+          "sources": {
+            "2": 211,
+            "0": 175,
+            "1": 18
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "74b9fb877913f9796c3c0ec9d910840020af37c1484bfd160375890f9074f1fa",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 1,
+            "logical_episode_id": "20260911_183057_rollout_0003",
+            "num_frames": 404,
+            "parquet_path": "data/chunk-000/episode_000001.parquet",
+            "parquet_sha256": "2439c8b5459cae0089e6232f71c126f4d5860cd128b891dd459580a847f47eea"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0005",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 2,
+          "frames": 436,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 419,
+          "success_source": 2,
+          "sources": {
+            "2": 229,
+            "0": 191,
+            "1": 16
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "bdf4a2d42f832a9bf6c1d012f580c34c54a46ef15d7f05298e5abcca6168dfde",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 2,
+            "logical_episode_id": "20260911_183057_rollout_0005",
+            "num_frames": 436,
+            "parquet_path": "data/chunk-000/episode_000002.parquet",
+            "parquet_sha256": "9c4a4960e638241eb25e24c5ab93c1bfaba09dbc6bac14bffe23b9ff8b259780"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 3,
+          "frames": 507,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 494,
+          "success_source": 0,
+          "sources": {
+            "2": 227,
+            "0": 191,
+            "1": 89
+          },
+          "tick_gaps": 4,
+          "dropped_frames": 0,
+          "annotation_sha256": "ba83e0c9d8a71b5559043846d6d39b7a58dacedbae1d5cef9a6897834303b0a8",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 3,
+            "logical_episode_id": "20260911_183057_rollout_0006",
+            "num_frames": 507,
+            "parquet_path": "data/chunk-000/episode_000003.parquet",
+            "parquet_sha256": "e6e9d8f2b029368197563fd4f9277686693b1517f576a157e2f4a041d6548944"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0007",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 4,
+          "frames": 342,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "AUTONOMOUS_SUCCESS",
+          "first_success": 317,
+          "success_source": 2,
+          "sources": {
+            "2": 190,
+            "0": 152
+          },
+          "tick_gaps": 0,
+          "dropped_frames": 0,
+          "annotation_sha256": "3f2c171b6080a66a10f8b64a54f5b214cf2c5c74dbc2c863c541bf14200979d4",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 4,
+            "logical_episode_id": "20260911_183057_rollout_0007",
+            "num_frames": 342,
+            "parquet_path": "data/chunk-000/episode_000004.parquet",
+            "parquet_sha256": "2a2df0af8f77127c5b9092de18c778a9451b1aa7bf81d4cd7787b08ccb70f726"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0008",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 5,
+          "frames": 417,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 393,
+          "success_source": 2,
+          "sources": {
+            "2": 213,
+            "0": 176,
+            "1": 28
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "eef32abeb068f6ff746b7a9402fc8c27ab85eea38d04e18ff14daab1b23f0daa",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 5,
+            "logical_episode_id": "20260911_183057_rollout_0008",
+            "num_frames": 417,
+            "parquet_path": "data/chunk-000/episode_000005.parquet",
+            "parquet_sha256": "a20ef28d8099b6873182d275cd53fcfb88266b57153993c10bf620f6033b941e"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 6,
+          "frames": 446,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 437,
+          "success_source": 0,
+          "sources": {
+            "2": 207,
+            "0": 177,
+            "1": 62
+          },
+          "tick_gaps": 4,
+          "dropped_frames": 0,
+          "annotation_sha256": "1826ade8d388adf39611ef3c31760dfd16505af3a4c4001b10247c11343b54a9",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 6,
+            "logical_episode_id": "20260911_183057_rollout_0009",
+            "num_frames": 446,
+            "parquet_path": "data/chunk-000/episode_000006.parquet",
+            "parquet_sha256": "cd758ad25df2f6ed9078b4ae3be9a9e5931e58eed37745a59e691d652aa23d68"
+          }
+        }
+      ],
+      "duration_ticks_min": 2,
+      "duration_ticks_max": 21,
+      "transitions_sha256": "d5bcc633f366b879907cc9d3143a1a628533ebc201fa38897a576b157c75dd79"
+    },
+    "tick_c1": {
+      "config": {
+        "chunk_size": 1,
+        "stride": 1,
+        "gamma_tick": 0.997,
+        "intervention_mode": "mixed",
+        "temporal_mode": "tick"
+      },
+      "transitions": 2829,
+      "end_reasons": {
+        "continuing": 2822,
+        "failure_end": 1,
+        "success": 6
+      },
+      "episodes": [
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0002",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 0,
+          "frames": 389,
+          "status": "ready",
+          "outcome": "failure",
+          "outcome_class": "FAILURE",
+          "first_success": null,
+          "success_source": null,
+          "sources": {
+            "2": 202,
+            "0": 166,
+            "1": 21
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 1,
+          "annotation_sha256": null,
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 0,
+            "logical_episode_id": "20260911_183057_rollout_0002",
+            "num_frames": 389,
+            "parquet_path": "data/chunk-000/episode_000000.parquet",
+            "parquet_sha256": "e129a88fe3e0ba0f88e604f75fdfcd0afac5e9099973833215a16b786d06c2bf"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0003",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 1,
+          "frames": 404,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 399,
+          "success_source": 0,
+          "sources": {
+            "2": 211,
+            "0": 175,
+            "1": 18
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "74b9fb877913f9796c3c0ec9d910840020af37c1484bfd160375890f9074f1fa",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 1,
+            "logical_episode_id": "20260911_183057_rollout_0003",
+            "num_frames": 404,
+            "parquet_path": "data/chunk-000/episode_000001.parquet",
+            "parquet_sha256": "2439c8b5459cae0089e6232f71c126f4d5860cd128b891dd459580a847f47eea"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0005",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 2,
+          "frames": 436,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 419,
+          "success_source": 2,
+          "sources": {
+            "2": 229,
+            "0": 191,
+            "1": 16
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "bdf4a2d42f832a9bf6c1d012f580c34c54a46ef15d7f05298e5abcca6168dfde",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 2,
+            "logical_episode_id": "20260911_183057_rollout_0005",
+            "num_frames": 436,
+            "parquet_path": "data/chunk-000/episode_000002.parquet",
+            "parquet_sha256": "9c4a4960e638241eb25e24c5ab93c1bfaba09dbc6bac14bffe23b9ff8b259780"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 3,
+          "frames": 507,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 494,
+          "success_source": 0,
+          "sources": {
+            "2": 227,
+            "0": 191,
+            "1": 89
+          },
+          "tick_gaps": 4,
+          "dropped_frames": 0,
+          "annotation_sha256": "ba83e0c9d8a71b5559043846d6d39b7a58dacedbae1d5cef9a6897834303b0a8",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 3,
+            "logical_episode_id": "20260911_183057_rollout_0006",
+            "num_frames": 507,
+            "parquet_path": "data/chunk-000/episode_000003.parquet",
+            "parquet_sha256": "e6e9d8f2b029368197563fd4f9277686693b1517f576a157e2f4a041d6548944"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0007",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 4,
+          "frames": 342,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "AUTONOMOUS_SUCCESS",
+          "first_success": 317,
+          "success_source": 2,
+          "sources": {
+            "2": 190,
+            "0": 152
+          },
+          "tick_gaps": 0,
+          "dropped_frames": 0,
+          "annotation_sha256": "3f2c171b6080a66a10f8b64a54f5b214cf2c5c74dbc2c863c541bf14200979d4",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 4,
+            "logical_episode_id": "20260911_183057_rollout_0007",
+            "num_frames": 342,
+            "parquet_path": "data/chunk-000/episode_000004.parquet",
+            "parquet_sha256": "2a2df0af8f77127c5b9092de18c778a9451b1aa7bf81d4cd7787b08ccb70f726"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0008",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 5,
+          "frames": 417,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 393,
+          "success_source": 2,
+          "sources": {
+            "2": 213,
+            "0": 176,
+            "1": 28
+          },
+          "tick_gaps": 2,
+          "dropped_frames": 0,
+          "annotation_sha256": "eef32abeb068f6ff746b7a9402fc8c27ab85eea38d04e18ff14daab1b23f0daa",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 5,
+            "logical_episode_id": "20260911_183057_rollout_0008",
+            "num_frames": 417,
+            "parquet_path": "data/chunk-000/episode_000005.parquet",
+            "parquet_sha256": "a20ef28d8099b6873182d275cd53fcfb88266b57153993c10bf620f6033b941e"
+          }
+        },
+        {
+          "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+          "root": "/home/fenghao/workspace/AHA-WAM/data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057",
+          "episode_index": 6,
+          "frames": 446,
+          "status": "ready",
+          "outcome": "success",
+          "outcome_class": "SUCCESS_WITH_INTERVENTION",
+          "first_success": 437,
+          "success_source": 0,
+          "sources": {
+            "2": 207,
+            "0": 177,
+            "1": 62
+          },
+          "tick_gaps": 4,
+          "dropped_frames": 0,
+          "annotation_sha256": "1826ade8d388adf39611ef3c31760dfd16505af3a4c4001b10247c11343b54a9",
+          "success_reviewed": false,
+          "source": {
+            "episode_index": 6,
+            "logical_episode_id": "20260911_183057_rollout_0009",
+            "num_frames": 446,
+            "parquet_path": "data/chunk-000/episode_000006.parquet",
+            "parquet_sha256": "cd758ad25df2f6ed9078b4ae3be9a9e5931e58eed37745a59e691d652aa23d68"
+          }
+        }
+      ],
+      "duration_ticks_min": 1,
+      "duration_ticks_max": 1,
+      "transitions_sha256": "0d5d2249b95906b2c0ab74f515d0bfe25d5f3e095b05b96e559808f641c7d85f"
+    }
+  },
+  "verification": {
+    "unit_tests_passed": 16,
+    "full_wam_export": "not_run_no_cuda",
+    "robot_execution": "not_run",
+    "learner_cli_resume": "passed_step_4_to_step_6_with_optimizer_and_split_checks",
+    "cli_smokes": {
+      "attention_iql": 4,
+      "attention_td3_bc": 4,
+      "reader_pretrain": 2,
+      "reader_to_mlp_iql": 4
+    },
+    "synthetic_features": true,
+    "synthetic_note": "Real source transitions, random feature fixture; no learned robot representation or success improvement claimed",
+    "halo_module_candidate_reverse_max_q_difference": 1.862645149230957e-09
+  },
+  "data_limits": {
+    "tick_gaps": 16,
+    "maximum_gap_tick_delta": 126,
+    "maximum_missing_ticks_between_recorded_rows": 125,
+    "censor_counts_same_as_mixed_on_this_batch": true
+  }
+}
