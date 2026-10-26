@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import copy
 import math
+import os
+from pathlib import Path
 from dataclasses import asdict, dataclass
 
 import torch
@@ -126,7 +128,7 @@ class OfflineLearner:
             elif cfg.algorithm == "td3_bc" and not actor_only:
                 self.critic.requires_grad_(False)
                 try:
-                    q_pi = self.critic.q1(*obs, canonical_tail(pi, b["action_valid"]))
+                    q_pi = self.critic.first(*obs, canonical_tail(pi, b["action_valid"]))
                     scale = cfg.td3_bc_alpha / q_pi.abs().mean().detach().clamp_min(1e-3)
                     actor_loss = bc.mean() - scale*q_pi.mean()
                     actor_loss += cfg.reference_penalty * masked_mse(pi, b["reference"], b["action_valid"]).mean()
@@ -140,19 +142,22 @@ class OfflineLearner:
                 actor_loss += cfg.reference_penalty * masked_mse(pi, b["reference"], b["action_valid"]).mean()
                 metrics["actor_grad"] = self._step(actor_loss, self.actor_optimizer, self.actor)
             metrics.update(actor_loss=float(actor_loss.detach()), bc_mse=float(bc.mean().detach()))
-        if not actor_only:
+        if not actor_only and (cfg.algorithm == "iql" or (cfg.algorithm == "td3_bc" and self.steps % cfg.actor_delay == 0)):
             self._soft_update(self.critic, self.target_critic)
             if cfg.algorithm == "td3_bc" and self.steps % cfg.actor_delay == 0:
                 self._soft_update(self.actor, self.target_actor)
         return metrics
 
     def save(self, path, provenance):
+        path = Path(path)
+        temporary = path.with_suffix(path.suffix + f".{os.getpid()}.tmp")
         torch.save(dict(format="ahawam_offline_learner/v1", network=asdict(self.network_config),
                         config=asdict(self.config), steps=self.steps, provenance=provenance,
                         models={k: getattr(self,k).state_dict() for k in
                                 ("actor", "critic", "value", "target_actor", "target_critic")},
                         optimizers={k: getattr(self,k+"_optimizer").state_dict() for k in ("actor","critic","value")},
-                        rng=torch.get_rng_state()), path)
+                        rng=torch.get_rng_state(), cuda_rng=torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []), temporary)
+        os.replace(temporary, path)
 
     @classmethod
     def load(cls, path, device="cpu"):
@@ -164,4 +169,6 @@ class OfflineLearner:
             getattr(learner,k+"_optimizer").load_state_dict(v)
         learner.steps = data["steps"]
         torch.set_rng_state(data["rng"].cpu())
+        if torch.cuda.is_available() and data.get("cuda_rng"):
+            torch.cuda.set_rng_state_all([s.cpu() for s in data["cuda_rng"]])
         return learner, data["provenance"]

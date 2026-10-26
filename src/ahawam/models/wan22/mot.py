@@ -115,6 +115,12 @@ class LayerwiseChunkKVCacheEditor(nn.Module):
         scores = scores / (float(self.head_dim) ** 0.5)
         weights = torch.softmax(scores, dim=-1)
         routed = torch.einsum("bhnqs,bshd->bnqhd", weights, v0)
+        # Opt-in offline instrumentation: no extra persistent tensors in serving.
+        if getattr(self, "offline_capture_layer", None) == layer_idx:
+            self.offline_capture = {
+                "routed": routed.reshape(batch_size, num_chunks, num_queries, self.attn_hidden_dim).detach(),
+                "projected_query": query.reshape(batch_size, num_chunks, num_queries, self.attn_hidden_dim).detach(),
+            }
 
         token_scores = torch.einsum("bshd,bnqhd->bhnsq", k0, routed)
         token_scores = token_scores / (float(self.head_dim) ** 0.5)

@@ -1,16 +1,32 @@
-# AHA-WAM：DAgger 数据上的离线 RL 方案与待决策项
+# AHA-WAM：103 episode 上的离线 RL
 
-日期：2026-10-23。本文是可运行候选实现的设计说明，**动作块时序尚未由用户选定，当前没有启动正式 WAM 特征训练或真机控制**。
+2026-10-25 在线比较：[三个策略的 YAML、GPU/端口、原 action server 启动方式与 history 近似](16_ONLINE_DEPLOYMENT_ZH.md)。
 
-已确认：保留外部 actor 和内部 Action DiT 更新两条路线，先做外部小 actor。用户要求先调研 hold 的处理区别，再决定使用哪种动作块；两种数据构造器均已提供，训练命令必须显式指定时序版本。
+2026-10-25 价值检查：[全量 103 条价值视频、Q/V 分数含义、提前截断轨迹及定量统计](15_VALUE_VIDEO_DIAGNOSTICS_ZH.md)。入口 `runs/offline_rl/value_videos_20261025/index.html`。
 
-2026-10-24 补充：[当前部署为什么是每次生成/返回 8 步，而不是生成 40 再取 8；RL 块长如何选择](04_DEPLOYMENT_CHUNK_LENGTH_ZH.md)。
+2026-10-25 实验启动：[三项实验的运行安排、原生 Action DiT LoRA 实现、日志与恢复方式](14_THREE_EXPERIMENTS_RUNBOOK_ZH.md)。cache 已完成，IQL 与 TD3+BC 各 10,000 步独立运行；IQL 加权 Action DiT 在第一项结束且真实验证通过后接续。
 
-2026-10-24 成功边界专项：[跨成功取 chunk、terminal bootstrap、HALO/QC/DSRL 源码行为与短前缀取舍](05_SUCCESS_BOUNDARY_AND_TERMINAL_CHUNKS_ZH.md)。
+2026-10-25 损失核查：[TD3+BC 的真实数据动作监督、reference 的角色及 RLT/VINE 的区别](13_TD3_BC_TARGETS_AND_REFERENCE_ZH.md)。
 
-2026-10-24 更新频率专项：[actor/critic 梯度、在线/离线调度、UTD 和各工作源码对照](06_ACTOR_CRITIC_UPDATE_SCHEDULES_ZH.md)。
+2026-10-25 内部 actor 讨论：[IQL 加权 flow matching 直接微调 Action DiT、与 VINE 的梯度区别及缓存限制](12_IQL_WEIGHTED_FLOW_ACTION_DIT_ZH.md)。这是可行的内部路线候选，尚未切换当前外部 actor 或后台队列。
 
-2026-10-24 缓存容量：[planner 最后一层 KV 形状、43,680 帧全量落盘估算与提取注意事项](07_PLANNER_KV_STORAGE_ESTIMATE_ZH.md)。
+2026-10-25 运行补充：[GPU利用率、剩余时间与双副本隔离测试结果](11_GPU_UTILIZATION_AND_CONCURRENCY_ZH.md)。测试已结束，原四卡单副本任务继续。
+
+2026-10-25 补充：[提前截断录像、零奖励监督与 critic 泛化专项调研](10_CRITIC_GENERALIZATION_AND_CENSORED_EPISODES_ZH.md)。用户已确认9条不是缺标注待补，而是录像在完整成功前提前结束；继续导出其缓存，当前基线仍排除，尚未按失败纳入。
+
+2026-10-24 当前方案已按用户选择实现：**冻结采集用 SFT step_006572 → 最后一层 post-OVCR 原始 KV → 小型 attention actor＋共享双 Q＋独立 V → 先 IQL、再 TD3+BC 对照**。动作只删 HOLD，保留 POLICY/HUMAN；成功按 HOLD 规则前移，动作块自然跨成功，terminal 不自举。
+
+先读 [08 系统实现与命令地图](08_SYSTEM_IMPLEMENTATION_ZH.md)，再读 [09 文献参数、资源实测与运行报告](09_PARAMETERS_AND_RESOURCE_REPORT_ZH.md)。本轮数据数字与9条缺标注轨迹见 [audit_20261024.json](audit_20261024.json)。全量103条缓存和已就绪轨迹的训练分开处理，不把未定位的成功当成失败。
+
+- [01 原始数据与三种时序的早期讨论](01_DATA_AND_TEMPORAL_CHOICES_ZH.md)
+- [02 旧 pooled/readout 原型运行说明](02_RUNBOOK_ZH.md)
+- [03 论文与公开代码审计](03_LITERATURE_AND_CODE_AUDIT_ZH.md)
+- [04 真实部署生成8步与planner布局40的区别](04_DEPLOYMENT_CHUNK_LENGTH_ZH.md)
+- [05 成功边界与不同终止动作块的文献行为](05_SUCCESS_BOUNDARY_AND_TERMINAL_CHUNKS_ZH.md)
+- [06 Actor/critic更新、UTD与在线/离线调度](06_ACTOR_CRITIC_UPDATE_SCHEDULES_ZH.md)
+- [07 原始KV容量静态估算](07_PLANNER_KV_STORAGE_ESTIMATE_ZH.md)
+
+以下保留2026-10-23的初始方案与研究论证，**其中“DAgger checkpoint、先训练reader、保留HOLD或终止prefix”的候选选择已由08的新决定覆盖**。早期CPU smoke结果不能视为本轮真实WAM训练结果。
 
 ## 1. 对当前设想的判断
 

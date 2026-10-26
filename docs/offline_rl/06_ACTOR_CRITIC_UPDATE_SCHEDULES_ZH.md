@@ -1,5 +1,7 @@
 # Actor、critic 怎样更新：在线/离线顺序、频率与代码审计
 
+> 2026-10-24 本轮已选择 skip_hold＋自然完整尾部、SFT 006572 和直接 KV attention；当前实现以 [08](08_SYSTEM_IMPLEMENTATION_ZH.md) 为准，运行与资源见 [09](09_PARAMETERS_AND_RESOURCE_REPORT_ZH.md)。本文保留专项分析/早期原型记录。
+
 核查日期：2026-10-24。补充用户关于具体梯度更新与训练频率的问题。本轮读取论文、作者配置及 learner/runner 循环，未改变本项目训练行为或启动机器人。
 
 ## 1. 先区分五个时钟

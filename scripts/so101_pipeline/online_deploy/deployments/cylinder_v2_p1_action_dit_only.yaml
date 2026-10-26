@@ -19,7 +19,7 @@ task: robotwin_ahawam_offset
 # shell script is what lets several models be served side by side without one
 # edit leaking into another.
 serving:
-  gpu_id: 0
+  gpu_id: 3
   port: 12105
   host: 127.0.0.1
   action_dim: 6

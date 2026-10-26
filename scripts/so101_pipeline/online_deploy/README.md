@@ -8,13 +8,41 @@
 | 文件 | 作用 |
 | --- | --- |
 | `settings.yaml` | checkpoint、stats、模型形状和视频参数，主要配置文件 |
-| `run_action_server.sh` | 只返回动作，当前同步 DAgger 采集使用；在脚本里取消注释一行 `DEPLOY_CONFIG` 选模型，GPU/端口/指令读自 `deployments/*.yaml` 的 `serving:`（现均为 GPU 3，端口见脚本注释：cylinder 12100–12104，power adapter 12110–12114） |
+| `run_action_server.sh` | 同步动作服务；取消注释一行 `DEPLOY_CONFIG` 或传入 YAML 路径选模型，GPU/端口/指令及策略类读自 YAML 的 `serving:` |
 | `run_video_server.sh` | GPU 0、端口 12001，可同时返回动作和未来视频 |
 | `ahawam_tcp_client.py` | 机械臂端客户端、关节坐标转换和双相机拼接 |
 | `deployment_preflight.py` | 服务启动前检查 checkpoint、stats 和配置 |
 
 服务核心实现在 `deploy/server/ahawam_policy.py` 和
 `deploy/server/wam_policy_server.py`，一般不需要修改。
+
+离线 RL 三项对比使用新增的 `deploy/server/offline_rl_policy.py`。它复用相机、坐标与 TCP 协议，负责加载外部 actor 或 Action DiT LoRA，按训练的单 8 动作条件推理；不支持异步/未来视频服务。详细说明见 [离线 RL 部署](../../../docs/offline_rl/16_ONLINE_DEPLOYMENT_ZH.md)。
+
+## 离线 RL 三项对比
+
+| YAML（均在 `deployments/`） | 策略权重 | GPU | 端口 |
+| --- | --- | ---: | ---: |
+| `cylinder_offline_iql.yaml` | IQL 外部 actor，10,000步 | 0 | 12130 |
+| `cylinder_offline_td3_bc.yaml` | TD3+BC 外部 actor，10,000步 | 1 | 12131 |
+| `cylinder_offline_iql_action_dit.yaml` | IQL 加权 FM 的 Action DiT LoRA，2,000步 | 2 | 12132 |
+
+三个终端分别启动，不用来回修改脚本：
+
+```bash
+bash scripts/so101_pipeline/online_deploy/run_action_server.sh scripts/so101_pipeline/online_deploy/deployments/cylinder_offline_iql.yaml
+bash scripts/so101_pipeline/online_deploy/run_action_server.sh scripts/so101_pipeline/online_deploy/deployments/cylinder_offline_td3_bc.yaml
+bash scripts/so101_pipeline/online_deploy/run_action_server.sh scripts/so101_pipeline/online_deploy/deployments/cylinder_offline_iql_action_dit.yaml
+```
+
+机器人端沿用 `AHAWAMTCPClient`、`arm_to_model`、`model_to_arm`，切换服务端口即可。请求指令为 `Pick up the cylinder and insert it into the matching hole.`，每次返回 `(8,6)` 的绝对 G05/model 坐标目标。每次假设执行完整8动作；新 episode、人工接管或中途丢弃部分动作块后，需要重新 `reset`，避免沿用错误的历史。
+
+SSH 转发可在同一连接中带三个端口：
+
+```powershell
+ssh -N -L 12130:127.0.0.1:12130 -L 12131:127.0.0.1:12131 -L 12132:127.0.0.1:12132 fenghao@chickadee.engin.umich.edu
+```
+
+三个方案均使用采集用 SFT `step_006572.pt`；YAML 顶层 `checkpoint_path` 是完整基座，`offline_rl.checkpoint_path` 是小 actor 或 LoRA sidecar，不能将二者互换。每次请求刷新独立 planner 条件、使用 offset=0 / chunk index=0。现有客户端每 chunk 只提供一个观察，因此 history 按每48个请求执行动作取样，无法重建含 HOLD 的原始控制 tick；这是明确的在线近似，见详细文档。
 
 ## 1. 修改配置
 
@@ -43,7 +71,7 @@ bash scripts/so101_pipeline/online_deploy/run_action_server.sh
 bash scripts/so101_pipeline/online_deploy/run_video_server.sh
 ```
 
-动作脚本当前使用 GPU 3，视频脚本的 GPU 设置以其文件为准，不要同时启动。服务只监听
+GPU 以所选 YAML 的 `serving.gpu_id` 为准；视频脚本另有 GPU 设置，同一 GPU 的服务需考虑显存。服务只监听
 `127.0.0.1`，Windows 端通过
 SSH 隧道访问，端口换成所选 yaml 的 `serving.port`，例如 cylinder SFT：
 

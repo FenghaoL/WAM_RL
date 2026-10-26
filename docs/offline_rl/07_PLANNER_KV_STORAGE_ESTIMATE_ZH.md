@@ -1,5 +1,7 @@
 # Planner 最后一层 KV：全量缓存容量估算
 
+> 2026-10-24 本轮已选择 skip_hold＋自然完整尾部、SFT 006572 和直接 KV attention；当前实现以 [08](08_SYSTEM_IMPLEMENTATION_ZH.md) 为准，运行与资源见 [09](09_PARAMETERS_AND_RESOURCE_REPORT_ZH.md)。本文保留专项分析/早期原型记录。
+
 日期：2026-10-24。基于本地配置和源码静态推导，以及逐个 parquet 的 metadata 行数核对；未执行 GPU 推理，尚无实际耗时基准。此次只读全目录 metadata，没有修改原始数据或对其他未完成标注的数据做训练。
 
 ## 1. 结论与假设

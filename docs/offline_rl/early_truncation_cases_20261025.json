@@ -1,0 +1,160 @@
+{
+  "format": "ahawam_recording_ending_review/v1",
+  "source": "User clarification: final recorded image is half inserted; recording stopped before complete success",
+  "cases": [
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0010",
+      "run": "20260911_232927",
+      "episode_index": 7,
+      "source": {
+        "episode_index": 7,
+        "logical_episode_id": "20260911_232927_rollout_0010",
+        "num_frames": 437,
+        "parquet_path": "data/chunk-000/episode_000007.parquet",
+        "parquet_sha256": "026d9d2fd7cc35a217935a80f357b2cef708b0f70e0f2e95c9eace321de03d7f"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0016",
+      "run": "20260911_232927",
+      "episode_index": 13,
+      "source": {
+        "episode_index": 13,
+        "logical_episode_id": "20260911_232927_rollout_0016",
+        "num_frames": 388,
+        "parquet_path": "data/chunk-000/episode_000013.parquet",
+        "parquet_sha256": "f31eee34eb59cd5c5fc5a1b3845745f4e23969f1f181dbb29e4b8c6bee830868"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0018",
+      "run": "20260911_232927",
+      "episode_index": 15,
+      "source": {
+        "episode_index": 15,
+        "logical_episode_id": "20260911_232927_rollout_0018",
+        "num_frames": 352,
+        "parquet_path": "data/chunk-000/episode_000015.parquet",
+        "parquet_sha256": "5ed711d44b9f357037f7ea9a25ec83fc7b04fe8648840411e3067be14d2181e3"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0030",
+      "run": "20260911_232927",
+      "episode_index": 25,
+      "source": {
+        "episode_index": 25,
+        "logical_episode_id": "20260911_232927_rollout_0030",
+        "num_frames": 374,
+        "parquet_path": "data/chunk-000/episode_000025.parquet",
+        "parquet_sha256": "241e22c09ddd9f5c98aa6ba1880ba61e72512867aa6247d021b607a4877fd879"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0004",
+      "run": "20260912_001855",
+      "episode_index": 2,
+      "source": {
+        "episode_index": 2,
+        "logical_episode_id": "20260912_001855_rollout_0004",
+        "num_frames": 416,
+        "parquet_path": "data/chunk-000/episode_000002.parquet",
+        "parquet_sha256": "c6422864e1f0c502307fcbf12e5d00089c32aee77ccc3648614a5e2003510262"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0012",
+      "run": "20260912_001855",
+      "episode_index": 5,
+      "source": {
+        "episode_index": 5,
+        "logical_episode_id": "20260912_001855_rollout_0012",
+        "num_frames": 328,
+        "parquet_path": "data/chunk-000/episode_000005.parquet",
+        "parquet_sha256": "e17c94c2771c13ff978388fd79d4ab2ddb07a8f6082c6def6c8005e8c03b0b13"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0021",
+      "run": "20260912_001855",
+      "episode_index": 9,
+      "source": {
+        "episode_index": 9,
+        "logical_episode_id": "20260912_001855_rollout_0021",
+        "num_frames": 430,
+        "parquet_path": "data/chunk-000/episode_000009.parquet",
+        "parquet_sha256": "c64de1aa313329779d68d071a8f23d3d3fcb443af16ceee193991290afbdd7fd"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0034",
+      "run": "20260912_001855",
+      "episode_index": 17,
+      "source": {
+        "episode_index": 17,
+        "logical_episode_id": "20260912_001855_rollout_0034",
+        "num_frames": 345,
+        "parquet_path": "data/chunk-000/episode_000017.parquet",
+        "parquet_sha256": "317e051aeedbb7a30e4b4c492e2e1d710a4b96c0daaf3697031201e0618096cf"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0002",
+      "run": "20260912_010747_val",
+      "episode_index": 0,
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260912_010747_rollout_0002",
+        "num_frames": 432,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "bf1e936e6b41d15d8fcda6a224fa10e70ecba8bc845e681f8c887fb0994029de"
+      },
+      "recording_end_reason": "early_recording_stop",
+      "recorded_goal_reached": false,
+      "external_outcome": "success_reported_by_user",
+      "future_reward_time": "unobserved",
+      "training_policy": "remain_excluded_in_current_baseline; candidate nonterminal partial-trajectory ablation"
+    }
+  ],
+  "changes_training": false
+}

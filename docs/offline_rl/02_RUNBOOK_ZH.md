@@ -1,5 +1,7 @@
 # 候选实现运行与验收
 
+> 2026-10-24 本轮已选择 skip_hold＋自然完整尾部、SFT 006572 和直接 KV attention；当前实现以 [08](08_SYSTEM_IMPLEMENTATION_ZH.md) 为准，运行与资源见 [09](09_PARAMETERS_AND_RESOURCE_REPORT_ZH.md)。本文保留专项分析/早期原型记录。
+
 所有命令从 AHA-WAM 仓库根目录运行，不连接机械臂。输出默认示例在 `runs/offline_rl`；数据目录只读。正式 checkpoint、时序和接管目标仍需按主文档讨论确定。
 
 ## 1. 环境与代码

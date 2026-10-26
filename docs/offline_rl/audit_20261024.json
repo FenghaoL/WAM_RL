@@ -1,0 +1,667 @@
+{
+  "episodes": 103,
+  "frames": 43680,
+  "transitions": 16554,
+  "end_reasons": {
+    "continuing": 16006,
+    "failure_end": 13,
+    "success": 535
+  },
+  "pending": [
+    {
+      "run": "20260911_232927",
+      "episode_index": 7,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260911_232927",
+      "episode_index": 13,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260911_232927",
+      "episode_index": 15,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260911_232927",
+      "episode_index": 25,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260912_001855",
+      "episode_index": 2,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260912_001855",
+      "episode_index": 5,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260912_001855",
+      "episode_index": 9,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260912_001855",
+      "episode_index": 17,
+      "status": "pending_success_annotation"
+    },
+    {
+      "run": "20260912_010747_val",
+      "episode_index": 0,
+      "status": "pending_success_annotation"
+    }
+  ],
+  "source_audit": "runs/offline_rl/cylinder103_skip_hold/data/audit.json",
+  "control_sources": {
+    "POLICY": 17482,
+    "HUMAN": 3629,
+    "SYSTEM_HOLD": 22569
+  },
+  "positive_annotated_episodes": 81,
+  "episodes_with_terminal_windows": 79,
+  "success_frame_relocations": 16,
+  "relocation_delta_frames": [
+    1,
+    3
+  ],
+  "terminal_windows_missing": [
+    {
+      "run": "20260911_225809",
+      "episode_index": 17
+    },
+    {
+      "run": "20260912_010747_val",
+      "episode_index": 2
+    }
+  ],
+  "network_parameters": {
+    "actor": 3863814,
+    "critic_shared": 5043970,
+    "value": 3860481
+  },
+  "cpu_tests_passed": 21,
+  "real_cache_probe": {
+    "rank": 0,
+    "world_size": 1,
+    "observations": 16,
+    "shards": [
+      "20260911_183057_ep000000_000000_000016.json"
+    ],
+    "model_load_seconds": 559.852176591754,
+    "wall_seconds": 572.4357921015471,
+    "memory": {
+      "allocated_mib": 17863.49609375,
+      "reserved_mib": 18360.0,
+      "peak_allocated_mib": 18202.83203125,
+      "peak_reserved_mib": 18360.0
+    },
+    "mean_seconds": 0.7340540939476341,
+    "video_sha256": {
+      "20260911_183057/20260911_183057_rollout_0002": {
+        "fixed": "bd057d4afb20d9ec6e0fa20a53f484a233bb6926aeee761ac190182f37c6ba79",
+        "wrist": "133a7b7c7a1178f13fe30aa4c4512db7a745b815f246811d9c2653189f597ec1"
+      }
+    }
+  },
+  "resource_benchmark": {
+    "device": "NVIDIA A100-SXM4-40GB",
+    "results": [
+      {
+        "algorithm": "iql",
+        "batch_size": 32,
+        "steps": 20,
+        "seconds_per_update": 0.0815278728492558,
+        "seconds_per_load": 0.01938881315290928,
+        "memory": {
+          "allocated_mib": 249.79736328125,
+          "reserved_mib": 774.0,
+          "peak_allocated_mib": 757.3056640625,
+          "peak_reserved_mib": 774.0
+        },
+        "last_metrics": {
+          "value_grad": 0.9216098189353943,
+          "value_loss": 0.004233130253851414,
+          "critic_grad": 6.124133586883545,
+          "critic_loss": 0.05775255337357521,
+          "q_data": -0.322917640209198,
+          "target_mean": -0.42627981305122375,
+          "q_disagreement": 0.11359131336212158,
+          "q_outside_0_1": 1.0,
+          "weight_mean": 0.7521173357963562,
+          "weight_max": 0.7521173357963562,
+          "weight_ess": 32.0,
+          "actor_grad": 1.5760624408721924,
+          "actor_loss": 0.26574647426605225,
+          "bc_mse": 0.3533310890197754
+        },
+        "covered_real_transitions": 1,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "iql",
+        "batch_size": 64,
+        "steps": 20,
+        "seconds_per_update": 0.12762648444622754,
+        "seconds_per_load": 0.03963524261489511,
+        "memory": {
+          "allocated_mib": 246.17236328125,
+          "reserved_mib": 1324.0,
+          "peak_allocated_mib": 1244.484375,
+          "peak_reserved_mib": 1324.0
+        },
+        "last_metrics": {
+          "value_grad": 0.4709862768650055,
+          "value_loss": 0.0011388268321752548,
+          "critic_grad": 3.61106538772583,
+          "critic_loss": 0.02137991413474083,
+          "q_data": -0.12397826462984085,
+          "target_mean": -0.12243566662073135,
+          "q_disagreement": 0.14775317907333374,
+          "q_outside_0_1": 1.0,
+          "weight_mean": 0.8786793351173401,
+          "weight_max": 0.8786793351173401,
+          "weight_ess": 64.0,
+          "actor_grad": 0.8731403946876526,
+          "actor_loss": 0.14683017134666443,
+          "bc_mse": 0.16710326075553894
+        },
+        "covered_real_transitions": 1,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "iql",
+        "batch_size": 128,
+        "steps": 20,
+        "seconds_per_update": 0.2571502923965454,
+        "seconds_per_load": 0.12063745940104127,
+        "memory": {
+          "allocated_mib": 246.17236328125,
+          "reserved_mib": 2390.0,
+          "peak_allocated_mib": 2240.15869140625,
+          "peak_reserved_mib": 2390.0
+        },
+        "last_metrics": {
+          "value_grad": 0.949878454208374,
+          "value_loss": 0.004617827013134956,
+          "critic_grad": 4.29675817489624,
+          "critic_loss": 0.02796833962202072,
+          "q_data": -0.4878217577934265,
+          "target_mean": -0.5835869908332825,
+          "q_disagreement": 0.0413382351398468,
+          "q_outside_0_1": 1.0,
+          "weight_mean": 0.7423500418663025,
+          "weight_max": 0.7423500418663025,
+          "weight_ess": 128.0,
+          "actor_grad": 1.145072340965271,
+          "actor_loss": 0.19333550333976746,
+          "bc_mse": 0.2604370713233948
+        },
+        "covered_real_transitions": 1,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "td3_bc",
+        "batch_size": 32,
+        "steps": 20,
+        "seconds_per_update": 0.0626408789306879,
+        "seconds_per_load": 0.019505277182906865,
+        "memory": {
+          "allocated_mib": 203.13671875,
+          "reserved_mib": 756.0,
+          "peak_allocated_mib": 709.162109375,
+          "peak_reserved_mib": 756.0
+        },
+        "last_metrics": {
+          "critic_grad": 2.253919839859009,
+          "critic_loss": 0.008588606491684914,
+          "q_data": -0.008556032553315163,
+          "target_mean": -0.03272520750761032,
+          "q_disagreement": 0.06296005100011826,
+          "q_outside_0_1": 1.0
+        },
+        "covered_real_transitions": 1,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "td3_bc",
+        "batch_size": 64,
+        "steps": 20,
+        "seconds_per_update": 0.11795863583683967,
+        "seconds_per_load": 0.05368075454607606,
+        "memory": {
+          "allocated_mib": 202.63671875,
+          "reserved_mib": 1318.0,
+          "peak_allocated_mib": 1200.6083984375,
+          "peak_reserved_mib": 1318.0
+        },
+        "last_metrics": {
+          "critic_grad": 2.2326407432556152,
+          "critic_loss": 0.007206030655652285,
+          "q_data": 0.09767621010541916,
+          "target_mean": 0.03936847299337387,
+          "q_disagreement": 0.000865936279296875,
+          "q_outside_0_1": 0.0
+        },
+        "covered_real_transitions": 1,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "td3_bc",
+        "batch_size": 128,
+        "steps": 20,
+        "seconds_per_update": 0.281122287735343,
+        "seconds_per_load": 0.1511061791330576,
+        "memory": {
+          "allocated_mib": 202.38671875,
+          "reserved_mib": 2390.0,
+          "peak_allocated_mib": 2197.19384765625,
+          "peak_reserved_mib": 2390.0
+        },
+        "last_metrics": {
+          "critic_grad": 1.2866621017456055,
+          "critic_loss": 0.00255991006270051,
+          "q_data": -0.5538329482078552,
+          "target_mean": -0.5165789723396301,
+          "q_disagreement": 0.007276475429534912,
+          "q_outside_0_1": 1.0
+        },
+        "covered_real_transitions": 1,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      }
+    ],
+    "note": "Resource benchmark; batches can repeat a tiny real-data subset; no held-out policy evaluation"
+  },
+  "background_sequence": {
+    "pid": 1615255,
+    "command": [
+      "/home/fenghao/miniconda3/envs/ahawam/bin/python",
+      "scripts/so101_pipeline/offline_rl/system.py",
+      "sequence",
+      "--transitions",
+      "runs/offline_rl/cylinder103_skip_hold/data/transitions.pt",
+      "--cache",
+      "runs/offline_rl/cylinder103_skip_hold/cache",
+      "--gpus",
+      "0",
+      "1",
+      "2",
+      "3",
+      "--pilot-steps",
+      "500"
+    ],
+    "started_utc": "2026-10-25T03:35:52.800948+00:00",
+    "log": "runs/offline_rl/cylinder103_skip_hold/sequence.log",
+    "attempt": 2
+  },
+  "data_config": {
+    "chunk_size": 8,
+    "stride": 1,
+    "gamma_tick": 0.997,
+    "intervention_mode": "mixed",
+    "temporal_mode": "skip_hold"
+  },
+  "conventions": {
+    "reward": "first marked success relocated to first HOLD image when incoming action is HOLD; incoming active command earns +1",
+    "action": "natural POLICY+HUMAN commands; HOLD omitted; full tails past success retained; discount per active command",
+    "terminal": "success or finite-horizon manifest failure end",
+    "annotation": "positive marks accepted as first-success events by task contract"
+  },
+  "transitions_sha256": "f9e059cbff0896eb31cef9a2ac6551cc3d65391fb43f169d5943a3e3ba7372df",
+  "background_workers": {
+    "supervisor_pid": 1615255,
+    "workers": [
+      {
+        "rank": 0,
+        "gpu": 0,
+        "pid": 1615268
+      },
+      {
+        "rank": 1,
+        "gpu": 1,
+        "pid": 1615269
+      },
+      {
+        "rank": 2,
+        "gpu": 2,
+        "pid": 1615270
+      },
+      {
+        "rank": 3,
+        "gpu": 3,
+        "pid": 1615271
+      }
+    ]
+  },
+  "background_snapshot": {
+    "rank_frames": {
+      "0": 10871,
+      "1": 11349,
+      "2": 11402,
+      "3": 10058
+    },
+    "progress": {
+      "0": {
+        "rank": 0,
+        "observations": 128,
+        "shards": [
+          "20260911_183057_ep000000_000000_000128.json"
+        ],
+        "model_load_seconds": 143.4337059762329,
+        "mean_seconds": 0.5507006075786194,
+        "memory": {
+          "allocated_mib": 17863.49609375,
+          "reserved_mib": 18484.0,
+          "peak_allocated_mib": 18286.86328125,
+          "peak_reserved_mib": 18484.0
+        },
+        "wall_seconds": 215.00005872361362,
+        "video_sha256": {
+          "20260911_183057/20260911_183057_rollout_0002": {
+            "fixed": "bd057d4afb20d9ec6e0fa20a53f484a233bb6926aeee761ac190182f37c6ba79",
+            "wrist": "133a7b7c7a1178f13fe30aa4c4512db7a745b815f246811d9c2653189f597ec1"
+          }
+        }
+      },
+      "1": {
+        "rank": 1,
+        "observations": 128,
+        "shards": [
+          "20260911_183057_ep000001_000000_000128.json"
+        ],
+        "model_load_seconds": 138.1654320321977,
+        "mean_seconds": 0.5184955655859085,
+        "memory": {
+          "allocated_mib": 17947.96484375,
+          "reserved_mib": 18484.0,
+          "peak_allocated_mib": 18287.08203125,
+          "peak_reserved_mib": 18484.0
+        },
+        "wall_seconds": 205.5970999021083,
+        "video_sha256": {
+          "20260911_183057/20260911_183057_rollout_0003": {
+            "fixed": "3dc7d9e667bafba5734fa09d9eed3bba7c3fc7e5003678fcb092a18deb0b2d0a",
+            "wrist": "1678cd361f8c82053382d865c7d6e36da630235430eec8b30252958db731b19a"
+          }
+        }
+      },
+      "2": {
+        "rank": 2,
+        "observations": 128,
+        "shards": [
+          "20260911_183057_ep000002_000000_000128.json"
+        ],
+        "model_load_seconds": 136.61557805165648,
+        "mean_seconds": 0.5432993190333946,
+        "memory": {
+          "allocated_mib": 17897.46484375,
+          "reserved_mib": 18484.0,
+          "peak_allocated_mib": 18286.86328125,
+          "peak_reserved_mib": 18484.0
+        },
+        "wall_seconds": 207.33923587203026,
+        "video_sha256": {
+          "20260911_183057/20260911_183057_rollout_0005": {
+            "fixed": "3485cebd776e5e63808fb1690f8584be9e800b7281015327728a5518b43ffe11",
+            "wrist": "8c4128daf6b508f6c1627f6a2000a455ee2df1e70f86355a1c362c2fb55fb173"
+          }
+        }
+      },
+      "3": {
+        "rank": 3,
+        "observations": 128,
+        "shards": [
+          "20260911_183057_ep000003_000000_000128.json"
+        ],
+        "model_load_seconds": 135.59113617427647,
+        "mean_seconds": 0.5011125352903036,
+        "memory": {
+          "allocated_mib": 17896.87109375,
+          "reserved_mib": 18484.0,
+          "peak_allocated_mib": 18244.14013671875,
+          "peak_reserved_mib": 18484.0
+        },
+        "wall_seconds": 201.12911072559655,
+        "video_sha256": {
+          "20260911_183057/20260911_183057_rollout_0006": {
+            "fixed": "6074d9b86895c63663c8127ef8d819d990b9258d76fd4e32281b8d018bc34255",
+            "wrist": "2e54933d9563f5037e66803480270dfefe4b0587c0cff7d924c062469b6288fe"
+          }
+        }
+      }
+    }
+  },
+  "resource_benchmark_partial": {
+    "device": "NVIDIA A100-SXM4-40GB",
+    "results": [
+      {
+        "algorithm": "iql",
+        "batch_size": 32,
+        "steps": 10,
+        "seconds_per_update": 0.1772549543529749,
+        "seconds_per_load": 0.0872820470482111,
+        "memory": {
+          "allocated_mib": 249.79736328125,
+          "reserved_mib": 774.0,
+          "peak_allocated_mib": 757.3056640625,
+          "peak_reserved_mib": 774.0
+        },
+        "last_metrics": {
+          "value_grad": 2.7032113075256348,
+          "value_loss": 0.01916341669857502,
+          "critic_grad": 9.0712890625,
+          "critic_loss": 0.1152048408985138,
+          "q_data": -0.7328870296478271,
+          "target_mean": -0.41756635904312134,
+          "q_disagreement": 0.24903792142868042,
+          "q_outside_0_1": 1.0,
+          "weight_mean": 1.272606611251831,
+          "weight_max": 1.9358752965927124,
+          "weight_ess": 30.246152877807617,
+          "actor_grad": 1.3025996685028076,
+          "actor_loss": 0.14565345644950867,
+          "bc_mse": 0.10882947593927383
+        },
+        "covered_real_transitions": 197,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "iql",
+        "batch_size": 64,
+        "steps": 10,
+        "seconds_per_update": 0.2767967926338315,
+        "seconds_per_load": 0.14809168316423893,
+        "memory": {
+          "allocated_mib": 246.17236328125,
+          "reserved_mib": 1324.0,
+          "peak_allocated_mib": 1244.484375,
+          "peak_reserved_mib": 1324.0
+        },
+        "last_metrics": {
+          "value_grad": 3.0881056785583496,
+          "value_loss": 0.02211015485227108,
+          "critic_grad": 9.13026237487793,
+          "critic_loss": 0.10237003117799759,
+          "q_data": -0.7710074186325073,
+          "target_mean": -0.481494665145874,
+          "q_disagreement": 0.42282038927078247,
+          "q_outside_0_1": 1.0,
+          "weight_mean": 1.360790491104126,
+          "weight_max": 1.9837080240249634,
+          "weight_ess": 61.560386657714844,
+          "actor_grad": 2.768869400024414,
+          "actor_loss": 0.3869609832763672,
+          "bc_mse": 0.29621055722236633
+        },
+        "covered_real_transitions": 197,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "iql",
+        "batch_size": 128,
+        "steps": 10,
+        "seconds_per_update": 0.5336743643507361,
+        "seconds_per_load": 0.3134003050625324,
+        "memory": {
+          "allocated_mib": 246.17236328125,
+          "reserved_mib": 2390.0,
+          "peak_allocated_mib": 2240.15869140625,
+          "peak_reserved_mib": 2390.0
+        },
+        "last_metrics": {
+          "value_grad": 1.687140703201294,
+          "value_loss": 0.01358039304614067,
+          "critic_grad": 8.444995880126953,
+          "critic_loss": 0.10669317841529846,
+          "q_data": 0.06530649960041046,
+          "target_mean": -0.015907783061265945,
+          "q_disagreement": 0.2120005041360855,
+          "q_outside_0_1": 0.0,
+          "weight_mean": 0.6182053685188293,
+          "weight_max": 0.7482973337173462,
+          "weight_ess": 126.7260971069336,
+          "actor_grad": 0.8101832866668701,
+          "actor_loss": 0.10647661238908768,
+          "bc_mse": 0.1800827831029892
+        },
+        "covered_real_transitions": 197,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "td3_bc",
+        "batch_size": 32,
+        "steps": 10,
+        "seconds_per_update": 0.12326892223209143,
+        "seconds_per_load": 0.0635381106287241,
+        "memory": {
+          "allocated_mib": 203.13671875,
+          "reserved_mib": 758.0,
+          "peak_allocated_mib": 709.162109375,
+          "peak_reserved_mib": 758.0
+        },
+        "last_metrics": {
+          "critic_grad": 6.914379596710205,
+          "critic_loss": 0.06544075906276703,
+          "q_data": -0.4444175958633423,
+          "target_mean": -0.26109418272972107,
+          "q_disagreement": 0.3444940745830536,
+          "q_outside_0_1": 1.0
+        },
+        "covered_real_transitions": 197,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "td3_bc",
+        "batch_size": 64,
+        "steps": 10,
+        "seconds_per_update": 0.23452218025922775,
+        "seconds_per_load": 0.1487521117553115,
+        "memory": {
+          "allocated_mib": 202.63671875,
+          "reserved_mib": 1318.0,
+          "peak_allocated_mib": 1200.6083984375,
+          "peak_reserved_mib": 1318.0
+        },
+        "last_metrics": {
+          "critic_grad": 6.14456033706665,
+          "critic_loss": 0.05490422248840332,
+          "q_data": -0.10645578056573868,
+          "target_mean": 0.08479443192481995,
+          "q_disagreement": 0.2955389618873596,
+          "q_outside_0_1": 0.828125
+        },
+        "covered_real_transitions": 197,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      },
+      {
+        "algorithm": "td3_bc",
+        "batch_size": 128,
+        "steps": 10,
+        "seconds_per_update": 0.3269161367788911,
+        "seconds_per_load": 0.18502011001110077,
+        "memory": {
+          "allocated_mib": 202.38671875,
+          "reserved_mib": 2390.0,
+          "peak_allocated_mib": 2197.19384765625,
+          "peak_reserved_mib": 2390.0
+        },
+        "last_metrics": {
+          "critic_grad": 5.232549667358398,
+          "critic_loss": 0.03934645280241966,
+          "q_data": -0.959564208984375,
+          "target_mean": -0.8089858889579773,
+          "q_disagreement": 0.27171003818511963,
+          "q_outside_0_1": 1.0
+        },
+        "covered_real_transitions": 197,
+        "parameters": {
+          "actor": 3863814,
+          "critic": 5043970,
+          "value": 3860481
+        }
+      }
+    ],
+    "note": "Resource benchmark; batches can repeat a tiny real-data subset; no held-out policy evaluation"
+  },
+  "integration_smoke": {
+    "real_episodes": 4,
+    "real_transitions": 667,
+    "iql_steps": 8,
+    "td3_bc_steps": 6,
+    "bc_warmup": 2,
+    "batch_size": 4,
+    "resume_iql_6_to_8": true,
+    "inference_finite": true,
+    "outputs": [
+      "runs/offline_rl/cylinder103_skip_hold/integration_iql",
+      "runs/offline_rl/cylinder103_skip_hold/integration_td3_bc"
+    ],
+    "note": "CLI integration only, not policy performance evaluation"
+  }
+}

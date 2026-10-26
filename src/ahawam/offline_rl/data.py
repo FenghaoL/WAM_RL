@@ -47,8 +47,8 @@ class TransitionConfig:
             raise ValueError("Invalid chunk_size, stride or gamma_tick")
         if self.intervention_mode not in {"mixed", "censor"}:
             raise ValueError("intervention_mode must be mixed or censor")
-        if self.temporal_mode not in {"tick", "macro"}:
-            raise ValueError("temporal_mode must be tick or macro")
+        if self.temporal_mode not in {"tick", "macro", "skip_hold"}:
+            raise ValueError("temporal_mode must be tick, macro or skip_hold")
 
 
 def inspect_episode(root: Path, row: dict, manifest: dict, info: dict):
@@ -119,6 +119,8 @@ def episode_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig
     """
     if report["status"] != "ready":
         return []
+    if cfg.temporal_mode == "skip_hold":
+        return skip_hold_transitions(table, report, cfg)
     if cfg.temporal_mode == "macro":
         return macro_transitions(table, report, cfg)
     success = report["first_success"]
@@ -167,6 +169,72 @@ def episode_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig
             assisted_episode=report.get("outcome_class") == "SUCCESS_WITH_INTERVENTION",
         ))
     return rows
+
+
+def effective_success_frame(table, success):
+    """Move success whose incoming command is HOLD to that hold's first image."""
+    if success is None:
+        return None
+    source = table.control_source.to_numpy()
+    # First HOLD image already belongs to the preceding active command.
+    if success > 0 and source[success - 1] == 2:
+        first = success - 1
+        while first > 0 and source[first - 1] == 2:
+            first -= 1
+        return first
+    return success
+
+
+def skip_hold_transitions(table, report, cfg):
+    """Full natural active-action windows, single-event terminal credit.
+
+    Retain POLICY and HUMAN; omit only SYSTEM_HOLD commands. The endpoint
+    is the *raw* observation immediately after the C-th command, including
+    a first-HOLD image. Success changes return/continuation, never the
+    natural command tail or actor labels. No fabricated terminal padding.
+    Discount is measured in retained commands (not elapsed wall time).
+    """
+    success = effective_success_frame(table, report["first_success"])
+    source = table.control_source.to_numpy()
+    active = np.flatnonzero(source[:-1] != 2)  # each command needs a following image
+    actions = np.stack(table.executed_action_arm).astype(np.float32)
+    states = np.stack(table["observation.state"]).astype(np.float32)
+    ticks = table.tick_index.to_numpy()
+    out = []
+    for pos in range(0, len(active), cfg.stride):
+        t = int(active[pos])
+        if success is not None and t >= success:
+            continue
+        indices = active[pos:pos + cfg.chunk_size]
+        if len(indices) != cfg.chunk_size:
+            continue  # no unknown/padded actor labels, even at a terminal
+        end = int(indices[-1]) + 1
+        if np.any(np.diff(ticks[t:end+1]) != 1) or table.dropped_tick.iloc[t:end+1].any():
+            continue
+        if cfg.intervention_mode == "censor" and source[t] != 1 and (source[indices] == 1).any():
+            continue
+        hit = success is not None and t < success <= end
+        # effective success is an observation, so action[success-1] earns +1.
+        reward_index = int(np.searchsorted(indices, success) - 1) if hit else None
+        if hit and int(indices[reward_index]) != success - 1:
+            continue  # no incoming active action observed (e.g. recording begins in HOLD)
+        failure_end = success is None and pos + cfg.chunk_size == len(active)
+        terminal = hit or failure_end
+        out.append(dict(episode_uid=report["episode_uid"], root=report["root"],
+            episode_index=report["episode_index"], start_frame=t, next_frame=end,
+            observation_key=f"{report['episode_uid']}:{t}", next_observation_key=f"{report['episode_uid']}:{end}",
+            action_frames=indices.tolist(), annotated_success_frame=report["first_success"],
+            effective_success_frame=success, reward_action_index=reward_index,
+            state=states[t], next_state=states[end], action=actions[indices],
+            action_valid=np.ones(cfg.chunk_size, dtype=bool), control_source=source[indices],
+            reward=cfg.gamma_tick ** reward_index if hit else 0.0,
+            discount=0.0 if terminal else cfg.gamma_tick ** cfg.chunk_size,
+            duration_ticks=int(ticks[end]-ticks[t]),
+            duration_seconds=(int(table.monotonic_ns.iloc[end])-int(table.monotonic_ns.iloc[t]))/1e9,
+            terminated=terminal, truncated=False,
+            end_reason="success" if hit else "failure_end" if failure_end else "continuing",
+            assisted_episode=report.get("outcome_class") == "SUCCESS_WITH_INTERVENTION"))
+    return out
 
 
 def macro_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig):
@@ -245,16 +313,23 @@ def build_dataset(roots: list[Path], cfg: TransitionConfig):
             if report["episode_uid"] in seen:
                 raise ValueError("Duplicate episode_uid across roots")
             seen.add(report["episode_uid"])
+            if cfg.temporal_mode == "skip_hold":
+                report["effective_success_frame"] = effective_success_frame(table, report["first_success"])
             episodes.append(report)
-            records.extend(episode_transitions(table, report, cfg))
+            episode_rows = episode_transitions(table, report, cfg)
+            report["transitions"] = len(episode_rows)
+            report["success_windows"] = sum(r["end_reason"] == "success" for r in episode_rows)
+            records.extend(episode_rows)
     numeric = ("state", "next_state", "action", "action_valid", "control_source", "reward", "discount",
                "duration_ticks", "duration_seconds", "terminated", "truncated")
     tensors = {k: torch.from_numpy(np.asarray([r[k] for r in records])) for k in numeric} if records else {}
     metadata = [{k: v for k, v in r.items() if k not in numeric} for r in records]
     return dict(format="ahawam_offline_transitions/v1", config=asdict(cfg), tensors=tensors,
                 records=metadata, episodes=episodes,
-                conventions=dict(reward="first marked success observation rewards its incoming transition",
-                                 action=("active absolute target blocks; trailing hold included in environment duration"
+                conventions=dict(reward=("first marked success relocated to first HOLD image when incoming action is HOLD; incoming active command earns +1"
+                                         if cfg.temporal_mode == "skip_hold" else "first marked success observation rewards its incoming transition"),
+                                 action=("natural POLICY+HUMAN commands; HOLD omitted; full tails past success retained; discount per active command"
+                                         if cfg.temporal_mode == "skip_hold" else "active absolute target blocks; trailing hold included in environment duration"
                                          if cfg.temporal_mode == "macro" else "actual absolute joint targets, hold included"),
                                  terminal="success or finite-horizon manifest failure end",
                                  annotation="positive marks accepted as first-success events by task contract"))

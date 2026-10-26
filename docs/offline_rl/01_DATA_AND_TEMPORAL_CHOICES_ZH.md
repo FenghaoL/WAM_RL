@@ -1,5 +1,7 @@
 # 真实数据、成功标签和动作块时间语义
 
+> 2026-10-24 本轮已选择 skip_hold＋自然完整尾部、SFT 006572 和直接 KV attention；当前实现以 [08](08_SYSTEM_IMPLEMENTATION_ZH.md) 为准，运行与资源见 [09](09_PARAMETERS_AND_RESOURCE_REPORT_ZH.md)。本文保留专项分析/早期原型记录。
+
 本轮只检查 `data/ahawam_hil_raw/so101_ahawam_cylinder_hil_v2/20260911_183057`。源 Parquet、视频和标注 JSON 均未改写。
 
 ## 1. 实测内容
