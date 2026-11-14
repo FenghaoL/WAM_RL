@@ -1,3 +1,22 @@
+# WAM_RL
+
+SO101 cylinder-insertion experiments built on AHA-WAM and FastWAM: HG-DAgger
+supervised adaptation, offline IQL / TD3+BC with compact actors reading planner
+features, IQL-weighted Action DiT fine-tuning, and real-robot policy deployment.
+Online RL is planned; the current RL training pipeline is offline.
+
+- [Offline RL implementation and experiment guide](docs/offline_rl/README_ZH.md)
+- [Episode continuity, data splits, and rebuild recipe](docs/offline_rl/18_REBUILD_AND_EPISODE_RECIPE_ZH.md)
+- [FastWAM SFT and human-correction experiments](docs/project/FASTWAM_CYLINDER_SFT_AND_CORRECTION_20261105_ZH.md)
+- [SO101 deployment scripts](scripts/so101_pipeline/online_deploy/README.md)
+
+Repository: <https://github.com/FenghaoL/WAM_RL>. Datasets, model weights,
+feature caches, and training outputs are stored locally and excluded from Git.
+Existing commit history and upstream license notices are retained. The original
+AHA-WAM documentation follows.
+
+---
+
 <div align="center">
 
 <img src="assets/aha-wam-title.svg" alt="AHA-WAM" width="410">

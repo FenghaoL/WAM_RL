@@ -26,6 +26,13 @@ def load_data(path):
 def split(data,seed=42):
     from scripts.so101_pipeline.offline_rl.run import episode_split
     records=data["records"]
+    assigned={e["episode_uid"]:e.get("split") for e in data["episodes"]}
+    if any(v is not None for v in assigned.values()):
+        if any(v not in {"train","val"} for v in assigned.values()):
+            raise ValueError("Incomplete explicit episode split")
+        val=sorted(uid for uid,part in assigned.items() if part=="val")
+        return (torch.tensor([i for i,r in enumerate(records) if assigned[r["episode_uid"]]=="train"],dtype=torch.long),
+                torch.tensor([i for i,r in enumerate(records) if assigned[r["episode_uid"]]=="val"],dtype=torch.long),val)
     val={r["episode_uid"] for r in records if Path(r["root"]).name.endswith("_val")}
     if not val:return episode_split(records,seed)
     return (torch.tensor([i for i,r in enumerate(records) if r["episode_uid"] not in val]),
@@ -33,6 +40,11 @@ def split(data,seed=42):
 
 
 def require_complete(data,cache):
+    if data["config"].get("timeline_mode", "strict_ticks") != cache.spec.get("timeline_mode", "strict_ticks"):
+        raise ValueError("Transition/cache timeline mismatch; regenerate cache in a new directory")
+    limits={e["episode_uid"]:e.get("retained_frames",e["frames"]) for e in data["episodes"]}
+    if "episode_frame_limits" in cache.spec and cache.spec["episode_frame_limits"]!=limits:
+        raise ValueError("Cache/transition frame-limit recipe mismatch")
     for e in data["episodes"]:
         if cache.spec["source_hashes"].get(e["episode_uid"])!=e["source"]["parquet_sha256"]:
             raise ValueError("Cache source mismatch")

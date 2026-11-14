@@ -1,0 +1,1352 @@
+{
+  "format": "ahawam_episode_recipe/v1",
+  "date": "2026-10-26",
+  "episodes": {
+    "20260911_183057/20260911_183057_rollout_0002": {
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260911_183057_rollout_0002",
+        "num_frames": 389,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "e129a88fe3e0ba0f88e604f75fdfcd0afac5e9099973833215a16b786d06c2bf"
+      },
+      "split": "val",
+      "retained_frames": 389,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "failure_holdout"
+    },
+    "20260911_183057/20260911_183057_rollout_0003": {
+      "source": {
+        "episode_index": 1,
+        "logical_episode_id": "20260911_183057_rollout_0003",
+        "num_frames": 404,
+        "parquet_path": "data/chunk-000/episode_000001.parquet",
+        "parquet_sha256": "2439c8b5459cae0089e6232f71c126f4d5860cd128b891dd459580a847f47eea"
+      },
+      "split": "train",
+      "retained_frames": 404,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_183057/20260911_183057_rollout_0005": {
+      "source": {
+        "episode_index": 2,
+        "logical_episode_id": "20260911_183057_rollout_0005",
+        "num_frames": 436,
+        "parquet_path": "data/chunk-000/episode_000002.parquet",
+        "parquet_sha256": "9c4a4960e638241eb25e24c5ab93c1bfaba09dbc6bac14bffe23b9ff8b259780"
+      },
+      "split": "train",
+      "retained_frames": 436,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_183057/20260911_183057_rollout_0006": {
+      "source": {
+        "episode_index": 3,
+        "logical_episode_id": "20260911_183057_rollout_0006",
+        "num_frames": 507,
+        "parquet_path": "data/chunk-000/episode_000003.parquet",
+        "parquet_sha256": "e6e9d8f2b029368197563fd4f9277686693b1517f576a157e2f4a041d6548944"
+      },
+      "split": "train",
+      "retained_frames": 507,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_183057/20260911_183057_rollout_0007": {
+      "source": {
+        "episode_index": 4,
+        "logical_episode_id": "20260911_183057_rollout_0007",
+        "num_frames": 342,
+        "parquet_path": "data/chunk-000/episode_000004.parquet",
+        "parquet_sha256": "2a2df0af8f77127c5b9092de18c778a9451b1aa7bf81d4cd7787b08ccb70f726"
+      },
+      "split": "train",
+      "retained_frames": 342,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_183057/20260911_183057_rollout_0008": {
+      "source": {
+        "episode_index": 5,
+        "logical_episode_id": "20260911_183057_rollout_0008",
+        "num_frames": 417,
+        "parquet_path": "data/chunk-000/episode_000005.parquet",
+        "parquet_sha256": "a20ef28d8099b6873182d275cd53fcfb88266b57153993c10bf620f6033b941e"
+      },
+      "split": "train",
+      "retained_frames": 417,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_183057/20260911_183057_rollout_0009": {
+      "source": {
+        "episode_index": 6,
+        "logical_episode_id": "20260911_183057_rollout_0009",
+        "num_frames": 446,
+        "parquet_path": "data/chunk-000/episode_000006.parquet",
+        "parquet_sha256": "cd758ad25df2f6ed9078b4ae3be9a9e5931e58eed37745a59e691d652aa23d68"
+      },
+      "split": "train",
+      "retained_frames": 446,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0001": {
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260911_225809_rollout_0001",
+        "num_frames": 512,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "0453dd1f8c307f01b64c81fa48fec05824b3f767e87c6944cd1910e4e03a6798"
+      },
+      "split": "train",
+      "retained_frames": 512,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0002": {
+      "source": {
+        "episode_index": 1,
+        "logical_episode_id": "20260911_225809_rollout_0002",
+        "num_frames": 167,
+        "parquet_path": "data/chunk-000/episode_000001.parquet",
+        "parquet_sha256": "465dc0f7d05393b269114ce44c187c287545f902034d609bfdcd23583a267965"
+      },
+      "split": "val",
+      "retained_frames": 167,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "failure_holdout"
+    },
+    "20260911_225809/20260911_225809_rollout_0003": {
+      "source": {
+        "episode_index": 2,
+        "logical_episode_id": "20260911_225809_rollout_0003",
+        "num_frames": 188,
+        "parquet_path": "data/chunk-000/episode_000002.parquet",
+        "parquet_sha256": "68b2196cce5d131cc2e6d593638d529772b0ad498bc96d25ebe7d8342552f8ac"
+      },
+      "split": "train",
+      "retained_frames": 188,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0004": {
+      "source": {
+        "episode_index": 3,
+        "logical_episode_id": "20260911_225809_rollout_0004",
+        "num_frames": 503,
+        "parquet_path": "data/chunk-000/episode_000003.parquet",
+        "parquet_sha256": "fd945acc398db5a9353ae7a7a0afb1c4cfa2b3680b4c62af0e671197aafb0669"
+      },
+      "split": "train",
+      "retained_frames": 503,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0005": {
+      "source": {
+        "episode_index": 4,
+        "logical_episode_id": "20260911_225809_rollout_0005",
+        "num_frames": 506,
+        "parquet_path": "data/chunk-000/episode_000004.parquet",
+        "parquet_sha256": "ffe6a94721db4e06e7ba9601d44206e6e08881e69dcd244e3ac879bae04b686d"
+      },
+      "split": "train",
+      "retained_frames": 506,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0006": {
+      "source": {
+        "episode_index": 5,
+        "logical_episode_id": "20260911_225809_rollout_0006",
+        "num_frames": 478,
+        "parquet_path": "data/chunk-000/episode_000005.parquet",
+        "parquet_sha256": "1bc3622bcb7fc0d74faa24d7d01f1ad1c2ad3a3575b7b1f898903557ac205059"
+      },
+      "split": "train",
+      "retained_frames": 478,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0007": {
+      "source": {
+        "episode_index": 6,
+        "logical_episode_id": "20260911_225809_rollout_0007",
+        "num_frames": 490,
+        "parquet_path": "data/chunk-000/episode_000006.parquet",
+        "parquet_sha256": "626910d1d54d924692efe6712b578662419faf50ceb6d3bbd0a0e1b6750f9cb0"
+      },
+      "split": "train",
+      "retained_frames": 490,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0008": {
+      "source": {
+        "episode_index": 7,
+        "logical_episode_id": "20260911_225809_rollout_0008",
+        "num_frames": 451,
+        "parquet_path": "data/chunk-000/episode_000007.parquet",
+        "parquet_sha256": "f38a1efd20630993e814aeb914eb90d394979f38c128823c35993573ff993215"
+      },
+      "split": "train",
+      "retained_frames": 451,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0010": {
+      "source": {
+        "episode_index": 8,
+        "logical_episode_id": "20260911_225809_rollout_0010",
+        "num_frames": 396,
+        "parquet_path": "data/chunk-000/episode_000008.parquet",
+        "parquet_sha256": "8da062fdae6d2e7ef8741df08b06799584c75018952886613eb0091b04373e54"
+      },
+      "split": "train",
+      "retained_frames": 396,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0011": {
+      "source": {
+        "episode_index": 9,
+        "logical_episode_id": "20260911_225809_rollout_0011",
+        "num_frames": 448,
+        "parquet_path": "data/chunk-000/episode_000009.parquet",
+        "parquet_sha256": "ddad6d6072def306f5a1c1873d4dc98e22fc4f7b55241c4586f6e2a2316d8602"
+      },
+      "split": "train",
+      "retained_frames": 448,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0012": {
+      "source": {
+        "episode_index": 10,
+        "logical_episode_id": "20260911_225809_rollout_0012",
+        "num_frames": 489,
+        "parquet_path": "data/chunk-000/episode_000010.parquet",
+        "parquet_sha256": "f4bc083fa89fbc245acc249ff587d398a9a7226155624da288a7aaddc5adc831"
+      },
+      "split": "train",
+      "retained_frames": 489,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0013": {
+      "source": {
+        "episode_index": 11,
+        "logical_episode_id": "20260911_225809_rollout_0013",
+        "num_frames": 451,
+        "parquet_path": "data/chunk-000/episode_000011.parquet",
+        "parquet_sha256": "00ac78321dc4832c6d65390a4f3c7cfb3ae8aa46037cb1b154fab237a9c1da7c"
+      },
+      "split": "train",
+      "retained_frames": 451,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0014": {
+      "source": {
+        "episode_index": 12,
+        "logical_episode_id": "20260911_225809_rollout_0014",
+        "num_frames": 162,
+        "parquet_path": "data/chunk-000/episode_000012.parquet",
+        "parquet_sha256": "645b17656b39471ea5bd06979e007ca3d24c2dd3051d3a6e7fb2a22e970886b1"
+      },
+      "split": "train",
+      "retained_frames": 162,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0016": {
+      "source": {
+        "episode_index": 13,
+        "logical_episode_id": "20260911_225809_rollout_0016",
+        "num_frames": 449,
+        "parquet_path": "data/chunk-000/episode_000013.parquet",
+        "parquet_sha256": "78be79a51cf4c2a457cb19136a23cc6a3f7225d5612e431402e654a849613f0a"
+      },
+      "split": "train",
+      "retained_frames": 449,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0017": {
+      "source": {
+        "episode_index": 14,
+        "logical_episode_id": "20260911_225809_rollout_0017",
+        "num_frames": 404,
+        "parquet_path": "data/chunk-000/episode_000014.parquet",
+        "parquet_sha256": "ab81c3ddc424d7486c25ceeb20cd2517c6d4acf4f415e0fdb381417187d33c8b"
+      },
+      "split": "train",
+      "retained_frames": 404,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0018": {
+      "source": {
+        "episode_index": 15,
+        "logical_episode_id": "20260911_225809_rollout_0018",
+        "num_frames": 453,
+        "parquet_path": "data/chunk-000/episode_000015.parquet",
+        "parquet_sha256": "930d072099c6f09d2828b3eb992c034e2523ceef8c1799ee079613f8607ea9eb"
+      },
+      "split": "train",
+      "retained_frames": 453,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0019": {
+      "source": {
+        "episode_index": 16,
+        "logical_episode_id": "20260911_225809_rollout_0019",
+        "num_frames": 421,
+        "parquet_path": "data/chunk-000/episode_000016.parquet",
+        "parquet_sha256": "dd2bd14950c44f7ad45572a121228578966813c2138131d3dcedd9e630a6789f"
+      },
+      "split": "train",
+      "retained_frames": 421,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0020": {
+      "source": {
+        "episode_index": 17,
+        "logical_episode_id": "20260911_225809_rollout_0020",
+        "num_frames": 439,
+        "parquet_path": "data/chunk-000/episode_000017.parquet",
+        "parquet_sha256": "2e3968cb61bdf6458687e752422f345698e76a2fb716cfc8a1dd66f7e459e98e"
+      },
+      "split": "train",
+      "retained_frames": 439,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0021": {
+      "source": {
+        "episode_index": 18,
+        "logical_episode_id": "20260911_225809_rollout_0021",
+        "num_frames": 452,
+        "parquet_path": "data/chunk-000/episode_000018.parquet",
+        "parquet_sha256": "37d4edc500d5df28fc8577e5e2ed2c7b38ba712255b311bbbe267b502101a441"
+      },
+      "split": "train",
+      "retained_frames": 452,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0022": {
+      "source": {
+        "episode_index": 19,
+        "logical_episode_id": "20260911_225809_rollout_0022",
+        "num_frames": 423,
+        "parquet_path": "data/chunk-000/episode_000019.parquet",
+        "parquet_sha256": "21de01aec7a5139b349231e4daea6a9039ecc47e94ab682fc68f9e92fe6883e9"
+      },
+      "split": "train",
+      "retained_frames": 423,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0023": {
+      "source": {
+        "episode_index": 20,
+        "logical_episode_id": "20260911_225809_rollout_0023",
+        "num_frames": 401,
+        "parquet_path": "data/chunk-000/episode_000020.parquet",
+        "parquet_sha256": "0511bb529a7b33bab7f57843baab0c5149bf478bcde8d48ecd2357d3fc511260"
+      },
+      "split": "train",
+      "retained_frames": 401,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0024": {
+      "source": {
+        "episode_index": 21,
+        "logical_episode_id": "20260911_225809_rollout_0024",
+        "num_frames": 396,
+        "parquet_path": "data/chunk-000/episode_000021.parquet",
+        "parquet_sha256": "fb85f45d3d6b22ff31a37644023f0e60e2083336ef2a6234e737a5a79c851ca8"
+      },
+      "split": "train",
+      "retained_frames": 396,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0025": {
+      "source": {
+        "episode_index": 22,
+        "logical_episode_id": "20260911_225809_rollout_0025",
+        "num_frames": 419,
+        "parquet_path": "data/chunk-000/episode_000022.parquet",
+        "parquet_sha256": "8d846a5cbc9ad68d1901b9aa5d3434d8e9477d286a1dbd428d80509be8baf1cf"
+      },
+      "split": "train",
+      "retained_frames": 419,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0026": {
+      "source": {
+        "episode_index": 23,
+        "logical_episode_id": "20260911_225809_rollout_0026",
+        "num_frames": 425,
+        "parquet_path": "data/chunk-000/episode_000023.parquet",
+        "parquet_sha256": "e9512f04b03f81621d53cd9dc4523c99166d4d4158c53ee45cc5267b990a0618"
+      },
+      "split": "train",
+      "retained_frames": 425,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0028": {
+      "source": {
+        "episode_index": 24,
+        "logical_episode_id": "20260911_225809_rollout_0028",
+        "num_frames": 466,
+        "parquet_path": "data/chunk-000/episode_000024.parquet",
+        "parquet_sha256": "95006d52f766fed3beae2a23fb0c139f8ab1fa47e532f1caca29487a02917802"
+      },
+      "split": "train",
+      "retained_frames": 466,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0029": {
+      "source": {
+        "episode_index": 25,
+        "logical_episode_id": "20260911_225809_rollout_0029",
+        "num_frames": 371,
+        "parquet_path": "data/chunk-000/episode_000025.parquet",
+        "parquet_sha256": "4ec340b202125acc9595d079887fbd877ceae1a1c153f1b8aa4b9f8fb33cb02a"
+      },
+      "split": "train",
+      "retained_frames": 371,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0030": {
+      "source": {
+        "episode_index": 26,
+        "logical_episode_id": "20260911_225809_rollout_0030",
+        "num_frames": 163,
+        "parquet_path": "data/chunk-000/episode_000026.parquet",
+        "parquet_sha256": "f272c957f0e03fe7a39f8a91887d11bac74b0afd4e5b47c6701eeac423048c66"
+      },
+      "split": "train",
+      "retained_frames": 163,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0032": {
+      "source": {
+        "episode_index": 27,
+        "logical_episode_id": "20260911_225809_rollout_0032",
+        "num_frames": 457,
+        "parquet_path": "data/chunk-000/episode_000027.parquet",
+        "parquet_sha256": "b377cd1809d3d52446e2b19c8dbe7f604908075acc333cf35c96bdb89f81f249"
+      },
+      "split": "train",
+      "retained_frames": 457,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0033": {
+      "source": {
+        "episode_index": 28,
+        "logical_episode_id": "20260911_225809_rollout_0033",
+        "num_frames": 184,
+        "parquet_path": "data/chunk-000/episode_000028.parquet",
+        "parquet_sha256": "8a00b365b4d39a1de4647cdd3fb8d877eddbddb36146906d7ac039b78507634e"
+      },
+      "split": "train",
+      "retained_frames": 184,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_225809/20260911_225809_rollout_0035": {
+      "source": {
+        "episode_index": 29,
+        "logical_episode_id": "20260911_225809_rollout_0035",
+        "num_frames": 446,
+        "parquet_path": "data/chunk-000/episode_000029.parquet",
+        "parquet_sha256": "9c77ca0c3b79ed1a86642b95cff7b030227db6f6a7ac20e812933e3ee3a3ab42"
+      },
+      "split": "train",
+      "retained_frames": 446,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0001": {
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260911_232927_rollout_0001",
+        "num_frames": 454,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "97e8d089906de1efe60f5bd0de41029ec8570c18fb7d895a415970b92ef3c392"
+      },
+      "split": "train",
+      "retained_frames": 454,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0002": {
+      "source": {
+        "episode_index": 1,
+        "logical_episode_id": "20260911_232927_rollout_0002",
+        "num_frames": 411,
+        "parquet_path": "data/chunk-000/episode_000001.parquet",
+        "parquet_sha256": "3cc9a6378e3fba19fe90531f1f61522d2a04ca91a34f4e77b1cdf3bb70251524"
+      },
+      "split": "train",
+      "retained_frames": 411,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0003": {
+      "source": {
+        "episode_index": 2,
+        "logical_episode_id": "20260911_232927_rollout_0003",
+        "num_frames": 427,
+        "parquet_path": "data/chunk-000/episode_000002.parquet",
+        "parquet_sha256": "f7cbff90aaf3c0a2a1ec2a33da1fc2211ee8688ddf4b575e62f112eb9298a258"
+      },
+      "split": "train",
+      "retained_frames": 427,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0004": {
+      "source": {
+        "episode_index": 3,
+        "logical_episode_id": "20260911_232927_rollout_0004",
+        "num_frames": 435,
+        "parquet_path": "data/chunk-000/episode_000003.parquet",
+        "parquet_sha256": "b9a6c7d213b5484dbe444a729bbe53ef649c82d47457b78a75061abbe981b5fd"
+      },
+      "split": "train",
+      "retained_frames": 435,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0005": {
+      "source": {
+        "episode_index": 4,
+        "logical_episode_id": "20260911_232927_rollout_0005",
+        "num_frames": 415,
+        "parquet_path": "data/chunk-000/episode_000004.parquet",
+        "parquet_sha256": "bb6f24295ed7c87335d1118c62cd5b03421cfa9234ba3b7bc9818b825660604b"
+      },
+      "split": "train",
+      "retained_frames": 415,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0006": {
+      "source": {
+        "episode_index": 5,
+        "logical_episode_id": "20260911_232927_rollout_0006",
+        "num_frames": 463,
+        "parquet_path": "data/chunk-000/episode_000005.parquet",
+        "parquet_sha256": "ede8b128253dcd87d391f1831d5f8c5528290c76189ef9fd44b1de80172f7611"
+      },
+      "split": "train",
+      "retained_frames": 463,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0007": {
+      "source": {
+        "episode_index": 6,
+        "logical_episode_id": "20260911_232927_rollout_0007",
+        "num_frames": 403,
+        "parquet_path": "data/chunk-000/episode_000006.parquet",
+        "parquet_sha256": "27cd524f7bacd0c4e92b5600d6f7f9ef63aefb13888a2ba68d35cd783c45567d"
+      },
+      "split": "train",
+      "retained_frames": 403,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0010": {
+      "source": {
+        "episode_index": 7,
+        "logical_episode_id": "20260911_232927_rollout_0010",
+        "num_frames": 437,
+        "parquet_path": "data/chunk-000/episode_000007.parquet",
+        "parquet_sha256": "026d9d2fd7cc35a217935a80f357b2cef708b0f70e0f2e95c9eace321de03d7f"
+      },
+      "split": "train",
+      "retained_frames": 218,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "first_half_censored_success"
+    },
+    "20260911_232927/20260911_232927_rollout_0011": {
+      "source": {
+        "episode_index": 8,
+        "logical_episode_id": "20260911_232927_rollout_0011",
+        "num_frames": 431,
+        "parquet_path": "data/chunk-000/episode_000008.parquet",
+        "parquet_sha256": "0a97a6e98e2bcc05f896f353c94383f4d27509b61ccb22ab57f252e066784ff8"
+      },
+      "split": "train",
+      "retained_frames": 431,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0012": {
+      "source": {
+        "episode_index": 9,
+        "logical_episode_id": "20260911_232927_rollout_0012",
+        "num_frames": 399,
+        "parquet_path": "data/chunk-000/episode_000009.parquet",
+        "parquet_sha256": "1224c948aa4d35385ec5a1975e1fbd70ad526c60e9cca89e4dcd00da14526e7b"
+      },
+      "split": "train",
+      "retained_frames": 399,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0013": {
+      "source": {
+        "episode_index": 10,
+        "logical_episode_id": "20260911_232927_rollout_0013",
+        "num_frames": 166,
+        "parquet_path": "data/chunk-000/episode_000010.parquet",
+        "parquet_sha256": "8fbd415fa6fc6f71b5e1da1e37cd45d8035868b6b853f993bea61a25b93442d6"
+      },
+      "split": "train",
+      "retained_frames": 166,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0014": {
+      "source": {
+        "episode_index": 11,
+        "logical_episode_id": "20260911_232927_rollout_0014",
+        "num_frames": 425,
+        "parquet_path": "data/chunk-000/episode_000011.parquet",
+        "parquet_sha256": "5e10a1bb8d43851aa180823e0c1ff240549e4f7c4dc1c4666f1d8a32a2cda2d1"
+      },
+      "split": "train",
+      "retained_frames": 425,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0015": {
+      "source": {
+        "episode_index": 12,
+        "logical_episode_id": "20260911_232927_rollout_0015",
+        "num_frames": 378,
+        "parquet_path": "data/chunk-000/episode_000012.parquet",
+        "parquet_sha256": "d13639eb0b2ded802385a0c77d667c59aadb854a5dc15f1cfc9a466bf5b2731b"
+      },
+      "split": "train",
+      "retained_frames": 378,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0016": {
+      "source": {
+        "episode_index": 13,
+        "logical_episode_id": "20260911_232927_rollout_0016",
+        "num_frames": 388,
+        "parquet_path": "data/chunk-000/episode_000013.parquet",
+        "parquet_sha256": "f31eee34eb59cd5c5fc5a1b3845745f4e23969f1f181dbb29e4b8c6bee830868"
+      },
+      "split": "train",
+      "retained_frames": 388,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "full_censored_success"
+    },
+    "20260911_232927/20260911_232927_rollout_0017": {
+      "source": {
+        "episode_index": 14,
+        "logical_episode_id": "20260911_232927_rollout_0017",
+        "num_frames": 155,
+        "parquet_path": "data/chunk-000/episode_000014.parquet",
+        "parquet_sha256": "244cb37759e1ef8de589788189eafb86715b8cde80672f3de28cc0a35c3fba90"
+      },
+      "split": "train",
+      "retained_frames": 155,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0018": {
+      "source": {
+        "episode_index": 15,
+        "logical_episode_id": "20260911_232927_rollout_0018",
+        "num_frames": 352,
+        "parquet_path": "data/chunk-000/episode_000015.parquet",
+        "parquet_sha256": "5ed711d44b9f357037f7ea9a25ec83fc7b04fe8648840411e3067be14d2181e3"
+      },
+      "split": "train",
+      "retained_frames": 176,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "first_half_censored_success"
+    },
+    "20260911_232927/20260911_232927_rollout_0019": {
+      "source": {
+        "episode_index": 16,
+        "logical_episode_id": "20260911_232927_rollout_0019",
+        "num_frames": 553,
+        "parquet_path": "data/chunk-000/episode_000016.parquet",
+        "parquet_sha256": "24c7e610e46fdc22f3a39d33dd8fe6a5241a8bee10859971b8d15541b51e3007"
+      },
+      "split": "train",
+      "retained_frames": 553,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0021": {
+      "source": {
+        "episode_index": 17,
+        "logical_episode_id": "20260911_232927_rollout_0021",
+        "num_frames": 407,
+        "parquet_path": "data/chunk-000/episode_000017.parquet",
+        "parquet_sha256": "ccffb6103d89cfea8673c90d62e959fcb9e0289836fbaf5383948eef0e10920b"
+      },
+      "split": "train",
+      "retained_frames": 407,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0022": {
+      "source": {
+        "episode_index": 18,
+        "logical_episode_id": "20260911_232927_rollout_0022",
+        "num_frames": 195,
+        "parquet_path": "data/chunk-000/episode_000018.parquet",
+        "parquet_sha256": "16b60d7236ecaab1e0ec11f56b1129e4a613764998dcdd11db8fb443dec267e4"
+      },
+      "split": "train",
+      "retained_frames": 195,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0023": {
+      "source": {
+        "episode_index": 19,
+        "logical_episode_id": "20260911_232927_rollout_0023",
+        "num_frames": 525,
+        "parquet_path": "data/chunk-000/episode_000019.parquet",
+        "parquet_sha256": "91164d2f3e343d8c88261cdb7949aacd42cd9d5308587e14738f21f3b8c11ed8"
+      },
+      "split": "train",
+      "retained_frames": 525,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0024": {
+      "source": {
+        "episode_index": 20,
+        "logical_episode_id": "20260911_232927_rollout_0024",
+        "num_frames": 479,
+        "parquet_path": "data/chunk-000/episode_000020.parquet",
+        "parquet_sha256": "5c29e699c62bd6dbee8ed358e7c16feb67a6029456f6ac399b3d349900c1bb69"
+      },
+      "split": "train",
+      "retained_frames": 479,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0025": {
+      "source": {
+        "episode_index": 21,
+        "logical_episode_id": "20260911_232927_rollout_0025",
+        "num_frames": 369,
+        "parquet_path": "data/chunk-000/episode_000021.parquet",
+        "parquet_sha256": "950957c4d7ef7ba88d939776b1c99920a8a16b07d9689da63e6c5babe86a8511"
+      },
+      "split": "train",
+      "retained_frames": 369,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0026": {
+      "source": {
+        "episode_index": 22,
+        "logical_episode_id": "20260911_232927_rollout_0026",
+        "num_frames": 191,
+        "parquet_path": "data/chunk-000/episode_000022.parquet",
+        "parquet_sha256": "d6fd6c13005575a0b0215aa8e6d35b8e0918a52d86f3c74c4dc55bf52aa73eb0"
+      },
+      "split": "train",
+      "retained_frames": 191,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0027": {
+      "source": {
+        "episode_index": 23,
+        "logical_episode_id": "20260911_232927_rollout_0027",
+        "num_frames": 385,
+        "parquet_path": "data/chunk-000/episode_000023.parquet",
+        "parquet_sha256": "fa4d047f67587a9a510bfcdeb0d219adcad8fcdd7a4454d478ff08773c36e86b"
+      },
+      "split": "train",
+      "retained_frames": 385,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0028": {
+      "source": {
+        "episode_index": 24,
+        "logical_episode_id": "20260911_232927_rollout_0028",
+        "num_frames": 426,
+        "parquet_path": "data/chunk-000/episode_000024.parquet",
+        "parquet_sha256": "ce2ddb89f7e7881c99732b6ca2dabc17aa1f79ad8c45e2f14827599ba47d645c"
+      },
+      "split": "train",
+      "retained_frames": 426,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0030": {
+      "source": {
+        "episode_index": 25,
+        "logical_episode_id": "20260911_232927_rollout_0030",
+        "num_frames": 374,
+        "parquet_path": "data/chunk-000/episode_000025.parquet",
+        "parquet_sha256": "241e22c09ddd9f5c98aa6ba1880ba61e72512867aa6247d021b607a4877fd879"
+      },
+      "split": "train",
+      "retained_frames": 374,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "full_censored_success"
+    },
+    "20260911_232927/20260911_232927_rollout_0031": {
+      "source": {
+        "episode_index": 26,
+        "logical_episode_id": "20260911_232927_rollout_0031",
+        "num_frames": 448,
+        "parquet_path": "data/chunk-000/episode_000026.parquet",
+        "parquet_sha256": "300fac86242d5d8176c9108a957c45cf7f7f0e311bf6a2431f5796f255525004"
+      },
+      "split": "train",
+      "retained_frames": 448,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0033": {
+      "source": {
+        "episode_index": 27,
+        "logical_episode_id": "20260911_232927_rollout_0033",
+        "num_frames": 439,
+        "parquet_path": "data/chunk-000/episode_000027.parquet",
+        "parquet_sha256": "2c70e7ca9c0ff13f12ea87d2e95a2a44b60a7c3c99539423e3c127626974e0c4"
+      },
+      "split": "train",
+      "retained_frames": 439,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0034": {
+      "source": {
+        "episode_index": 28,
+        "logical_episode_id": "20260911_232927_rollout_0034",
+        "num_frames": 418,
+        "parquet_path": "data/chunk-000/episode_000028.parquet",
+        "parquet_sha256": "4b3987889885ed71c9b70bf3b88be4ffbd2b3cf61ede1fa1167ec425474db117"
+      },
+      "split": "train",
+      "retained_frames": 418,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260911_232927/20260911_232927_rollout_0035": {
+      "source": {
+        "episode_index": 29,
+        "logical_episode_id": "20260911_232927_rollout_0035",
+        "num_frames": 154,
+        "parquet_path": "data/chunk-000/episode_000029.parquet",
+        "parquet_sha256": "30d2d12827486fc12f2987fd21a0e5181ff4af44f17a05f2996c0a05bbf27505"
+      },
+      "split": "train",
+      "retained_frames": 154,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0001": {
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260912_001855_rollout_0001",
+        "num_frames": 538,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "bb2b0fe295b4a96addcc0425c945e2b78893dbbb3a00f4794a431c655e0fa1d7"
+      },
+      "split": "train",
+      "retained_frames": 538,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0003": {
+      "source": {
+        "episode_index": 1,
+        "logical_episode_id": "20260912_001855_rollout_0003",
+        "num_frames": 426,
+        "parquet_path": "data/chunk-000/episode_000001.parquet",
+        "parquet_sha256": "005a0b601ade22bcb5f01510631406f407262ab2a9ee2aa53df169c0b8afa2db"
+      },
+      "split": "train",
+      "retained_frames": 426,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0004": {
+      "source": {
+        "episode_index": 2,
+        "logical_episode_id": "20260912_001855_rollout_0004",
+        "num_frames": 416,
+        "parquet_path": "data/chunk-000/episode_000002.parquet",
+        "parquet_sha256": "c6422864e1f0c502307fcbf12e5d00089c32aee77ccc3648614a5e2003510262"
+      },
+      "split": "train",
+      "retained_frames": 208,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "first_half_censored_success"
+    },
+    "20260912_001855/20260912_001855_rollout_0005": {
+      "source": {
+        "episode_index": 3,
+        "logical_episode_id": "20260912_001855_rollout_0005",
+        "num_frames": 413,
+        "parquet_path": "data/chunk-000/episode_000003.parquet",
+        "parquet_sha256": "0240001ccd6c5730f28b5df904398335afbb1ea7198353b988784aa97faf6a47"
+      },
+      "split": "train",
+      "retained_frames": 413,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0006": {
+      "source": {
+        "episode_index": 4,
+        "logical_episode_id": "20260912_001855_rollout_0006",
+        "num_frames": 630,
+        "parquet_path": "data/chunk-000/episode_000004.parquet",
+        "parquet_sha256": "2eb9928b232e253b106b49d65e4552eab94b6af191ce22bf8bc058a5e888bd0b"
+      },
+      "split": "train",
+      "retained_frames": 630,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0012": {
+      "source": {
+        "episode_index": 5,
+        "logical_episode_id": "20260912_001855_rollout_0012",
+        "num_frames": 328,
+        "parquet_path": "data/chunk-000/episode_000005.parquet",
+        "parquet_sha256": "e17c94c2771c13ff978388fd79d4ab2ddb07a8f6082c6def6c8005e8c03b0b13"
+      },
+      "split": "train",
+      "retained_frames": 328,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "full_censored_success"
+    },
+    "20260912_001855/20260912_001855_rollout_0018": {
+      "source": {
+        "episode_index": 6,
+        "logical_episode_id": "20260912_001855_rollout_0018",
+        "num_frames": 540,
+        "parquet_path": "data/chunk-000/episode_000006.parquet",
+        "parquet_sha256": "11f79239c041ab17bddbd31a066984164a3a331b12ecfcff35cc92fe49687558"
+      },
+      "split": "train",
+      "retained_frames": 540,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0019": {
+      "source": {
+        "episode_index": 7,
+        "logical_episode_id": "20260912_001855_rollout_0019",
+        "num_frames": 504,
+        "parquet_path": "data/chunk-000/episode_000007.parquet",
+        "parquet_sha256": "080dfdef8829b669d1e60b19e171df995cabf46086bc479b9fd5a927157f790f"
+      },
+      "split": "train",
+      "retained_frames": 504,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0020": {
+      "source": {
+        "episode_index": 8,
+        "logical_episode_id": "20260912_001855_rollout_0020",
+        "num_frames": 466,
+        "parquet_path": "data/chunk-000/episode_000008.parquet",
+        "parquet_sha256": "eba3f71c5ee621a401144da8f41d130e24f7ee9833c423f750961f0082e8145f"
+      },
+      "split": "train",
+      "retained_frames": 466,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0021": {
+      "source": {
+        "episode_index": 9,
+        "logical_episode_id": "20260912_001855_rollout_0021",
+        "num_frames": 430,
+        "parquet_path": "data/chunk-000/episode_000009.parquet",
+        "parquet_sha256": "c64de1aa313329779d68d071a8f23d3d3fcb443af16ceee193991290afbdd7fd"
+      },
+      "split": "train",
+      "retained_frames": 215,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "first_half_censored_success"
+    },
+    "20260912_001855/20260912_001855_rollout_0023": {
+      "source": {
+        "episode_index": 10,
+        "logical_episode_id": "20260912_001855_rollout_0023",
+        "num_frames": 394,
+        "parquet_path": "data/chunk-000/episode_000010.parquet",
+        "parquet_sha256": "d104cc24734e69325d712bdd142e8e5047dfcb2f02ff868838e31badadf6e9e6"
+      },
+      "split": "train",
+      "retained_frames": 394,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0024": {
+      "source": {
+        "episode_index": 11,
+        "logical_episode_id": "20260912_001855_rollout_0024",
+        "num_frames": 430,
+        "parquet_path": "data/chunk-000/episode_000011.parquet",
+        "parquet_sha256": "c8e409cfa04e0600e3274d392e4175da47e509b291f1f23c2a8007ae848ee7c3"
+      },
+      "split": "train",
+      "retained_frames": 430,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0026": {
+      "source": {
+        "episode_index": 12,
+        "logical_episode_id": "20260912_001855_rollout_0026",
+        "num_frames": 422,
+        "parquet_path": "data/chunk-000/episode_000012.parquet",
+        "parquet_sha256": "703fa971d94bf68e3c0c5184e1d00922ad09deb808cc1561ee9cb17baf6f4b64"
+      },
+      "split": "train",
+      "retained_frames": 422,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0028": {
+      "source": {
+        "episode_index": 13,
+        "logical_episode_id": "20260912_001855_rollout_0028",
+        "num_frames": 419,
+        "parquet_path": "data/chunk-000/episode_000013.parquet",
+        "parquet_sha256": "1a153e7f70cd540823f00ed1a8a406d1eae75f0f596d0c6d3456d050d0127e5a"
+      },
+      "split": "train",
+      "retained_frames": 419,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0029": {
+      "source": {
+        "episode_index": 14,
+        "logical_episode_id": "20260912_001855_rollout_0029",
+        "num_frames": 437,
+        "parquet_path": "data/chunk-000/episode_000014.parquet",
+        "parquet_sha256": "a51b07c3a8dce4fcc13223900a6523710f69c19b238e4309a7f1112ab50077b5"
+      },
+      "split": "train",
+      "retained_frames": 437,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0030": {
+      "source": {
+        "episode_index": 15,
+        "logical_episode_id": "20260912_001855_rollout_0030",
+        "num_frames": 458,
+        "parquet_path": "data/chunk-000/episode_000015.parquet",
+        "parquet_sha256": "7ec7254055018ffcbba773a4b58bd069d46acc2858e78d10b9dcbe8c5e8f5423"
+      },
+      "split": "train",
+      "retained_frames": 458,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0031": {
+      "source": {
+        "episode_index": 16,
+        "logical_episode_id": "20260912_001855_rollout_0031",
+        "num_frames": 404,
+        "parquet_path": "data/chunk-000/episode_000016.parquet",
+        "parquet_sha256": "3fc06bf7c18d2f9924ed1db3828c2deb0aaf04bcfd7618e9fa09bfe7b434389b"
+      },
+      "split": "train",
+      "retained_frames": 404,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0034": {
+      "source": {
+        "episode_index": 17,
+        "logical_episode_id": "20260912_001855_rollout_0034",
+        "num_frames": 345,
+        "parquet_path": "data/chunk-000/episode_000017.parquet",
+        "parquet_sha256": "317e051aeedbb7a30e4b4c492e2e1d710a4b96c0daaf3697031201e0618096cf"
+      },
+      "split": "train",
+      "retained_frames": 345,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "full_censored_success"
+    },
+    "20260912_001855/20260912_001855_rollout_0035": {
+      "source": {
+        "episode_index": 18,
+        "logical_episode_id": "20260912_001855_rollout_0035",
+        "num_frames": 429,
+        "parquet_path": "data/chunk-000/episode_000018.parquet",
+        "parquet_sha256": "6cae12e546cce97770db3244141ffa2efed26d319af48a6f3212629e3c49c030"
+      },
+      "split": "train",
+      "retained_frames": 429,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0038": {
+      "source": {
+        "episode_index": 19,
+        "logical_episode_id": "20260912_001855_rollout_0038",
+        "num_frames": 488,
+        "parquet_path": "data/chunk-000/episode_000019.parquet",
+        "parquet_sha256": "a37d3c949478cf9e6de84fe4f599bbfe55f9bf0e74ad034145686d7fa3ab3658"
+      },
+      "split": "train",
+      "retained_frames": 488,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0040": {
+      "source": {
+        "episode_index": 20,
+        "logical_episode_id": "20260912_001855_rollout_0040",
+        "num_frames": 516,
+        "parquet_path": "data/chunk-000/episode_000020.parquet",
+        "parquet_sha256": "2e36250254fc50f255213757d88b58e7981effad255180cf7dffe3c749b43cd7"
+      },
+      "split": "train",
+      "retained_frames": 516,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0042": {
+      "source": {
+        "episode_index": 21,
+        "logical_episode_id": "20260912_001855_rollout_0042",
+        "num_frames": 434,
+        "parquet_path": "data/chunk-000/episode_000021.parquet",
+        "parquet_sha256": "c245aa74a8728fab48d4032810df2ff2296140c92040b2967ee928dfe8cdecac"
+      },
+      "split": "train",
+      "retained_frames": 434,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0043": {
+      "source": {
+        "episode_index": 22,
+        "logical_episode_id": "20260912_001855_rollout_0043",
+        "num_frames": 399,
+        "parquet_path": "data/chunk-000/episode_000022.parquet",
+        "parquet_sha256": "b233dc03628daedbc8adf51dc85563abc691a441bf652157966feae6f6371105"
+      },
+      "split": "train",
+      "retained_frames": 399,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0044": {
+      "source": {
+        "episode_index": 23,
+        "logical_episode_id": "20260912_001855_rollout_0044",
+        "num_frames": 457,
+        "parquet_path": "data/chunk-000/episode_000023.parquet",
+        "parquet_sha256": "2877315aee5e69f94e8aae06f9be07e5114ea75bd272c35823dc24083a0f403d"
+      },
+      "split": "train",
+      "retained_frames": 457,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0045": {
+      "source": {
+        "episode_index": 24,
+        "logical_episode_id": "20260912_001855_rollout_0045",
+        "num_frames": 390,
+        "parquet_path": "data/chunk-000/episode_000024.parquet",
+        "parquet_sha256": "aa4309aca92162168eaef405d54dfb3b6d5d01bcb7140044e524f0f7bd2a7de7"
+      },
+      "split": "train",
+      "retained_frames": 390,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0046": {
+      "source": {
+        "episode_index": 25,
+        "logical_episode_id": "20260912_001855_rollout_0046",
+        "num_frames": 566,
+        "parquet_path": "data/chunk-000/episode_000025.parquet",
+        "parquet_sha256": "ed527c976b57004c990b86e6f1e455537e31a1a4cc9c174940745cea124b4ab1"
+      },
+      "split": "train",
+      "retained_frames": 566,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0048": {
+      "source": {
+        "episode_index": 26,
+        "logical_episode_id": "20260912_001855_rollout_0048",
+        "num_frames": 618,
+        "parquet_path": "data/chunk-000/episode_000026.parquet",
+        "parquet_sha256": "510d549ca9e129226c02e7cb309408254be7b0b82321aa42c80364d1be09ca33"
+      },
+      "split": "train",
+      "retained_frames": 618,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0049": {
+      "source": {
+        "episode_index": 27,
+        "logical_episode_id": "20260912_001855_rollout_0049",
+        "num_frames": 710,
+        "parquet_path": "data/chunk-000/episode_000027.parquet",
+        "parquet_sha256": "639f022d43aaf40c0a9730b79fd3cb633fc93e249597010e412b809b9baae9fb"
+      },
+      "split": "train",
+      "retained_frames": 710,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0050": {
+      "source": {
+        "episode_index": 28,
+        "logical_episode_id": "20260912_001855_rollout_0050",
+        "num_frames": 720,
+        "parquet_path": "data/chunk-000/episode_000028.parquet",
+        "parquet_sha256": "a5302aace0fd54ad6088fbce74d3461dbccc152f2d3f7dcc93d871ccf0aeae85"
+      },
+      "split": "train",
+      "retained_frames": 720,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_001855/20260912_001855_rollout_0051": {
+      "source": {
+        "episode_index": 29,
+        "logical_episode_id": "20260912_001855_rollout_0051",
+        "num_frames": 544,
+        "parquet_path": "data/chunk-000/episode_000029.parquet",
+        "parquet_sha256": "6c3f767a9e6c070d0f5cf6f05402fdff20a6685cc0c97e2cf71ae4fa43fa3bf3"
+      },
+      "split": "train",
+      "retained_frames": 544,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_010503/20260912_010503_rollout_0001": {
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260912_010503_rollout_0001",
+        "num_frames": 752,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "3dd5697bcd1728b18d09e990bdc9fe8776f1af42d4589935d66a3969c2f7d899"
+      },
+      "split": "train",
+      "retained_frames": 752,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_010503/20260912_010503_rollout_0002": {
+      "source": {
+        "episode_index": 1,
+        "logical_episode_id": "20260912_010503_rollout_0002",
+        "num_frames": 489,
+        "parquet_path": "data/chunk-000/episode_000001.parquet",
+        "parquet_sha256": "1d0d3a3c5c893964100eea74b69285e1a009b81160a1eeaf3dcf2e4009f8a5b3"
+      },
+      "split": "train",
+      "retained_frames": 489,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "ordinary_train"
+    },
+    "20260912_010747_val/20260912_010747_rollout_0002": {
+      "source": {
+        "episode_index": 0,
+        "logical_episode_id": "20260912_010747_rollout_0002",
+        "num_frames": 432,
+        "parquet_path": "data/chunk-000/episode_000000.parquet",
+        "parquet_sha256": "bf1e936e6b41d15d8fcda6a224fa10e70ecba8bc845e681f8c887fb0994029de"
+      },
+      "split": "train",
+      "retained_frames": 432,
+      "reward_mode": "observed_zero_nonterminal",
+      "treatment": "full_censored_success"
+    },
+    "20260912_010747_val/20260912_010747_rollout_0003": {
+      "source": {
+        "episode_index": 1,
+        "logical_episode_id": "20260912_010747_rollout_0003",
+        "num_frames": 456,
+        "parquet_path": "data/chunk-000/episode_000001.parquet",
+        "parquet_sha256": "66ca1b80aa0426934d72be1cd0954f91ff771527d3fc26eab6ea69d2e923ebaa"
+      },
+      "split": "val",
+      "retained_frames": 456,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "original_labelled_validation"
+    },
+    "20260912_010747_val/20260912_010747_rollout_0004": {
+      "source": {
+        "episode_index": 2,
+        "logical_episode_id": "20260912_010747_rollout_0004",
+        "num_frames": 384,
+        "parquet_path": "data/chunk-000/episode_000002.parquet",
+        "parquet_sha256": "bab3f456761d621ac2c2d81cd4a42676e5562f3136c1e031d35261cb1d751579"
+      },
+      "split": "val",
+      "retained_frames": 384,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "original_labelled_validation"
+    },
+    "20260912_010747_val/20260912_010747_rollout_0005": {
+      "source": {
+        "episode_index": 3,
+        "logical_episode_id": "20260912_010747_rollout_0005",
+        "num_frames": 443,
+        "parquet_path": "data/chunk-000/episode_000003.parquet",
+        "parquet_sha256": "cd26083eeeb0d32373e308595174c4c4dc1f7d9df24cc0dc642346d84b3127d3"
+      },
+      "split": "val",
+      "retained_frames": 443,
+      "reward_mode": "annotated_or_failure",
+      "treatment": "original_labelled_validation"
+    }
+  },
+  "decisions": {
+    "timeline": "episode saved-frame order; pauses never reset history or transitions",
+    "no_success_label": "observed reward=0; bootstrap remains gamma**8, even at cutoff; no fabricated +1 or failure terminal",
+    "half_definition": "floor(original saved frames / 2); include observations [0, retained_frames), no action may cross cutoff",
+    "selection": "fixed two source runs for half-prefixes; failure holdout includes one assisted and one policy-only failure; no critic-score selection",
+    "train_validation": "explicit per-episode assignment; former _val/ep0 unobserved success moves to train"
+  }
+}

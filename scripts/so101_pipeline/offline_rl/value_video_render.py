@@ -49,7 +49,7 @@ def render_episode(job):
     draw = ImageDraw.Draw(canvas)
     groups = {"train": "训练集", "val": "验证集", "excluded_early_stop": "未参与训练：提前结束、未录到成功"}
     group = payload["group"]
-    outcome = "失败" if e["outcome"] == "failure" else "成功（有成功帧）" if e["status"] == "ready" else "外部报告成功，录像未到终点"
+    outcome = "失败" if e["outcome"] == "failure" else "成功（有成功帧）" if e["first_success"] is not None else "外部报告成功，录像未到终点"
     title = f"{groups[group.split('/')[0]]} | {outcome} | {Path(e['root']).name} / ep {e['episode_index']:03d}"
     draw.text((18, 6), title, font=fonts[20], fill="white")
     success = payload["effective_success"]
@@ -75,7 +75,7 @@ def render_episode(job):
     draw.text((18, 934), "参考0/1是奖励尺度，不是校准成功率。REC return=已记录行为折扣回报，非 learned-policy Q 真值。", font=fonts[14], fill="#94a3b8")
     all_values = {key: np.array([np.nan if r[key] is None else r[key] for r in rows]) for key, _, _ in SERIES}
     sources = np.array([r["control_source"] for r in rows])
-    videos = {cam: Video(source, n) for cam, source in payload["videos"].items()}
+    videos = {cam: Video(source, e["frames"]) for cam, source in payload["videos"].items()}
     writer = None
     preview = payload["preview_frame"]
     try:

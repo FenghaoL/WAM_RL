@@ -1,5 +1,9 @@
 # AHA-WAM：103 episode 上的离线 RL
 
+2026-10-26 最新重建：[新数据划分、9 条未观测成功片段、4 条前半段视频、两条失败验证及四卡→IQL/TD3 队列](18_REBUILD_AND_EPISODE_RECIPE_ZH.md)。特殊处理永久保存在本轮 `data/episode_recipe.json`；异常汇总见 [19 数据异常与处理记录](19_DATA_ANOMALIES_ZH.md)。
+
+2026-10-26 时间轴修正：[暂停不拆 episode：证据、代码、转移与 history 覆盖率变化](17_EPISODE_CONTINUITY_CORRECTION_ZH.md)。新连续转移已准备；旧 cache、三项模型和价值视频仍使用此前的 tick 跳号过滤协议，尚未重新导出/训练。
+
 2026-10-25 在线比较：[三个策略的 YAML、GPU/端口、原 action server 启动方式与 history 近似](16_ONLINE_DEPLOYMENT_ZH.md)。
 
 2026-10-25 价值检查：[全量 103 条价值视频、Q/V 分数含义、提前截断轨迹及定量统计](15_VALUE_VIDEO_DIAGNOSTICS_ZH.md)。入口 `runs/offline_rl/value_videos_20261025/index.html`。

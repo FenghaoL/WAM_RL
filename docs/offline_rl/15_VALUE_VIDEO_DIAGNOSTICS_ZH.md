@@ -1,5 +1,7 @@
 # 价值函数的全量视频检查
 
+2026-10-26 补充：本页模型和视频使用旧 tick 连续性过滤。暂停不应拆 episode，修正代码和新转移已准备，但这些模型/视频尚未重做。见 [17 时间轴修正](17_EPISODE_CONTINUITY_CORRECTION_ZH.md)。
+
 日期：2026-10-25。输出目录：`runs/offline_rl/value_videos_20261025`；入口是目录中的 **`index.html`**。
 
 ## 评价了哪些模型、哪些动作

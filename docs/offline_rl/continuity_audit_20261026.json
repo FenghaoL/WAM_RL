@@ -1,0 +1,5060 @@
+{
+  "original_transitions": "/home/fenghao/workspace/AHA-WAM/runs/offline_rl/cylinder103_skip_hold/data/transitions.pt",
+  "original_sha256": "f9e059cbff0896eb31cef9a2ac6551cc3d65391fb43f169d5943a3e3ba7372df",
+  "corrected_transitions": "/home/fenghao/workspace/AHA-WAM/runs/offline_rl/cylinder103_episode_contiguous_20261026/data/transitions.pt",
+  "corrected_sha256": "d2e11d0c5ab7a131ec0d0b2be66075c47ce5396781125718f8bd4e2f0a14d881",
+  "legacy_reproduction_exact": true,
+  "old_transitions": 16554,
+  "new_transitions": 18345,
+  "added_windows": 1791,
+  "removed_windows": 0,
+  "old_success_windows": 535,
+  "new_success_windows": 580,
+  "old_success_episodes": 79,
+  "new_success_episodes": 81,
+  "old_split": {
+    "train": 16016,
+    "validation": 538
+  },
+  "new_split": {
+    "train": 17732,
+    "validation": 613
+  },
+  "conditioning_changed_observations": 23545,
+  "observations": 43680,
+  "history_coverage": {
+    "all_cache": {
+      "total": 43680,
+      "history_frame_counts": {
+        "0": 4944,
+        "1": 4944,
+        "2": 4944,
+        "3": 4746,
+        "4": 4467,
+        "5": 4464,
+        "6": 15171
+      },
+      "with_history_fraction": 0.8868131868131868,
+      "full_six_fraction": 0.34732142857142856,
+      "mean_history_frames": 3.6695054945054943
+    },
+    "train": {
+      "total": 17732,
+      "history_frame_counts": {
+        "0": 2119,
+        "1": 1805,
+        "2": 2572,
+        "3": 1934,
+        "4": 1602,
+        "5": 1669,
+        "6": 6031
+      },
+      "with_history_fraction": 0.8804985337243402,
+      "full_six_fraction": 0.34011955786149334,
+      "mean_history_frames": 3.5918114143920596
+    },
+    "validation": {
+      "total": 613,
+      "history_frame_counts": {
+        "0": 72,
+        "1": 60,
+        "2": 84,
+        "3": 76,
+        "4": 66,
+        "5": 58,
+        "6": 197
+      },
+      "with_history_fraction": 0.8825448613376835,
+      "full_six_fraction": 0.32137030995106036,
+      "mean_history_frames": 3.5758564437194127
+    }
+  },
+  "tick_jump_categories": {
+    "pause_or_handover": 250
+  },
+  "tick_jumps": [
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0002",
+      "before_frame": 98,
+      "after_frame": 99,
+      "before_tick": 112,
+      "after_tick": 161,
+      "wall_seconds": 3.3283877,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0002",
+      "before_frame": 119,
+      "after_frame": 120,
+      "before_tick": 181,
+      "after_tick": 196,
+      "wall_seconds": 1.0179493,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0003",
+      "before_frame": 360,
+      "after_frame": 361,
+      "before_tick": 375,
+      "after_tick": 424,
+      "wall_seconds": 3.3258918,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0003",
+      "before_frame": 378,
+      "after_frame": 379,
+      "before_tick": 441,
+      "after_tick": 456,
+      "wall_seconds": 1.0172661,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0005",
+      "before_frame": 120,
+      "after_frame": 121,
+      "before_tick": 134,
+      "after_tick": 176,
+      "wall_seconds": 2.8499149,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0005",
+      "before_frame": 136,
+      "after_frame": 137,
+      "before_tick": 191,
+      "after_tick": 208,
+      "wall_seconds": 1.1499348,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+      "before_frame": 84,
+      "after_frame": 85,
+      "before_tick": 98,
+      "after_tick": 142,
+      "wall_seconds": 2.9843961,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+      "before_frame": 98,
+      "after_frame": 99,
+      "before_tick": 155,
+      "after_tick": 172,
+      "wall_seconds": 1.151949,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+      "before_frame": 378,
+      "after_frame": 379,
+      "before_tick": 451,
+      "after_tick": 493,
+      "wall_seconds": 2.8505687,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0006",
+      "before_frame": 453,
+      "after_frame": 454,
+      "before_tick": 567,
+      "after_tick": 583,
+      "wall_seconds": 1.0827492,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0008",
+      "before_frame": 121,
+      "after_frame": 122,
+      "before_tick": 134,
+      "after_tick": 180,
+      "wall_seconds": 3.125039,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0008",
+      "before_frame": 149,
+      "after_frame": 150,
+      "before_tick": 207,
+      "after_tick": 225,
+      "wall_seconds": 1.2198341,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+      "before_frame": 113,
+      "after_frame": 114,
+      "before_tick": 127,
+      "after_tick": 170,
+      "wall_seconds": 2.9211942,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+      "before_frame": 130,
+      "after_frame": 131,
+      "before_tick": 186,
+      "after_tick": 203,
+      "wall_seconds": 1.1522816,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+      "before_frame": 371,
+      "after_frame": 372,
+      "before_tick": 443,
+      "after_tick": 499,
+      "wall_seconds": 3.804305,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0009",
+      "before_frame": 416,
+      "after_frame": 417,
+      "before_tick": 543,
+      "after_tick": 669,
+      "wall_seconds": 8.5301101,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0001",
+      "before_frame": 110,
+      "after_frame": 111,
+      "before_tick": 124,
+      "after_tick": 167,
+      "wall_seconds": 2.9174223,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0001",
+      "before_frame": 124,
+      "after_frame": 125,
+      "before_tick": 180,
+      "after_tick": 196,
+      "wall_seconds": 1.0855772,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0001",
+      "before_frame": 429,
+      "after_frame": 430,
+      "before_tick": 500,
+      "after_tick": 551,
+      "wall_seconds": 3.4559053,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0001",
+      "before_frame": 463,
+      "after_frame": 464,
+      "before_tick": 584,
+      "after_tick": 600,
+      "wall_seconds": 1.0824966,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0004",
+      "before_frame": 393,
+      "after_frame": 394,
+      "before_tick": 407,
+      "after_tick": 454,
+      "wall_seconds": 3.1808829,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0004",
+      "before_frame": 427,
+      "after_frame": 428,
+      "before_tick": 487,
+      "after_tick": 505,
+      "wall_seconds": 1.2193137,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0005",
+      "before_frame": 126,
+      "after_frame": 127,
+      "before_tick": 141,
+      "after_tick": 183,
+      "wall_seconds": 2.8517527,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0005",
+      "before_frame": 139,
+      "after_frame": 140,
+      "before_tick": 195,
+      "after_tick": 210,
+      "wall_seconds": 1.0155864,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0006",
+      "before_frame": 422,
+      "after_frame": 423,
+      "before_tick": 436,
+      "after_tick": 485,
+      "wall_seconds": 3.3150223,
+      "event_names": [
+        "fresh_policy_ready",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_queue_cleared",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0007",
+      "before_frame": 410,
+      "after_frame": 411,
+      "before_tick": 423,
+      "after_tick": 472,
+      "wall_seconds": 3.3200813,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0007",
+      "before_frame": 443,
+      "after_frame": 444,
+      "before_tick": 504,
+      "after_tick": 520,
+      "wall_seconds": 1.0823878,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0008",
+      "before_frame": 113,
+      "after_frame": 114,
+      "before_tick": 126,
+      "after_tick": 166,
+      "wall_seconds": 2.8077282,
+      "event_names": [
+        "deadline_miss",
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0008",
+      "before_frame": 132,
+      "after_frame": 133,
+      "before_tick": 184,
+      "after_tick": 199,
+      "wall_seconds": 1.0136571,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0008",
+      "before_frame": 358,
+      "after_frame": 359,
+      "before_tick": 424,
+      "after_tick": 469,
+      "wall_seconds": 3.0515838,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0008",
+      "before_frame": 416,
+      "after_frame": 417,
+      "before_tick": 526,
+      "after_tick": 541,
+      "wall_seconds": 1.0138119,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0010",
+      "before_frame": 357,
+      "after_frame": 358,
+      "before_tick": 371,
+      "after_tick": 418,
+      "wall_seconds": 3.1877288,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0012",
+      "before_frame": 398,
+      "after_frame": 399,
+      "before_tick": 412,
+      "after_tick": 465,
+      "wall_seconds": 3.598497,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0012",
+      "before_frame": 440,
+      "after_frame": 441,
+      "before_tick": 506,
+      "after_tick": 522,
+      "wall_seconds": 1.0815796,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0013",
+      "before_frame": 367,
+      "after_frame": 368,
+      "before_tick": 381,
+      "after_tick": 424,
+      "wall_seconds": 2.9148411,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0013",
+      "before_frame": 386,
+      "after_frame": 387,
+      "before_tick": 442,
+      "after_tick": 458,
+      "wall_seconds": 1.0809695,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0016",
+      "before_frame": 119,
+      "after_frame": 120,
+      "before_tick": 133,
+      "after_tick": 176,
+      "wall_seconds": 2.9214954,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0016",
+      "before_frame": 137,
+      "after_frame": 138,
+      "before_tick": 193,
+      "after_tick": 208,
+      "wall_seconds": 1.0181824,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0016",
+      "before_frame": 367,
+      "after_frame": 368,
+      "before_tick": 437,
+      "after_tick": 483,
+      "wall_seconds": 3.1220196,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0016",
+      "before_frame": 386,
+      "after_frame": 387,
+      "before_tick": 501,
+      "after_tick": 567,
+      "wall_seconds": 4.4659597,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0017",
+      "before_frame": 117,
+      "after_frame": 118,
+      "before_tick": 130,
+      "after_tick": 171,
+      "wall_seconds": 2.7831179,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0017",
+      "before_frame": 131,
+      "after_frame": 132,
+      "before_tick": 184,
+      "after_tick": 199,
+      "wall_seconds": 1.0167744,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0018",
+      "before_frame": 392,
+      "after_frame": 393,
+      "before_tick": 405,
+      "after_tick": 449,
+      "wall_seconds": 2.9916742,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0018",
+      "before_frame": 418,
+      "after_frame": 419,
+      "before_tick": 474,
+      "after_tick": 489,
+      "wall_seconds": 1.0137872,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0019",
+      "before_frame": 99,
+      "after_frame": 100,
+      "before_tick": 113,
+      "after_tick": 153,
+      "wall_seconds": 2.7256676,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0019",
+      "before_frame": 113,
+      "after_frame": 114,
+      "before_tick": 166,
+      "after_tick": 180,
+      "wall_seconds": 0.948556,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0019",
+      "before_frame": 353,
+      "after_frame": 354,
+      "before_tick": 419,
+      "after_tick": 557,
+      "wall_seconds": 9.3427522,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0019",
+      "before_frame": 392,
+      "after_frame": 393,
+      "before_tick": 595,
+      "after_tick": 610,
+      "wall_seconds": 1.0146163,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0020",
+      "before_frame": 111,
+      "after_frame": 112,
+      "before_tick": 125,
+      "after_tick": 186,
+      "wall_seconds": 4.1338385,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0020",
+      "before_frame": 122,
+      "after_frame": 123,
+      "before_tick": 196,
+      "after_tick": 212,
+      "wall_seconds": 1.0859936,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0020",
+      "before_frame": 371,
+      "after_frame": 372,
+      "before_tick": 460,
+      "after_tick": 503,
+      "wall_seconds": 2.9149925,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0020",
+      "before_frame": 412,
+      "after_frame": 413,
+      "before_tick": 543,
+      "after_tick": 558,
+      "wall_seconds": 1.0149467,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0021",
+      "before_frame": 391,
+      "after_frame": 392,
+      "before_tick": 405,
+      "after_tick": 451,
+      "wall_seconds": 3.1187467,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0021",
+      "before_frame": 423,
+      "after_frame": 424,
+      "before_tick": 482,
+      "after_tick": 497,
+      "wall_seconds": 1.017358,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0022",
+      "before_frame": 93,
+      "after_frame": 94,
+      "before_tick": 107,
+      "after_tick": 148,
+      "wall_seconds": 2.7807408,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0022",
+      "before_frame": 103,
+      "after_frame": 104,
+      "before_tick": 157,
+      "after_tick": 172,
+      "wall_seconds": 1.0169178,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0022",
+      "before_frame": 371,
+      "after_frame": 372,
+      "before_tick": 439,
+      "after_tick": 487,
+      "wall_seconds": 3.2509278,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0022",
+      "before_frame": 395,
+      "after_frame": 396,
+      "before_tick": 510,
+      "after_tick": 528,
+      "wall_seconds": 1.2161482,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0023",
+      "before_frame": 99,
+      "after_frame": 100,
+      "before_tick": 113,
+      "after_tick": 159,
+      "wall_seconds": 3.1164733,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0023",
+      "before_frame": 118,
+      "after_frame": 119,
+      "before_tick": 177,
+      "after_tick": 192,
+      "wall_seconds": 1.0154035,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0023",
+      "before_frame": 350,
+      "after_frame": 351,
+      "before_tick": 423,
+      "after_tick": 465,
+      "wall_seconds": 2.8487618,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0023",
+      "before_frame": 372,
+      "after_frame": 373,
+      "before_tick": 486,
+      "after_tick": 500,
+      "wall_seconds": 0.9482249,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0024",
+      "before_frame": 125,
+      "after_frame": 126,
+      "before_tick": 194,
+      "after_tick": 237,
+      "wall_seconds": 2.913207,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0024",
+      "before_frame": 143,
+      "after_frame": 144,
+      "before_tick": 254,
+      "after_tick": 269,
+      "wall_seconds": 1.0153799,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0025",
+      "before_frame": 315,
+      "after_frame": 316,
+      "before_tick": 328,
+      "after_tick": 380,
+      "wall_seconds": 3.5232821,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0025",
+      "before_frame": 359,
+      "after_frame": 360,
+      "before_tick": 423,
+      "after_tick": 439,
+      "wall_seconds": 1.0791528,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0026",
+      "before_frame": 109,
+      "after_frame": 110,
+      "before_tick": 123,
+      "after_tick": 167,
+      "wall_seconds": 2.9891576,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared",
+        "policy_request_replied"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0026",
+      "before_frame": 123,
+      "after_frame": 124,
+      "before_tick": 180,
+      "after_tick": 195,
+      "wall_seconds": 1.0142152,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0028",
+      "before_frame": 414,
+      "after_frame": 415,
+      "before_tick": 428,
+      "after_tick": 473,
+      "wall_seconds": 3.0525352,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0028",
+      "before_frame": 439,
+      "after_frame": 440,
+      "before_tick": 497,
+      "after_tick": 511,
+      "wall_seconds": 0.950687,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0032",
+      "before_frame": 135,
+      "after_frame": 136,
+      "before_tick": 149,
+      "after_tick": 188,
+      "wall_seconds": 2.6425274,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0032",
+      "before_frame": 189,
+      "after_frame": 190,
+      "before_tick": 241,
+      "after_tick": 256,
+      "wall_seconds": 1.0173441,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0035",
+      "before_frame": 115,
+      "after_frame": 116,
+      "before_tick": 128,
+      "after_tick": 169,
+      "wall_seconds": 2.7846481,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0035",
+      "before_frame": 141,
+      "after_frame": 142,
+      "before_tick": 194,
+      "after_tick": 209,
+      "wall_seconds": 1.0181164,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0001",
+      "before_frame": 135,
+      "after_frame": 136,
+      "before_tick": 149,
+      "after_tick": 191,
+      "wall_seconds": 2.8461454,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0001",
+      "before_frame": 154,
+      "after_frame": 155,
+      "before_tick": 209,
+      "after_tick": 225,
+      "wall_seconds": 1.0861385,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0002",
+      "before_frame": 357,
+      "after_frame": 358,
+      "before_tick": 371,
+      "after_tick": 413,
+      "wall_seconds": 2.848716,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0002",
+      "before_frame": 382,
+      "after_frame": 383,
+      "before_tick": 437,
+      "after_tick": 452,
+      "wall_seconds": 1.0168117,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0003",
+      "before_frame": 112,
+      "after_frame": 113,
+      "before_tick": 126,
+      "after_tick": 166,
+      "wall_seconds": 2.7157294,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0003",
+      "before_frame": 125,
+      "after_frame": 126,
+      "before_tick": 178,
+      "after_tick": 194,
+      "wall_seconds": 1.083858,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0003",
+      "before_frame": 302,
+      "after_frame": 303,
+      "before_tick": 370,
+      "after_tick": 420,
+      "wall_seconds": 3.3833528,
+      "event_names": [
+        "fresh_policy_ready",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0003",
+      "before_frame": 350,
+      "after_frame": 351,
+      "before_tick": 467,
+      "after_tick": 534,
+      "wall_seconds": 4.5367229,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0003",
+      "before_frame": 380,
+      "after_frame": 381,
+      "before_tick": 563,
+      "after_tick": 578,
+      "wall_seconds": 1.0159678,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0004",
+      "before_frame": 108,
+      "after_frame": 109,
+      "before_tick": 122,
+      "after_tick": 166,
+      "wall_seconds": 2.9873372,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared",
+        "policy_request_cancel_requested",
+        "policy_request_replied"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0004",
+      "before_frame": 123,
+      "after_frame": 124,
+      "before_tick": 180,
+      "after_tick": 284,
+      "wall_seconds": 7.0361995,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_failed",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0004",
+      "before_frame": 375,
+      "after_frame": 376,
+      "before_tick": 535,
+      "after_tick": 577,
+      "wall_seconds": 2.8513099,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0004",
+      "before_frame": 404,
+      "after_frame": 405,
+      "before_tick": 605,
+      "after_tick": 620,
+      "wall_seconds": 1.0125134,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0005",
+      "before_frame": 101,
+      "after_frame": 102,
+      "before_tick": 115,
+      "after_tick": 159,
+      "wall_seconds": 2.9832105,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0005",
+      "before_frame": 126,
+      "after_frame": 127,
+      "before_tick": 183,
+      "after_tick": 198,
+      "wall_seconds": 1.0144135,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0006",
+      "before_frame": 117,
+      "after_frame": 118,
+      "before_tick": 131,
+      "after_tick": 173,
+      "wall_seconds": 2.8491618,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0006",
+      "before_frame": 148,
+      "after_frame": 149,
+      "before_tick": 203,
+      "after_tick": 218,
+      "wall_seconds": 1.0156481,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0007",
+      "before_frame": 115,
+      "after_frame": 116,
+      "before_tick": 129,
+      "after_tick": 190,
+      "wall_seconds": 4.1349401,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0007",
+      "before_frame": 156,
+      "after_frame": 157,
+      "before_tick": 230,
+      "after_tick": 244,
+      "wall_seconds": 0.9477367,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0010",
+      "before_frame": 102,
+      "after_frame": 103,
+      "before_tick": 117,
+      "after_tick": 159,
+      "wall_seconds": 2.8498941,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0010",
+      "before_frame": 134,
+      "after_frame": 135,
+      "before_tick": 190,
+      "after_tick": 205,
+      "wall_seconds": 1.0155663,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0010",
+      "before_frame": 368,
+      "after_frame": 369,
+      "before_tick": 438,
+      "after_tick": 480,
+      "wall_seconds": 2.8454155,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0011",
+      "before_frame": 124,
+      "after_frame": 125,
+      "before_tick": 139,
+      "after_tick": 180,
+      "wall_seconds": 2.778447,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0011",
+      "before_frame": 144,
+      "after_frame": 145,
+      "before_tick": 199,
+      "after_tick": 213,
+      "wall_seconds": 0.9480957,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0012",
+      "before_frame": 100,
+      "after_frame": 101,
+      "before_tick": 114,
+      "after_tick": 157,
+      "wall_seconds": 2.9181701,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0012",
+      "before_frame": 114,
+      "after_frame": 115,
+      "before_tick": 170,
+      "after_tick": 186,
+      "wall_seconds": 1.0804702,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0014",
+      "before_frame": 97,
+      "after_frame": 98,
+      "before_tick": 111,
+      "after_tick": 151,
+      "wall_seconds": 2.71097,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0014",
+      "before_frame": 131,
+      "after_frame": 132,
+      "before_tick": 184,
+      "after_tick": 199,
+      "wall_seconds": 1.0127467,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0014",
+      "before_frame": 375,
+      "after_frame": 376,
+      "before_tick": 442,
+      "after_tick": 499,
+      "wall_seconds": 3.87115,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0014",
+      "before_frame": 399,
+      "after_frame": 400,
+      "before_tick": 522,
+      "after_tick": 537,
+      "wall_seconds": 1.0147906,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0015",
+      "before_frame": 104,
+      "after_frame": 105,
+      "before_tick": 118,
+      "after_tick": 163,
+      "wall_seconds": 3.05356,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0015",
+      "before_frame": 139,
+      "after_frame": 140,
+      "before_tick": 197,
+      "after_tick": 211,
+      "wall_seconds": 0.9479825,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0016",
+      "before_frame": 354,
+      "after_frame": 355,
+      "before_tick": 368,
+      "after_tick": 414,
+      "wall_seconds": 3.1181814,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0018",
+      "before_frame": 104,
+      "after_frame": 105,
+      "before_tick": 117,
+      "after_tick": 172,
+      "wall_seconds": 3.7267746,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0018",
+      "before_frame": 134,
+      "after_frame": 135,
+      "before_tick": 201,
+      "after_tick": 216,
+      "wall_seconds": 1.0184488,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0018",
+      "before_frame": 325,
+      "after_frame": 326,
+      "before_tick": 406,
+      "after_tick": 450,
+      "wall_seconds": 2.9841879,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0019",
+      "before_frame": 444,
+      "after_frame": 445,
+      "before_tick": 463,
+      "after_tick": 514,
+      "wall_seconds": 3.4578292,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0019",
+      "before_frame": 468,
+      "after_frame": 469,
+      "before_tick": 537,
+      "after_tick": 552,
+      "wall_seconds": 1.0147482,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0021",
+      "before_frame": 359,
+      "after_frame": 360,
+      "before_tick": 373,
+      "after_tick": 415,
+      "wall_seconds": 2.8487323,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0021",
+      "before_frame": 380,
+      "after_frame": 381,
+      "before_tick": 435,
+      "after_tick": 452,
+      "wall_seconds": 1.1516624,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0023",
+      "before_frame": 108,
+      "after_frame": 109,
+      "before_tick": 122,
+      "after_tick": 184,
+      "wall_seconds": 4.1976428,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared",
+        "policy_request_replied"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0023",
+      "before_frame": 133,
+      "after_frame": 134,
+      "before_tick": 208,
+      "after_tick": 222,
+      "wall_seconds": 0.9466412,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0023",
+      "before_frame": 455,
+      "after_frame": 456,
+      "before_tick": 543,
+      "after_tick": 591,
+      "wall_seconds": 3.2519007,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0023",
+      "before_frame": 475,
+      "after_frame": 476,
+      "before_tick": 610,
+      "after_tick": 625,
+      "wall_seconds": 1.0152294,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0024",
+      "before_frame": 98,
+      "after_frame": 99,
+      "before_tick": 111,
+      "after_tick": 148,
+      "wall_seconds": 2.5069717,
+      "event_names": [
+        "fresh_policy_ready",
+        "leader_alignment_cancelled",
+        "leader_alignment_started",
+        "pause_requested",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0024",
+      "before_frame": 399,
+      "after_frame": 400,
+      "before_tick": 448,
+      "after_tick": 501,
+      "wall_seconds": 3.5921741,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0024",
+      "before_frame": 421,
+      "after_frame": 422,
+      "before_tick": 522,
+      "after_tick": 538,
+      "wall_seconds": 1.0824305,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0025",
+      "before_frame": 317,
+      "after_frame": 318,
+      "before_tick": 331,
+      "after_tick": 387,
+      "wall_seconds": 3.7953395,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0025",
+      "before_frame": 340,
+      "after_frame": 341,
+      "before_tick": 409,
+      "after_tick": 424,
+      "wall_seconds": 1.0149041,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0026",
+      "before_frame": 90,
+      "after_frame": 91,
+      "before_tick": 104,
+      "after_tick": 145,
+      "wall_seconds": 2.7791372,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared",
+        "policy_request_replied"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0026",
+      "before_frame": 106,
+      "after_frame": 107,
+      "before_tick": 160,
+      "after_tick": 175,
+      "wall_seconds": 1.0150663,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0027",
+      "before_frame": 98,
+      "after_frame": 99,
+      "before_tick": 112,
+      "after_tick": 158,
+      "wall_seconds": 3.117939,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0027",
+      "before_frame": 111,
+      "after_frame": 112,
+      "before_tick": 170,
+      "after_tick": 185,
+      "wall_seconds": 1.0158449,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0028",
+      "before_frame": 102,
+      "after_frame": 103,
+      "before_tick": 116,
+      "after_tick": 156,
+      "wall_seconds": 2.7155812,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0028",
+      "before_frame": 118,
+      "after_frame": 119,
+      "before_tick": 171,
+      "after_tick": 187,
+      "wall_seconds": 1.085861,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0028",
+      "before_frame": 363,
+      "after_frame": 364,
+      "before_tick": 431,
+      "after_tick": 486,
+      "wall_seconds": 3.7319738,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0028",
+      "before_frame": 384,
+      "after_frame": 385,
+      "before_tick": 506,
+      "after_tick": 522,
+      "wall_seconds": 1.0846543,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0030",
+      "before_frame": 84,
+      "after_frame": 85,
+      "before_tick": 98,
+      "after_tick": 145,
+      "wall_seconds": 3.1851312,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0030",
+      "before_frame": 133,
+      "after_frame": 134,
+      "before_tick": 193,
+      "after_tick": 208,
+      "wall_seconds": 1.0143771,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0030",
+      "before_frame": 323,
+      "after_frame": 324,
+      "before_tick": 397,
+      "after_tick": 440,
+      "wall_seconds": 2.9158416,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0031",
+      "before_frame": 87,
+      "after_frame": 88,
+      "before_tick": 101,
+      "after_tick": 140,
+      "wall_seconds": 2.6427822,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0031",
+      "before_frame": 116,
+      "after_frame": 117,
+      "before_tick": 168,
+      "after_tick": 183,
+      "wall_seconds": 1.0181052,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0031",
+      "before_frame": 378,
+      "after_frame": 379,
+      "before_tick": 444,
+      "after_tick": 487,
+      "wall_seconds": 2.9175762,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0031",
+      "before_frame": 396,
+      "after_frame": 397,
+      "before_tick": 504,
+      "after_tick": 520,
+      "wall_seconds": 1.0830204,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0033",
+      "before_frame": 97,
+      "after_frame": 98,
+      "before_tick": 111,
+      "after_tick": 151,
+      "wall_seconds": 2.7116955,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0033",
+      "before_frame": 132,
+      "after_frame": 133,
+      "before_tick": 185,
+      "after_tick": 200,
+      "wall_seconds": 1.0164371,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0033",
+      "before_frame": 362,
+      "after_frame": 363,
+      "before_tick": 429,
+      "after_tick": 474,
+      "wall_seconds": 3.0518589,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0033",
+      "before_frame": 394,
+      "after_frame": 395,
+      "before_tick": 505,
+      "after_tick": 520,
+      "wall_seconds": 1.0154364,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0034",
+      "before_frame": 346,
+      "after_frame": 347,
+      "before_tick": 360,
+      "after_tick": 400,
+      "wall_seconds": 2.7171664,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0034",
+      "before_frame": 366,
+      "after_frame": 367,
+      "before_tick": 419,
+      "after_tick": 435,
+      "wall_seconds": 1.081957,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0001",
+      "before_frame": 133,
+      "after_frame": 134,
+      "before_tick": 146,
+      "after_tick": 190,
+      "wall_seconds": 2.9811634,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0001",
+      "before_frame": 148,
+      "after_frame": 149,
+      "before_tick": 204,
+      "after_tick": 218,
+      "wall_seconds": 0.9482424,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0001",
+      "before_frame": 465,
+      "after_frame": 466,
+      "before_tick": 534,
+      "after_tick": 578,
+      "wall_seconds": 2.98021,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0001",
+      "before_frame": 493,
+      "after_frame": 494,
+      "before_tick": 605,
+      "after_tick": 619,
+      "wall_seconds": 0.950977,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0003",
+      "before_frame": 116,
+      "after_frame": 117,
+      "before_tick": 130,
+      "after_tick": 176,
+      "wall_seconds": 3.122661,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0003",
+      "before_frame": 142,
+      "after_frame": 143,
+      "before_tick": 201,
+      "after_tick": 217,
+      "wall_seconds": 1.0845166,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0003",
+      "before_frame": 368,
+      "after_frame": 369,
+      "before_tick": 442,
+      "after_tick": 481,
+      "wall_seconds": 2.6431224,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0003",
+      "before_frame": 395,
+      "after_frame": 396,
+      "before_tick": 507,
+      "after_tick": 521,
+      "wall_seconds": 0.9478327,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0004",
+      "before_frame": 98,
+      "after_frame": 99,
+      "before_tick": 112,
+      "after_tick": 157,
+      "wall_seconds": 3.0481014,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0004",
+      "before_frame": 113,
+      "after_frame": 114,
+      "before_tick": 171,
+      "after_tick": 187,
+      "wall_seconds": 1.0838531,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0004",
+      "before_frame": 376,
+      "after_frame": 377,
+      "before_tick": 449,
+      "after_tick": 492,
+      "wall_seconds": 2.9114124,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0005",
+      "before_frame": 99,
+      "after_frame": 100,
+      "before_tick": 113,
+      "after_tick": 158,
+      "wall_seconds": 3.0502278,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0005",
+      "before_frame": 110,
+      "after_frame": 111,
+      "before_tick": 168,
+      "after_tick": 182,
+      "wall_seconds": 0.9449787,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0006",
+      "before_frame": 537,
+      "after_frame": 538,
+      "before_tick": 550,
+      "after_tick": 594,
+      "wall_seconds": 2.9856676,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0006",
+      "before_frame": 620,
+      "after_frame": 621,
+      "before_tick": 676,
+      "after_tick": 691,
+      "wall_seconds": 1.0125267,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0012",
+      "before_frame": 107,
+      "after_frame": 108,
+      "before_tick": 120,
+      "after_tick": 302,
+      "wall_seconds": 12.3069798,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0012",
+      "before_frame": 132,
+      "after_frame": 133,
+      "before_tick": 326,
+      "after_tick": 342,
+      "wall_seconds": 1.0843061,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0012",
+      "before_frame": 291,
+      "after_frame": 292,
+      "before_tick": 500,
+      "after_tick": 806,
+      "wall_seconds": 20.6943281,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0018",
+      "before_frame": 447,
+      "after_frame": 448,
+      "before_tick": 460,
+      "after_tick": 505,
+      "wall_seconds": 3.0499736,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0018",
+      "before_frame": 495,
+      "after_frame": 496,
+      "before_tick": 552,
+      "after_tick": 567,
+      "wall_seconds": 1.0128353,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0019",
+      "before_frame": 131,
+      "after_frame": 132,
+      "before_tick": 145,
+      "after_tick": 187,
+      "wall_seconds": 2.8448808,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0019",
+      "before_frame": 146,
+      "after_frame": 147,
+      "before_tick": 201,
+      "after_tick": 215,
+      "wall_seconds": 0.9494332,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0019",
+      "before_frame": 408,
+      "after_frame": 409,
+      "before_tick": 476,
+      "after_tick": 525,
+      "wall_seconds": 3.3269195,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0019",
+      "before_frame": 439,
+      "after_frame": 440,
+      "before_tick": 555,
+      "after_tick": 572,
+      "wall_seconds": 1.1488878,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0020",
+      "before_frame": 380,
+      "after_frame": 381,
+      "before_tick": 393,
+      "after_tick": 446,
+      "wall_seconds": 3.5912479,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0020",
+      "before_frame": 419,
+      "after_frame": 420,
+      "before_tick": 484,
+      "after_tick": 499,
+      "wall_seconds": 1.0116461,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0021",
+      "before_frame": 118,
+      "after_frame": 119,
+      "before_tick": 132,
+      "after_tick": 181,
+      "wall_seconds": 3.3235436,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0021",
+      "before_frame": 148,
+      "after_frame": 149,
+      "before_tick": 210,
+      "after_tick": 226,
+      "wall_seconds": 1.0821306,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0021",
+      "before_frame": 405,
+      "after_frame": 406,
+      "before_tick": 482,
+      "after_tick": 524,
+      "wall_seconds": 2.8417495,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0023",
+      "before_frame": 83,
+      "after_frame": 84,
+      "before_tick": 96,
+      "after_tick": 138,
+      "wall_seconds": 2.8528322,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0023",
+      "before_frame": 118,
+      "after_frame": 119,
+      "before_tick": 172,
+      "after_tick": 187,
+      "wall_seconds": 1.0144923,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0023",
+      "before_frame": 335,
+      "after_frame": 336,
+      "before_tick": 403,
+      "after_tick": 445,
+      "wall_seconds": 2.8464894,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0023",
+      "before_frame": 366,
+      "after_frame": 367,
+      "before_tick": 475,
+      "after_tick": 490,
+      "wall_seconds": 1.0152112,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0028",
+      "before_frame": 84,
+      "after_frame": 85,
+      "before_tick": 98,
+      "after_tick": 143,
+      "wall_seconds": 3.0491433,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0028",
+      "before_frame": 138,
+      "after_frame": 139,
+      "before_tick": 196,
+      "after_tick": 213,
+      "wall_seconds": 1.1503193,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0029",
+      "before_frame": 87,
+      "after_frame": 88,
+      "before_tick": 101,
+      "after_tick": 143,
+      "wall_seconds": 2.8492871,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0029",
+      "before_frame": 123,
+      "after_frame": 124,
+      "before_tick": 178,
+      "after_tick": 195,
+      "wall_seconds": 1.1515895,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0029",
+      "before_frame": 378,
+      "after_frame": 379,
+      "before_tick": 449,
+      "after_tick": 504,
+      "wall_seconds": 3.7261428,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared",
+        "policy_request_replied"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0029",
+      "before_frame": 405,
+      "after_frame": 406,
+      "before_tick": 530,
+      "after_tick": 545,
+      "wall_seconds": 1.0135688,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0030",
+      "before_frame": 128,
+      "after_frame": 129,
+      "before_tick": 142,
+      "after_tick": 180,
+      "wall_seconds": 2.5779209,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0030",
+      "before_frame": 148,
+      "after_frame": 149,
+      "before_tick": 199,
+      "after_tick": 214,
+      "wall_seconds": 1.0131684,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0031",
+      "before_frame": 85,
+      "after_frame": 86,
+      "before_tick": 99,
+      "after_tick": 139,
+      "wall_seconds": 2.7160251,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0031",
+      "before_frame": 127,
+      "after_frame": 128,
+      "before_tick": 180,
+      "after_tick": 195,
+      "wall_seconds": 1.0144528,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0031",
+      "before_frame": 356,
+      "after_frame": 357,
+      "before_tick": 423,
+      "after_tick": 464,
+      "wall_seconds": 2.7828834,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0031",
+      "before_frame": 380,
+      "after_frame": 381,
+      "before_tick": 487,
+      "after_tick": 501,
+      "wall_seconds": 0.9470246,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0034",
+      "before_frame": 69,
+      "after_frame": 70,
+      "before_tick": 83,
+      "after_tick": 129,
+      "wall_seconds": 3.1202366,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0034",
+      "before_frame": 108,
+      "after_frame": 109,
+      "before_tick": 167,
+      "after_tick": 181,
+      "wall_seconds": 0.945307,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0034",
+      "before_frame": 313,
+      "after_frame": 314,
+      "before_tick": 385,
+      "after_tick": 427,
+      "wall_seconds": 2.8486686,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0038",
+      "before_frame": 115,
+      "after_frame": 116,
+      "before_tick": 130,
+      "after_tick": 169,
+      "wall_seconds": 2.6457258,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0038",
+      "before_frame": 171,
+      "after_frame": 172,
+      "before_tick": 224,
+      "after_tick": 239,
+      "wall_seconds": 1.0142768,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0038",
+      "before_frame": 419,
+      "after_frame": 420,
+      "before_tick": 486,
+      "after_tick": 526,
+      "wall_seconds": 2.7149114,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0038",
+      "before_frame": 460,
+      "after_frame": 461,
+      "before_tick": 566,
+      "after_tick": 583,
+      "wall_seconds": 1.1505914,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0040",
+      "before_frame": 115,
+      "after_frame": 116,
+      "before_tick": 129,
+      "after_tick": 172,
+      "wall_seconds": 2.9132601,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0040",
+      "before_frame": 163,
+      "after_frame": 164,
+      "before_tick": 219,
+      "after_tick": 241,
+      "wall_seconds": 1.4917896,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0043",
+      "before_frame": 355,
+      "after_frame": 356,
+      "before_tick": 369,
+      "after_tick": 410,
+      "wall_seconds": 2.78598,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0043",
+      "before_frame": 369,
+      "after_frame": 370,
+      "before_tick": 423,
+      "after_tick": 438,
+      "wall_seconds": 1.0157732,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0044",
+      "before_frame": 116,
+      "after_frame": 117,
+      "before_tick": 129,
+      "after_tick": 185,
+      "wall_seconds": 3.7961406,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0044",
+      "before_frame": 125,
+      "after_frame": 126,
+      "before_tick": 193,
+      "after_tick": 208,
+      "wall_seconds": 1.0143802,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0044",
+      "before_frame": 388,
+      "after_frame": 389,
+      "before_tick": 470,
+      "after_tick": 512,
+      "wall_seconds": 2.8487888,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0044",
+      "before_frame": 413,
+      "after_frame": 414,
+      "before_tick": 536,
+      "after_tick": 551,
+      "wall_seconds": 1.0150342,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0045",
+      "before_frame": 88,
+      "after_frame": 89,
+      "before_tick": 102,
+      "after_tick": 157,
+      "wall_seconds": 3.7355153,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0045",
+      "before_frame": 124,
+      "after_frame": 125,
+      "before_tick": 192,
+      "after_tick": 207,
+      "wall_seconds": 1.0142914,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0045",
+      "before_frame": 320,
+      "after_frame": 321,
+      "before_tick": 402,
+      "after_tick": 445,
+      "wall_seconds": 2.9165312,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0045",
+      "before_frame": 350,
+      "after_frame": 351,
+      "before_tick": 474,
+      "after_tick": 497,
+      "wall_seconds": 1.5537266,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0046",
+      "before_frame": 115,
+      "after_frame": 116,
+      "before_tick": 131,
+      "after_tick": 170,
+      "wall_seconds": 2.6444281,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0046",
+      "before_frame": 158,
+      "after_frame": 159,
+      "before_tick": 212,
+      "after_tick": 238,
+      "wall_seconds": 1.7607884,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0046",
+      "before_frame": 508,
+      "after_frame": 509,
+      "before_tick": 587,
+      "after_tick": 629,
+      "wall_seconds": 2.8452127,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0046",
+      "before_frame": 526,
+      "after_frame": 527,
+      "before_tick": 646,
+      "after_tick": 671,
+      "wall_seconds": 1.6944027,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0048",
+      "before_frame": 107,
+      "after_frame": 108,
+      "before_tick": 133,
+      "after_tick": 172,
+      "wall_seconds": 2.6428464,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0048",
+      "before_frame": 194,
+      "after_frame": 195,
+      "before_tick": 258,
+      "after_tick": 289,
+      "wall_seconds": 2.0971944,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0048",
+      "before_frame": 552,
+      "after_frame": 553,
+      "before_tick": 646,
+      "after_tick": 689,
+      "wall_seconds": 2.9145495,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_empty_hold",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_started"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0048",
+      "before_frame": 575,
+      "after_frame": 576,
+      "before_tick": 711,
+      "after_tick": 741,
+      "wall_seconds": 2.0313818,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0049",
+      "before_frame": 165,
+      "after_frame": 166,
+      "before_tick": 193,
+      "after_tick": 234,
+      "wall_seconds": 2.7779354,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0049",
+      "before_frame": 176,
+      "after_frame": 177,
+      "before_tick": 244,
+      "after_tick": 269,
+      "wall_seconds": 1.693449,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0049",
+      "before_frame": 589,
+      "after_frame": 590,
+      "before_tick": 681,
+      "after_tick": 752,
+      "wall_seconds": 4.8109097,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0049",
+      "before_frame": 606,
+      "after_frame": 607,
+      "before_tick": 768,
+      "after_tick": 797,
+      "wall_seconds": 1.9629708,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0050",
+      "before_frame": 116,
+      "after_frame": 117,
+      "before_tick": 142,
+      "after_tick": 182,
+      "wall_seconds": 2.7131011,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0050",
+      "before_frame": 142,
+      "after_frame": 143,
+      "before_tick": 207,
+      "after_tick": 240,
+      "wall_seconds": 2.2303194,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0050",
+      "before_frame": 201,
+      "after_frame": 202,
+      "before_tick": 298,
+      "after_tick": 343,
+      "wall_seconds": 3.0533335,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0050",
+      "before_frame": 216,
+      "after_frame": 217,
+      "before_tick": 357,
+      "after_tick": 385,
+      "wall_seconds": 1.8933838,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0050",
+      "before_frame": 659,
+      "after_frame": 660,
+      "before_tick": 827,
+      "after_tick": 878,
+      "wall_seconds": 3.4589346,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0050",
+      "before_frame": 684,
+      "after_frame": 685,
+      "before_tick": 902,
+      "after_tick": 921,
+      "wall_seconds": 1.2873664,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0051",
+      "before_frame": 92,
+      "after_frame": 93,
+      "before_tick": 116,
+      "after_tick": 157,
+      "wall_seconds": 2.7829775,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0051",
+      "before_frame": 136,
+      "after_frame": 137,
+      "before_tick": 200,
+      "after_tick": 224,
+      "wall_seconds": 1.6255898,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0051",
+      "before_frame": 436,
+      "after_frame": 437,
+      "before_tick": 523,
+      "after_tick": 585,
+      "wall_seconds": 4.190473,
+      "event_names": [
+        "fresh_policy_ready",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_cancel_requested",
+        "policy_request_failed",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0051",
+      "before_frame": 480,
+      "after_frame": 481,
+      "before_tick": 628,
+      "after_tick": 675,
+      "wall_seconds": 3.1875091,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0051",
+      "before_frame": 501,
+      "after_frame": 502,
+      "before_tick": 695,
+      "after_tick": 721,
+      "wall_seconds": 1.7603012,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0001",
+      "before_frame": 225,
+      "after_frame": 226,
+      "before_tick": 250,
+      "after_tick": 296,
+      "wall_seconds": 3.1172449,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0001",
+      "before_frame": 243,
+      "after_frame": 244,
+      "before_tick": 313,
+      "after_tick": 341,
+      "wall_seconds": 1.8924264,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0001",
+      "before_frame": 685,
+      "after_frame": 686,
+      "before_tick": 782,
+      "after_tick": 822,
+      "wall_seconds": 2.7129338,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0001",
+      "before_frame": 702,
+      "after_frame": 703,
+      "before_tick": 838,
+      "after_tick": 854,
+      "wall_seconds": 1.0821062,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0002",
+      "before_frame": 108,
+      "after_frame": 109,
+      "before_tick": 122,
+      "after_tick": 163,
+      "wall_seconds": 2.7816017,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0002",
+      "before_frame": 127,
+      "after_frame": 128,
+      "before_tick": 181,
+      "after_tick": 196,
+      "wall_seconds": 1.0138103,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0002",
+      "before_frame": 93,
+      "after_frame": 94,
+      "before_tick": 107,
+      "after_tick": 147,
+      "wall_seconds": 2.7096411,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0002",
+      "before_frame": 108,
+      "after_frame": 109,
+      "before_tick": 161,
+      "after_tick": 176,
+      "wall_seconds": 1.0139559,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0002",
+      "before_frame": 389,
+      "after_frame": 390,
+      "before_tick": 456,
+      "after_tick": 501,
+      "wall_seconds": 3.050534,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_queue_cleared"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0003",
+      "before_frame": 121,
+      "after_frame": 122,
+      "before_tick": 135,
+      "after_tick": 177,
+      "wall_seconds": 2.8520879,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0003",
+      "before_frame": 160,
+      "after_frame": 161,
+      "before_tick": 215,
+      "after_tick": 230,
+      "wall_seconds": 1.0138785,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0003",
+      "before_frame": 389,
+      "after_frame": 390,
+      "before_tick": 458,
+      "after_tick": 504,
+      "wall_seconds": 3.1194247,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0003",
+      "before_frame": 410,
+      "after_frame": 411,
+      "before_tick": 524,
+      "after_tick": 539,
+      "wall_seconds": 1.0148078,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0004",
+      "before_frame": 339,
+      "after_frame": 340,
+      "before_tick": 353,
+      "after_tick": 392,
+      "wall_seconds": 2.6413419,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0004",
+      "before_frame": 356,
+      "after_frame": 357,
+      "before_tick": 408,
+      "after_tick": 422,
+      "wall_seconds": 0.9472214,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0005",
+      "before_frame": 107,
+      "after_frame": 108,
+      "before_tick": 120,
+      "after_tick": 160,
+      "wall_seconds": 2.7105018,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0005",
+      "before_frame": 120,
+      "after_frame": 121,
+      "before_tick": 172,
+      "after_tick": 187,
+      "wall_seconds": 1.0179748,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0005",
+      "before_frame": 370,
+      "after_frame": 371,
+      "before_tick": 436,
+      "after_tick": 476,
+      "wall_seconds": 2.7174117,
+      "event_names": [
+        "human_control_started",
+        "leader_alignment_completed",
+        "leader_alignment_started",
+        "pause_requested",
+        "paused_leader_ready",
+        "policy_invalidated",
+        "policy_request_cancel_requested",
+        "policy_request_failed"
+      ],
+      "pause_or_handover": true
+    },
+    {
+      "episode_uid": "20260912_010747_val/20260912_010747_rollout_0005",
+      "before_frame": 392,
+      "after_frame": 393,
+      "before_tick": 497,
+      "after_tick": 512,
+      "wall_seconds": 1.0156198,
+      "event_names": [
+        "fresh_policy_ready",
+        "human_control_stopped",
+        "phase_changed",
+        "policy_invalidated",
+        "policy_remote_reset_completed",
+        "policy_remote_reset_started",
+        "policy_request_replied",
+        "policy_request_started",
+        "policy_resume_requested"
+      ],
+      "pause_or_handover": true
+    }
+  ],
+  "dropped_tick_rows": [
+    {
+      "episode_uid": "20260911_183057/20260911_183057_rollout_0002",
+      "frame": 287
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0008",
+      "frame": 100
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0020",
+      "frame": 1
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0025",
+      "frame": 6
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0028",
+      "frame": 189
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0032",
+      "frame": 25
+    },
+    {
+      "episode_uid": "20260911_225809/20260911_225809_rollout_0032",
+      "frame": 26
+    },
+    {
+      "episode_uid": "20260911_232927/20260911_232927_rollout_0024",
+      "frame": 380
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0018",
+      "frame": 57
+    },
+    {
+      "episode_uid": "20260912_001855/20260912_001855_rollout_0034",
+      "frame": 4
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0001",
+      "frame": 679
+    },
+    {
+      "episode_uid": "20260912_010503/20260912_010503_rollout_0002",
+      "frame": 460
+    }
+  ],
+  "collector_control_settings": {
+    "20260911_183057": {
+      "max_step": 10.0,
+      "dry_run": false,
+      "fake": false,
+      "pause_frames_stored": false,
+      "autonomous_queue_hold_frames_stored": true,
+      "system_hold_action": "last actual follower target",
+      "system_hold_action_supervision_mask": false,
+      "camera_age_source": "OpenCVCamera.read completion timestamp"
+    },
+    "20260911_225809": {
+      "max_step": 10.0,
+      "dry_run": false,
+      "fake": false,
+      "pause_frames_stored": false,
+      "autonomous_queue_hold_frames_stored": true,
+      "system_hold_action": "last actual follower target",
+      "system_hold_action_supervision_mask": false,
+      "camera_age_source": "OpenCVCamera.read completion timestamp"
+    },
+    "20260911_232927": {
+      "max_step": 10.0,
+      "dry_run": false,
+      "fake": false,
+      "pause_frames_stored": false,
+      "autonomous_queue_hold_frames_stored": true,
+      "system_hold_action": "last actual follower target",
+      "system_hold_action_supervision_mask": false,
+      "camera_age_source": "OpenCVCamera.read completion timestamp"
+    },
+    "20260912_001855": {
+      "max_step": 10.0,
+      "dry_run": false,
+      "fake": false,
+      "pause_frames_stored": false,
+      "autonomous_queue_hold_frames_stored": true,
+      "system_hold_action": "last actual follower target",
+      "system_hold_action_supervision_mask": false,
+      "camera_age_source": "OpenCVCamera.read completion timestamp"
+    },
+    "20260912_010503": {
+      "max_step": 10.0,
+      "dry_run": false,
+      "fake": false,
+      "pause_frames_stored": false,
+      "autonomous_queue_hold_frames_stored": true,
+      "system_hold_action": "last actual follower target",
+      "system_hold_action_supervision_mask": false,
+      "camera_age_source": "OpenCVCamera.read completion timestamp"
+    },
+    "20260912_010747_val": {
+      "max_step": 10.0,
+      "dry_run": false,
+      "fake": false,
+      "pause_frames_stored": false,
+      "autonomous_queue_hold_frames_stored": true,
+      "system_hold_action": "last actual follower target",
+      "system_hold_action_supervision_mask": false,
+      "camera_age_source": "OpenCVCamera.read completion timestamp"
+    }
+  },
+  "status": "CPU preparation only; existing cache, checkpoints and videos unchanged; new cache not exported"
+}

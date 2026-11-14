@@ -1,5 +1,7 @@
 # AHA-WAM × SO-101 精密操作项目：中英文简历表述与岗位关键词
 
+2026-10-26 补充：包含 HG-DAgger、末层 planner KV 小 actor、IQL/TD3+BC 及计划内在线 RL 的新版材料见 [项目完整总结与简历稿](AHAWAM_HGDAGGER_OFFLINE_ONLINE_RL_RESUME_ZH.md)。本文件保留为 2026-08-30 的早期快照。
+
 > 整理日期：2026-08-30  
 > 适用方向：机器人学习、具身智能、Robot Learning Research Engineer、Robotic Manipulation ML Engineer、VLA/WAM Research、强化学习与模仿学习工程。  
 > 当前状态：真机 SFT、在线人工接管数据闭环和 HUMAN-only 联合 video/action 训练管线已经实现；最终真机成功率、完整 value/advantage RL 和跨任务结果仍在实验中。

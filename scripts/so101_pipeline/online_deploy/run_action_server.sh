@@ -45,8 +45,13 @@ DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_v2_p1_a
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_vidext_cont4073.yaml"  # :12122
 #DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/padapter_v3_p1_full_balanced_video_segdemo_cont4073.yaml" # :12123
 
-# Optional argument or environment override allows three independent terminals
-# without repeatedly editing this file. No argument preserves the selection above.
+# Native FastWAM cylinder weights (available after the corresponding queued training):
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_fastwam_franka_demo_sft.yaml"     # GPU0 :12140
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_fastwam_franka_action_only.yaml"  # GPU1 :12141
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_fastwam_franka_full_vidext.yaml"  # GPU2 :12142
+#DEPLOY_CONFIG="scripts/so101_pipeline/online_deploy/deployments/cylinder_fastwam_robocoin_demo_sft.yaml"    # GPU3 :12143
+# Optional argument or environment override avoids repeatedly editing this file.
+# No argument preserves the selection above.
 DEPLOY_CONFIG="${1:-${AHAWAM_DEPLOY_CONFIG:-$DEPLOY_CONFIG}}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"

@@ -22,9 +22,17 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(windows[0], [0, 1, 4])
         self.assertEqual(why[2], "hold")
         self.assertNotIn(5, windows)
-        broken, why = diagnostic_windows(rows([0, 1, 2, 2, 0, 0, 0], gap=3), 3)
+        broken, why = diagnostic_windows(rows([0, 1, 2, 2, 0, 0, 0], gap=3), 3, "strict_ticks")
         self.assertNotIn(0, broken)
         self.assertEqual(why[0], "tick_gap_or_drop")
+
+    def test_pause_preserves_window_and_recorded_return(self):
+        t=rows([0,1,2,2,0,0,0],gap=3)
+        t.loc[3,"dropped_tick"]=True
+        windows,_=diagnostic_windows(t,3)
+        self.assertEqual(windows[0],[0,1,4])
+        values=recorded_returns(t,dict(status="ready",first_success=5),windows,gamma=.9)
+        self.assertAlmostEqual(values[0],.9**2)
 
     def test_missing_success_never_becomes_zero_return_or_failure(self):
         t = rows([0] * 8)
@@ -32,6 +40,10 @@ class DiagnosticTests(unittest.TestCase):
         episode = dict(status="pending_success_annotation", first_success=None, root="x_val")
         self.assertTrue(np.isnan(recorded_returns(t, episode, windows)).all())
         self.assertEqual(episode_group(episode, set()), ("excluded_early_stop/val_source", "success_early_stop_no_success_frame"))
+        censored=dict(episode,status="ready",censored_recording=True)
+        self.assertTrue(np.isnan(recorded_returns(t,censored,windows)).all())
+        censored.update(episode_uid="a",outcome="success",treatment="first_half_censored_success")
+        self.assertEqual(episode_group(censored,set()),("train/success_unobserved","first_half_censored_success"))
 
     def test_discount_matches_incoming_success_command_and_post_goal_na(self):
         t = rows([0, 0, 2, 2, 0, 0, 0, 0])

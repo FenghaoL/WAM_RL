@@ -24,7 +24,7 @@ def audit(data):
 
 
 def prepare(args):
-    cfg = TransitionConfig(args.chunk_size,args.stride,args.gamma_tick,args.intervention_mode,args.temporal_mode)
+    cfg = TransitionConfig(args.chunk_size,args.stride,args.gamma_tick,args.intervention_mode,args.temporal_mode,args.timeline_mode)
     data = build_dataset(args.roots,cfg)
     args.output.mkdir(parents=True,exist_ok=True)
     torch.save(data,args.output/"transitions.pt")
@@ -221,6 +221,8 @@ def main():
     p.add_argument("--stride",type=int,default=2)
     p.add_argument("--gamma-tick",type=float,default=.997)
     p.add_argument("--temporal-mode",choices=["tick","macro","skip_hold"],required=True)
+    p.add_argument("--timeline-mode",choices=["episode_frames","strict_ticks"],default="episode_frames",
+                   help="Episode storage order (default); strict_ticks reproduces the original experiments")
     p.add_argument("--intervention-mode",choices=["mixed","censor"],default="mixed")
     e = sub.add_parser("export")
     e.add_argument("--transitions",type=Path,required=True)

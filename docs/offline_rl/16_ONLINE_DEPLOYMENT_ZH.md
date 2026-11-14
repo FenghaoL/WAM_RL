@@ -1,5 +1,7 @@
 # 三项离线 RL policy 的同步部署
 
+2026-10-26 补充：本页 YAML 仍加载此前按 tick 跳号过滤训练的模型；本轮时间轴修正没有替换部署权重。连续 episode 的新 cache/重训尚未执行，见 [17 时间轴修正](17_EPISODE_CONTINUITY_CORRECTION_ZH.md)。
+
 日期：2026-10-25。复用 `scripts/so101_pipeline/online_deploy/run_action_server.sh`、现有 TCP server 和机器人客户端。
 
 ## 配置和启动

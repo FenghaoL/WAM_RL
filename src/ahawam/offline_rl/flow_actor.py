@@ -10,7 +10,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from .cache import conditioning_frames
+from .cache import conditioning_from_spec
 from .data import sha256
 
 
@@ -199,7 +199,7 @@ class FrozenConditionProvider:
             self._open(record["episode_uid"])
         spec = self.cache.spec
         frame = record["start_frame"]
-        anchor, history = conditioning_frames(self.table, frame, spec["offset_period"], spec["history_count"], spec["history_stride"])
+        anchor, history = conditioning_from_spec(self.table, frame, spec)
         policy, model = self.policy, self.policy.model
         if anchor != self.anchor:
             policy.reset_obsrvationwindows()

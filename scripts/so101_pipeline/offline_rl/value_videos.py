@@ -33,7 +33,8 @@ def read_table(episode):
         raise ValueError("Parquet changed since training")
     videos = {cam: str(root / info["video_path"].format(**fields, video_key=f"observation.images.{cam}"))
         for cam in ("fixed", "wrist")}
-    return pd.read_parquet(path), info, videos
+    table=pd.read_parquet(path)
+    return table.iloc[:episode.get("retained_frames",len(table))], info, videos
 
 
 def score_inputs(cache, uid, frames, device):
@@ -53,10 +54,11 @@ def score_episode(e, cache, models, data, record_index, val_uids, steps, batch_s
     if e["episode_uid"] not in video_hashes or any(sha256(Path(path)) != video_hashes[e["episode_uid"]][cam] for cam,path in videos.items()):
         raise ValueError("Raw videos differ from the frozen feature cache's videos")
     n, uid = len(table), e["episode_uid"]
-    if n != e["frames"]:
+    if n != e.get("retained_frames",e["frames"]):
         raise ValueError("Episode frame count changed")
-    windows, reasons = diagnostic_windows(table, data["config"]["chunk_size"])
-    reference = recorded_returns(table, e, windows, data["config"]["gamma_tick"])
+    timeline_mode = data["config"].get("timeline_mode", "strict_ticks")
+    windows, reasons = diagnostic_windows(table, data["config"]["chunk_size"], timeline_mode)
+    reference = recorded_returns(table, e, windows, data["config"]["gamma_tick"], timeline_mode)
     values = {key: np.full(n, np.nan) for key, _, _ in SERIES}
     values["recorded_return"] = reference
     device = next(models["iql_q"].parameters()).device
@@ -184,7 +186,7 @@ def gallery(output, paths, summary):
         video = f"videos/{group}/{stem}.mp4"
         cards.append(f'''<article data-group="{html.escape(group)}" data-name="{html.escape(stem)}">
 <h3>{html.escape(group)} · {Path(e['root']).name} · ep {e['episode_index']:03d}</h3>
-<p>{html.escape(p['outcome_label'])} · {e['frames']} frames · success={e['first_success']} / reward frame={p['effective_success']}</p>
+<p>{html.escape(p['outcome_label'])} · {len(p['rows'])} retained frames · success={e['first_success']} / reward frame={p['effective_success']}</p>
 <video controls preload="none" poster="{video[:-4]}.jpg" src="{video}"></video>
 <p><a href="{video}">下载 / 打开 MP4</a> · <a href="scores/{stem}.csv">逐帧 CSV</a> · <a href="scores/{stem}.json">完整数据与窗口</a></p></article>''')
     options = ''.join(f'<option value="{html.escape(g)}">{html.escape(g)} ({n})</option>' for g,n in sorted(counts.items()))
@@ -194,7 +196,7 @@ def gallery(output, paths, summary):
 使用两项 10,000 步 checkpoint 的当前 Q1/Q2，及 IQL V；不是 target Q。Q 输入后续 8 个真实 POLICY/HUMAN 动作，V 输入冻结 KV＋关节状态，不是仅看当前一张图。<br>
 理论回报尺度为 0–1（单次成功 +1，γ=0.997/保留动作），预测不做裁剪，也不是校准的成功概率。REC return 是已记录混合行为的折扣回报，不能当成新 actor 的 Q 真值。<br>
 HOLD、缺动作和丢帧处 Q 显示 N/A；V 仍会显示，但 HOLD、成功后等未拟合观察属于外推。灰色区=HOLD，绿竖线=奖励对齐成功帧，橙竖线=原成功标注帧。<br>
-9 条提前停止录像的 episode 标为 excluded_early_stop，未参与 Q/V 训练，没有臆造为失败或给它们画零回报。验证集只有 3 条标注成功＋1 条提前停止，没有失败样本。
+划分与片段处理以训练 recipe、各卡片来源及 summary.json 为准。未观测成功片段的 REC return 未知；参与训练时仍不臆造成功奖励或失败终止。
 </div><p><a href="summary.json">分组统计与误差</a> · <a href="provenance.json">checkpoint / cache 来源</a> · <a href="README.md">使用说明</a></p>
 <select id="group"><option value="">全部视频</option>OPTIONS</select><input id="query" placeholder="搜索 run / episode / early_stop"><span id="count"></span>
 CARDS

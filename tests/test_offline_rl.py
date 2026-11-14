@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 
 import numpy as np
@@ -12,7 +13,7 @@ import pandas as pd
 import torch
 
 from ahawam.offline_rl.data import TransitionConfig, build_dataset, episode_transitions, inspect_episode, effective_success_frame
-from ahawam.offline_rl.cache import conditioning_frames,ShardedCache,atomic_json
+from ahawam.offline_rl.cache import conditioning_frames,conditioning_from_spec,ShardedCache,atomic_json
 from ahawam.offline_rl.features import causal_history_frames, pool_routed_values
 from ahawam.offline_rl.learner import LearnerConfig, OfflineLearner, expectile_loss
 from ahawam.offline_rl.networks import NetworkConfig, TwinChunkQ
@@ -69,13 +70,13 @@ class TemporalTests(unittest.TestCase):
         self.assertAlmostEqual(first_hold["discount"],.9**2)
 
     def test_skip_hold_does_not_cross_missing_recording(self):
-        rows=episode_transitions(table(gaps=True),report(None),TransitionConfig(4,1,.9,temporal_mode="skip_hold"))
+        rows=episode_transitions(table(gaps=True),report(None),TransitionConfig(4,1,.9,temporal_mode="skip_hold",timeline_mode="strict_ticks"))
         self.assertTrue(all(not(r["start_frame"]<3<=r["next_frame"]) for r in rows))
 
     def test_planner_offset_is_causal_and_resets_at_gap(self):
         anchor,history=conditioning_frames(table(),7,8,6,2)
         self.assertEqual((anchor,history),(0,[]))
-        anchor,history=conditioning_frames(table(gaps=True),8,4,2,2)
+        anchor,history=conditioning_frames(table(gaps=True),8,4,2,2,"strict_ticks")
         self.assertEqual(anchor,7)
         self.assertEqual(history,[3,5])
     def test_success_observation_rewards_incoming_action_and_truncates(self):
@@ -94,7 +95,7 @@ class TemporalTests(unittest.TestCase):
         self.assertTrue(rows[-1]["terminated"])
 
     def test_gaps_never_spliced(self):
-        rows = episode_transitions(table(gaps=True),report(None),TransitionConfig(2,1,.9))
+        rows = episode_transitions(table(gaps=True),report(None),TransitionConfig(2,1,.9,timeline_mode="strict_ticks"))
         self.assertTrue(all(not(r["start_frame"]<3<=r["next_frame"]) for r in rows))
 
     def test_pending_success_never_becomes_negative(self):
@@ -143,7 +144,47 @@ class TemporalTests(unittest.TestCase):
                 inspect_episode(root,dict(episode_index=0,length=len(d)),{},dict(data_path="data/episode_{episode_index:06d}.parquet"))
 
     def test_history_never_uses_future_or_crosses_gap(self):
-        self.assertEqual(causal_history_frames(table(gaps=True),8,6,2),[4,6,8])
+        self.assertEqual(causal_history_frames(table(gaps=True),8,6,2,"strict_ticks"),[4,6,8])
+
+    def test_pause_retains_history_offsets_and_success_transition(self):
+        d=table((0,0,1,1,0,0,0,0,0),gaps=True)
+        d.loc[3,"dropped_tick"]=True  # saved row, not an absent observation
+        cfg=TransitionConfig(4,1,.9,temporal_mode="skip_hold")
+        row=episode_transitions(d,report(4),cfg)[0]
+        self.assertEqual(row["action_frames"],[0,1,2,3])
+        self.assertAlmostEqual(row["reward"],.9**3)
+        self.assertEqual(row["discount"],0)
+        self.assertEqual(conditioning_frames(d,8,4,2,2),(8,[4,6]))
+        self.assertEqual(causal_history_frames(d,8,6,2),[0,2,4,6,8])
+        legacy=dict(offset_period=4,history_count=2,history_stride=2)
+        self.assertEqual(conditioning_from_spec(d,8,legacy),(7,[3,5]))
+        self.assertEqual(conditioning_from_spec(d,8,dict(legacy,timeline_mode="episode_frames")),(8,[4,6]))
+
+    def test_corrected_transitions_cannot_silently_use_legacy_cache(self):
+        from scripts.so101_pipeline.offline_rl.system import require_complete
+        with self.assertRaisesRegex(ValueError,"timeline mismatch"):
+            require_complete(dict(config=dict(timeline_mode="episode_frames")),SimpleNamespace(spec={}))
+
+    def test_censored_prefix_bootstraps_without_success_or_failure_label(self):
+        d=table((0,1,2,2,0,0,1,0,0),gaps=True).iloc[:7]
+        cfg=TransitionConfig(3,1,.9,temporal_mode="skip_hold")
+        r=episode_transitions(d,dict(report(None),censored_recording=True),cfg)
+        self.assertTrue(r)
+        for row in r:
+            self.assertEqual(row["reward"],0)
+            self.assertFalse(row["terminated"])
+            self.assertAlmostEqual(row["discount"],.9**3)
+            self.assertLess(row["next_frame"],7)
+            self.assertLess(max(row["action_frames"]),6)
+        self.assertTrue(r[-1]["truncated"])
+        self.assertEqual(r[-1]["end_reason"],"censored_recording_end")
+
+    def test_explicit_split_overrides_directory_and_holds_out_failure(self):
+        from scripts.so101_pipeline.offline_rl.system import split
+        d=dict(episodes=[dict(episode_uid="a",split="val"),dict(episode_uid="b",split="train")],
+            records=[dict(episode_uid="a",root="/train"),dict(episode_uid="b",root="/original_val")])
+        train,val,uids=split(d)
+        self.assertEqual(train.tolist(),[1]);self.assertEqual(val.tolist(),[0]);self.assertEqual(uids,["a"])
 
     def test_episode_split_has_no_neighbor_frame_leakage(self):
         records = [dict(episode_uid=f"ep{i//5}") for i in range(20)]

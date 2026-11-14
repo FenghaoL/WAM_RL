@@ -12,6 +12,7 @@ import torch
 from torch.nn import functional as F
 
 from .data import sha256
+from .timeline import history_start
 
 
 def pool_routed_values(cache, layer_indices=(-1,), num_tokens=64):
@@ -29,11 +30,9 @@ def pool_routed_values(cache, layer_indices=(-1,), num_tokens=64):
     return torch.cat(values, dim=-1).cpu()
 
 
-def causal_history_frames(table, frame, count, stride):
-    """Never cross a missing tick or use a future observation."""
-    ticks = table.tick_index.to_numpy()
-    gaps = np.flatnonzero(np.diff(ticks[:frame+1]) != 1)
-    lower = int(gaps[-1])+1 if len(gaps) else 0
+def causal_history_frames(table, frame, count, stride, timeline_mode="episode_frames"):
+    """Use earlier stored episode observations, without resetting at a pause."""
+    lower = history_start(table, frame, timeline_mode)
     return sorted([frame] + [frame-j*stride for j in range(1,count+1) if frame-j*stride >= lower])
 
 
@@ -92,7 +91,8 @@ def export_features(data, deploy_config: Path, output: Path, history_count=0,
             torch.manual_seed(policy.seed)
             policy.set_language_instruction(task)
             with torch.inference_mode():
-                for history_frame in causal_history_frames(table,frame,history_count,history_stride):
+                for history_frame in causal_history_frames(table,frame,history_count,history_stride,
+                        data["config"].get("timeline_mode", "strict_ticks")):
                     images = {cam:video.frame(history_frame) for cam,video in videos.items()}
                     composite = policy.prepare_camera_images(images)
                     policy.update_observation_window([composite],table["observation.state"].iloc[history_frame])
@@ -120,8 +120,10 @@ def export_features(data, deploy_config: Path, output: Path, history_count=0,
                 normalization="deployment processor affine scale/offset, clamped [-5,5]",
                 token_source=f"post_OVCR_V/layers={list(layers)}/adaptive_1d_pool={num_tokens}",
                 cache_protocol=f"canonical_causal_window_v1/history={history_count}/stride={history_stride}",
+                timeline_mode=data["config"].get("timeline_mode", "strict_ticks"),
                 source_hashes=source_hashes, video_hashes=video_hashes, synthetic=False)
     code_paths = [Path(__file__),Path("deploy/server/ahawam_policy.py"),
+                  Path("src/ahawam/offline_rl/timeline.py"),
                   Path("src/ahawam/models/wan22/ahawam.py"),Path("src/ahawam/models/wan22/ahawam_chunk_base.py"),
                   Path("src/ahawam/models/wan22/mot.py")]
     spec["code_sha256"] = {str(path):sha256(path) for path in code_paths}

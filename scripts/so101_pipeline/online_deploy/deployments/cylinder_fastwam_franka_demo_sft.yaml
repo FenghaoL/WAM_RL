@@ -1,0 +1,181 @@
+checkpoint_path: runs/fastwam_cylinder_20261105/franka_demo_sft/model/checkpoints/weights/step_006572.pt
+dataset_stats_path: runs/so101_ahawam_cylinder_v1/assets/dataset_stats.json
+text_embedding_cache_dir: data/so101_ahawam_square_v1_text_embeds_cache
+load_text_encoder: false
+project_root: .
+hydra_config_name: train
+task: null
+hydra_overrides:
+- data=robotwin
+- model=fastwam
+hydra_patch:
+  model:
+    _target_: scripts.so101_pipeline.fastwam_cylinder.model.create_model
+    model_id: Wan-AI/Wan2.2-TI2V-5B
+    tokenizer_model_id: Wan-AI/Wan2.1-T2V-1.3B
+    tokenizer_max_len: 128
+    load_text_encoder: false
+    proprio_dim: 6
+    redirect_common_files: true
+    mot_checkpoint_mixed_attn: false
+    action_dit_pretrained_path: null
+    skip_dit_load_from_pretrain: true
+    video_dit_config:
+      has_image_input: false
+      patch_size:
+      - 1
+      - 2
+      - 2
+      in_dim: 48
+      hidden_dim: 3072
+      ffn_dim: 14336
+      freq_dim: 256
+      text_dim: 4096
+      out_dim: 48
+      num_heads: 24
+      attn_head_dim: 128
+      num_layers: 30
+      eps: 1.0e-06
+      seperated_timestep: true
+      require_clip_embedding: false
+      require_vae_embedding: false
+      fuse_vae_embedding_in_latents: true
+      use_gradient_checkpointing: false
+      video_attention_mask_mode: first_frame_causal
+      action_conditioned: false
+      action_dim: 6
+      action_group_causal_mask_mode: group_diagonal
+    action_dit_config:
+      action_dim: 6
+      hidden_dim: 1024
+      ffn_dim: 4096
+      num_heads: 24
+      attn_head_dim: 128
+      num_layers: 30
+      text_dim: 4096
+      freq_dim: 256
+      eps: 1.0e-06
+      use_gradient_checkpointing: false
+    video_scheduler:
+      train_shift: 5.0
+      infer_shift: 5.0
+      num_train_timesteps: 1000
+    action_scheduler:
+      train_shift: 5.0
+      infer_shift: 5.0
+      num_train_timesteps: 1000
+    loss:
+      lambda_action: 1.0
+      lambda_video: 1.0
+    allow_interface_adaptation: false
+  data:
+    train:
+      shape_meta:
+        images:
+        - key: fixed
+          raw_shape:
+          - 3
+          - 480
+          - 480
+          shape:
+          - 3
+          - 240
+          - 320
+        - key: wrist
+          raw_shape:
+          - 3
+          - 480
+          - 640
+          shape:
+          - 3
+          - 240
+          - 320
+        action:
+        - key: default
+          raw_shape: 6
+          shape: 6
+        state:
+        - key: default
+          raw_shape: 6
+          shape: 6
+      num_frames: 49
+      action_video_freq_ratio: 4
+      video_size:
+      - 384
+      - 320
+      processor:
+        _target_: ahawam.datasets.lerobot.processors.ahawam_processor.AHAWAMProcessor
+        shape_meta:
+          images:
+          - key: fixed
+            raw_shape:
+            - 3
+            - 480
+            - 480
+            shape:
+            - 3
+            - 240
+            - 320
+          - key: wrist
+            raw_shape:
+            - 3
+            - 480
+            - 640
+            shape:
+            - 3
+            - 240
+            - 320
+          action:
+          - key: default
+            raw_shape: 6
+            shape: 6
+          state:
+          - key: default
+            raw_shape: 6
+            shape: 6
+        num_obs_steps: 49
+        num_output_cameras: 2
+        action_output_dim: 6
+        proprio_output_dim: 6
+        action_state_transforms: null
+        use_stepwise_action_norm: false
+        norm_default_mode: z-score
+        norm_exception_mode: null
+        action_state_merger:
+          _target_: ahawam.datasets.lerobot.transforms.action_state_merger.ConcatLeftAlign
+        train_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size:
+          - 240
+          - 320
+        val_transforms:
+        - _target_: ahawam.datasets.lerobot.transforms.image.ToTensor
+        - _target_: torchvision.transforms.Resize
+          size:
+          - 240
+          - 320
+serving:
+  gpu_id: 0
+  port: 12140
+  host: 127.0.0.1
+  action_dim: 6
+  max_return_actions: 8
+  policy_module: deploy.server.ahawam_policy
+  policy_class: FastWAMPolicy
+  instruction: Pick up the cylinder and insert it into the matching hole.
+device: cuda
+mixed_precision: bf16
+action_horizon: 48
+num_inference_steps: 10
+sigma_shift: 5.0
+seed: 42
+text_cfg_scale: 1.0
+negative_prompt: ''
+rand_device: cpu
+tiled: false
+warmup_rounds: 0
+video_height: 384
+video_width: 320
+input_control_hz: 15.0
+action_video_freq_ratio: 4

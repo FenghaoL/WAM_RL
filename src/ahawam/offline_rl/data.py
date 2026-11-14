@@ -2,7 +2,9 @@
 
 An observation at row k precedes action[k]. A success observation at k
 therefore rewards transition k-1 -> k. No action is inferred after the last
-observation, across a missing tick, or from an unannotated successful episode.
+observation. Unobserved successes require an explicit censored-data recipe.
+Collector pauses do not
+split episodes; strict tick continuity is an explicit legacy option.
 """
 from __future__ import annotations
 
@@ -14,6 +16,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
+
+from .timeline import span_is_continuous, validate_timeline_mode
 
 
 def sha256(path: Path) -> str:
@@ -41,8 +45,10 @@ class TransitionConfig:
     # "censor" stops policy credit before entry into a human segment.
     intervention_mode: str = "mixed"
     temporal_mode: str = "tick"
+    timeline_mode: str = "episode_frames"
 
     def __post_init__(self):
+        validate_timeline_mode(self.timeline_mode)
         if self.chunk_size < 1 or self.stride < 1 or not 0 < self.gamma_tick <= 1:
             raise ValueError("Invalid chunk_size, stride or gamma_tick")
         if self.intervention_mode not in {"mixed", "censor"}:
@@ -127,9 +133,7 @@ def episode_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig
     last = len(table) - 1 if success is None else success
     actions = np.stack(table.executed_action_arm).astype(np.float32)
     states = np.stack(table["observation.state"]).astype(np.float32)
-    ticks = table.tick_index.to_numpy()
     source = table.control_source.to_numpy()
-    dropped = table.dropped_tick.to_numpy(dtype=bool)
     rows = []
     for t in range(0, last, cfg.stride):
         end = min(t + cfg.chunk_size, last)
@@ -140,7 +144,7 @@ def episode_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig
                 end = t + 1 + int(entries[0])
                 boundary = "intervention_censored"
         k = end - t
-        if np.any(np.diff(ticks[t:end + 1]) != 1) or dropped[t:end + 1].any():
+        if not span_is_continuous(table, t, end, cfg.timeline_mode):
             continue
         is_success = success is not None and end == success
         is_failure = success is None and end == last
@@ -209,7 +213,7 @@ def skip_hold_transitions(table, report, cfg):
         if len(indices) != cfg.chunk_size:
             continue  # no unknown/padded actor labels, even at a terminal
         end = int(indices[-1]) + 1
-        if np.any(np.diff(ticks[t:end+1]) != 1) or table.dropped_tick.iloc[t:end+1].any():
+        if not span_is_continuous(table, t, end, cfg.timeline_mode):
             continue
         if cfg.intervention_mode == "censor" and source[t] != 1 and (source[indices] == 1).any():
             continue
@@ -218,7 +222,9 @@ def skip_hold_transitions(table, report, cfg):
         reward_index = int(np.searchsorted(indices, success) - 1) if hit else None
         if hit and int(indices[reward_index]) != success - 1:
             continue  # no incoming active action observed (e.g. recording begins in HOLD)
-        failure_end = success is None and pos + cfg.chunk_size == len(active)
+        reaches_recording_end = pos + cfg.chunk_size == len(active)
+        censored = bool(report.get("censored_recording", False))
+        failure_end = success is None and reaches_recording_end and not censored
         terminal = hit or failure_end
         out.append(dict(episode_uid=report["episode_uid"], root=report["root"],
             episode_index=report["episode_index"], start_frame=t, next_frame=end,
@@ -231,8 +237,9 @@ def skip_hold_transitions(table, report, cfg):
             discount=0.0 if terminal else cfg.gamma_tick ** cfg.chunk_size,
             duration_ticks=int(ticks[end]-ticks[t]),
             duration_seconds=(int(table.monotonic_ns.iloc[end])-int(table.monotonic_ns.iloc[t]))/1e9,
-            terminated=terminal, truncated=False,
-            end_reason="success" if hit else "failure_end" if failure_end else "continuing",
+            terminated=terminal, truncated=bool(censored and reaches_recording_end),
+            end_reason="success" if hit else "failure_end" if failure_end else
+                "censored_recording_end" if censored and reaches_recording_end else "continuing",
             assisted_episode=report.get("outcome_class") == "SUCCESS_WITH_INTERVENTION"))
     return out
 
@@ -249,7 +256,7 @@ def macro_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig):
     success = report["first_success"]
     last = len(table)-1 if success is None else success
     actions = np.stack(table.executed_action_arm).astype(np.float32)
-    source, ticks = table.control_source.to_numpy(), table.tick_index.to_numpy()
+    source = table.control_source.to_numpy()
     output = []
     t = 0
     while t < last:
@@ -267,7 +274,7 @@ def macro_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig):
         while end < last and source[end] == 2:
             end += 1
         c = active_end-t
-        valid = not np.any(np.diff(ticks[t:end+1]) != 1) and not table.dropped_tick.iloc[t:end+1].any()
+        valid = span_is_continuous(table, t, end, cfg.timeline_mode)
         if source[t] == 0:
             valid &= (int(table.action_index_in_chunk.iloc[t]) == 0 and
                       table.action_index_in_chunk.iloc[t:active_end].tolist() == list(range(c)))
@@ -299,9 +306,13 @@ def macro_transitions(table: pd.DataFrame, report: dict, cfg: TransitionConfig):
     return output
 
 
-def build_dataset(roots: list[Path], cfg: TransitionConfig):
+def build_dataset(roots: list[Path], cfg: TransitionConfig, recipe: dict | None = None):
     records, episodes = [], []
     seen = set()
+    if recipe is not None:
+        if recipe.get("format") != "ahawam_episode_recipe/v1" or cfg.temporal_mode != "skip_hold" or cfg.timeline_mode != "episode_frames":
+            raise ValueError("Episode recipe requires skip_hold and continuous episode_frames")
+        rules = recipe["episodes"]
     for root in roots:
         root = root.resolve()
         info = json.loads((root / "meta/info.json").read_text())
@@ -313,6 +324,27 @@ def build_dataset(roots: list[Path], cfg: TransitionConfig):
             if report["episode_uid"] in seen:
                 raise ValueError("Duplicate episode_uid across roots")
             seen.add(report["episode_uid"])
+            if recipe is not None:
+                rule = rules[report["episode_uid"]]
+                if rule["source"] != report["source"]:
+                    raise ValueError("Episode recipe source identity changed")
+                retained = rule["retained_frames"]
+                if type(retained) is not int or not 2 <= retained <= len(table):
+                    raise ValueError("Invalid retained frame limit")
+                if rule["split"] not in {"train", "val"}:
+                    raise ValueError("Invalid explicit split")
+                censored = rule["reward_mode"] == "observed_zero_nonterminal"
+                if rule["reward_mode"] not in {"annotated_or_failure", "observed_zero_nonterminal"}:
+                    raise ValueError("Invalid reward mode")
+                if censored and not (report["outcome"] == "success" and report["first_success"] is None):
+                    raise ValueError("Only unobserved successes may use the censored-success rule")
+                if retained < len(table) and not censored:
+                    raise ValueError("Prefix cuts are restricted to explicitly censored recordings")
+                report.update(original_status=report["status"], retained_frames=retained,
+                    split=rule["split"], censored_recording=censored, treatment=rule["treatment"])
+                if censored:
+                    report["status"] = "ready"
+                table = table.iloc[:retained].copy()
             if cfg.temporal_mode == "skip_hold":
                 report["effective_success_frame"] = effective_success_frame(table, report["first_success"])
             episodes.append(report)
@@ -320,16 +352,23 @@ def build_dataset(roots: list[Path], cfg: TransitionConfig):
             report["transitions"] = len(episode_rows)
             report["success_windows"] = sum(r["end_reason"] == "success" for r in episode_rows)
             records.extend(episode_rows)
+    if recipe is not None and seen != set(rules):
+        raise ValueError("Recipe does not exactly match input episodes")
     numeric = ("state", "next_state", "action", "action_valid", "control_source", "reward", "discount",
                "duration_ticks", "duration_seconds", "terminated", "truncated")
     tensors = {k: torch.from_numpy(np.asarray([r[k] for r in records])) for k in numeric} if records else {}
     metadata = [{k: v for k, v in r.items() if k not in numeric} for r in records]
-    return dict(format="ahawam_offline_transitions/v1", config=asdict(cfg), tensors=tensors,
+    result = dict(format="ahawam_offline_transitions/v1", config=asdict(cfg), tensors=tensors,
                 records=metadata, episodes=episodes,
                 conventions=dict(reward=("first marked success relocated to first HOLD image when incoming action is HOLD; incoming active command earns +1"
                                          if cfg.temporal_mode == "skip_hold" else "first marked success observation rewards its incoming transition"),
                                  action=("natural POLICY+HUMAN commands; HOLD omitted; full tails past success retained; discount per active command"
                                          if cfg.temporal_mode == "skip_hold" else "active absolute target blocks; trailing hold included in environment duration"
                                          if cfg.temporal_mode == "macro" else "actual absolute joint targets, hold included"),
-                                 terminal="success or finite-horizon manifest failure end",
+                                 terminal="success or finite-horizon manifest failure end; censored success recordings bootstrap with no invented reward",
+                                 timeline=("episode storage order; tick jumps and dropped_tick flags do not split history/transitions; pause time omitted"
+                                           if cfg.timeline_mode == "episode_frames" else "legacy strict tick continuity"),
                                  annotation="positive marks accepted as first-success events by task contract"))
+    if recipe is not None:
+        result["episode_recipe"] = recipe
+    return result

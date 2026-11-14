@@ -1,0 +1,66 @@
+{
+  "cache": "/home/fenghao/workspace/AHA-WAM/runs/offline_rl/cylinder103_skip_hold/cache",
+  "definition": "history count excludes current planner anchor; RL subsets count original transition observation_key only",
+  "history_stride_raw_frames": 48,
+  "max_history": 6,
+  "fps": 15,
+  "history_reset": "every non-unit increment of recorded tick_index; HOLD alone does not reset",
+  "tick_gaps": 250,
+  "episodes": 103,
+  "episodes_with_any_history": 103,
+  "episodes_with_full_six": 49,
+  "groups": {
+    "all_cache": {
+      "total": 43680,
+      "history_frame_counts": {
+        "0": 13716,
+        "1": 8300,
+        "2": 5851,
+        "3": 4718,
+        "4": 4121,
+        "5": 2976,
+        "6": 3998
+      },
+      "with_history": 29964,
+      "with_history_fraction": 0.685989010989011,
+      "full_six": 3998,
+      "full_six_fraction": 0.09152930402930402,
+      "mean_history_frames": 2.049175824175824
+    },
+    "train": {
+      "total": 16016,
+      "history_frame_counts": {
+        "0": 5960,
+        "1": 2723,
+        "2": 1873,
+        "3": 1808,
+        "4": 1361,
+        "5": 1025,
+        "6": 1266
+      },
+      "with_history": 10056,
+      "with_history_fraction": 0.6278721278721279,
+      "full_six": 1266,
+      "full_six_fraction": 0.07904595404595405,
+      "mean_history_frames": 1.8767482517482517
+    },
+    "validation": {
+      "total": 538,
+      "history_frame_counts": {
+        "0": 221,
+        "1": 100,
+        "2": 62,
+        "3": 72,
+        "4": 45,
+        "5": 21,
+        "6": 17
+      },
+      "with_history": 317,
+      "with_history_fraction": 0.5892193308550185,
+      "full_six": 17,
+      "full_six_fraction": 0.031598513011152414,
+      "mean_history_frames": 1.537174721189591
+    }
+  },
+  "status": "Historical measurement of existing strict_ticks cache; corrected episode_frames coverage is in continuity_audit_20261026.json; corrected cache not yet exported."
+}

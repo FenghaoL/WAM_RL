@@ -14,6 +14,7 @@ from safetensors import safe_open
 from safetensors.torch import save_file
 
 from .data import sha256
+from .timeline import history_start, validate_timeline_mode
 
 
 def atomic_json(path, data):
@@ -23,18 +24,24 @@ def atomic_json(path, data):
     os.replace(temporary,path)
 
 
-def conditioning_frames(table,frame,offset_period=8,history_count=6,history_stride=48):
-    """Deterministic uniform offset coverage, reset at every missing tick.
+def conditioning_frames(table,frame,offset_period=8,history_count=6,history_stride=48,
+                        timeline_mode="episode_frames"):
+    """Causal offsets/history in episode storage order, including across pauses.
 
     Planner sees anchor t-offset; local OVCR/action sees t. No future images.
     Each observation has one variant, rather than an eightfold cache expansion.
     """
-    gaps = np.flatnonzero(np.diff(table.tick_index.to_numpy()[:frame+1]) != 1)
-    lower = int(gaps[-1])+1 if len(gaps) else 0
+    lower = history_start(table, frame, timeline_mode)
     anchor = lower + ((frame-lower)//offset_period)*offset_period
     history = [anchor-j*history_stride for j in range(history_count,0,-1)
                if anchor-j*history_stride >= lower]
     return anchor,history
+
+
+def conditioning_from_spec(table, frame, spec):
+    """Old v2 caches/checkpoints keep their original tick-reset semantics."""
+    return conditioning_frames(table, frame, spec["offset_period"], spec["history_count"],
+                               spec["history_stride"], spec.get("timeline_mode", "strict_ticks"))
 
 
 def memory_stats():
@@ -59,6 +66,8 @@ def asset_fingerprint(path,record_path):
 
 def export_shards(data,deploy_config,output,rank=0,world_size=1,shard_size=128,limit=None,
                   history_count=6,history_stride=48,offset_period=8):
+    timeline_mode = data["config"].get("timeline_mode", "strict_ticks")
+    validate_timeline_mode(timeline_mode)
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA required for real WAM export")
     if not 0<=rank<world_size or min(shard_size,offset_period,history_stride)<1 or history_count<0:
@@ -91,13 +100,17 @@ def export_shards(data,deploy_config,output,rank=0,world_size=1,shard_size=128,l
         base_checkpoint_sha256=asset_fingerprint(asset("checkpoint_path"),output.parent/"checkpoint_fingerprint.json"),
         deploy_config_sha256=sha256(Path(deploy_config)),stats_sha256=sha256(asset("dataset_stats_path")),
         normalization="deployment affine z-score, clamp [-5,5]",token_source="last-layer post-OVCR K+V; routed weighted V and projected query",
-        cache_protocol="causal_independent_anchor_v2",offset_period=offset_period,
-        offset_schedule="(raw_frame - contiguous_segment_start) modulo offset_period",history_count=history_count,
+        cache_protocol=("causal_independent_anchor_v3_episode_frames" if timeline_mode == "episode_frames"
+                        else "causal_independent_anchor_v2"),timeline_mode=timeline_mode,offset_period=offset_period,
+        offset_schedule=("raw_frame modulo offset_period" if timeline_mode == "episode_frames" else
+                         "(raw_frame - contiguous_segment_start) modulo offset_period"),history_count=history_count,
         history_stride=history_stride,dtype="bfloat16",seed=policy.seed,synthetic=False,
         action_scale=normalizer.scale.cpu().tolist(),action_offset=normalizer.offset.cpu().tolist(),
         code_sha256={p:sha256(Path(p)) for p in (__file__,"src/ahawam/models/wan22/mot.py",
-            "src/ahawam/models/wan22/ahawam.py","deploy/server/ahawam_policy.py")},
+            "src/ahawam/models/wan22/ahawam.py","deploy/server/ahawam_policy.py",
+            "src/ahawam/offline_rl/timeline.py")},
         source_hashes={e["episode_uid"]:e["source"]["parquet_sha256"] for e in data["episodes"]})
+    spec["episode_frame_limits"]={e["episode_uid"]:e.get("retained_frames",e["frames"]) for e in data["episodes"]}
     spec_path=output/f"spec_rank{rank}.json"
     if spec_path.exists() and json.loads(spec_path.read_text())!=spec:
         raise ValueError("Cache provenance changed; choose a new output directory")
@@ -129,10 +142,11 @@ def export_shards(data,deploy_config,output,rank=0,world_size=1,shard_size=128,l
         context,context_mask=policy._resolve_text_condition(prompt)
         anchor_cached=None
         try:
-            for first in range(0,len(table),shard_size):
+            frame_limit=episode.get("retained_frames",len(table))
+            for first in range(0,frame_limit,shard_size):
                 if limit is not None and count>=limit:
                     break
-                stop=min(first+shard_size,len(table))
+                stop=min(first+shard_size,frame_limit)
                 if limit is not None:
                     stop=min(stop,first+limit-count)
                 stem=f"{root.name}_ep{ep:06d}_{first:06d}_{stop:06d}"
@@ -144,7 +158,7 @@ def export_shards(data,deploy_config,output,rank=0,world_size=1,shard_size=128,l
                     shards.append(metadata_path.name);count+=len(saved["rows"]);continue
                 rows=[];buffers={name:[] for name in ("k","v","routed","projected_query","state","reference")}
                 for frame in range(first,stop):
-                    tick=time.perf_counter();anchor,history=conditioning_frames(table,frame,offset_period,history_count,history_stride)
+                    tick=time.perf_counter();anchor,history=conditioning_frames(table,frame,offset_period,history_count,history_stride,timeline_mode)
                     with torch.inference_mode():
                         if anchor!=anchor_cached:
                             policy.reset_obsrvationwindows()
